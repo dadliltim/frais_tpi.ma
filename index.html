@@ -974,7 +974,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
     <aside class="sum" id="note">
       <div class="total">
-        <div class="lbl">Total provision à consigner</div>
+        <div class="lbl">Total Frais à consigner</div>
         <div class="amt" id="totalGeneral">0,00 DH</div>
         <div class="sub" id="subSummary"></div>
       </div>
@@ -1747,7 +1747,7 @@ function buildPdf(d){
   y-=4;
   ops.push('0.969 0.945 0.89 rg '+M+' '+(y-26)+' '+(W-2*M)+' 42 re f');
   ops.push(GOLD+' '+M+' '+(y-26)+' 3 42 re f');
-  T(M+14,y-6,d.totalLabel||'TOTAL PROVISION A CONSIGNER','F2',10.5,NAVY);
+  T(M+14,y-6,d.totalLabel||'TOTAL FRAISA A CONSIGNER','F2',10.5,NAVY);
   TR(y-8,fmt(d.total),'F2',15,NAVY);
   if(d.kind==='tpi' && d.enLettres) T(M+14,y-20,d.enLettres.toUpperCase(),'F2',7.5,NAVY);
   else if(d.prix>0) T(M+14,y-20,(d.total/d.prix*100).toFixed(2).replace('.',',')+" % de la base",'F1',8,MUT);
@@ -1779,7 +1779,7 @@ window.buildSharedProvisionPdf = buildPdf;
 
 function exportPdf(){
   if(!lastData){calc();}
-  var name='Note_Provision_'+(($('clientInfo').value.trim()||'Dossier').replace(/[^\w\u00C0-\u017F-]+/g,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+  var name='Note_Frais_'+(($('clientInfo').value.trim()||'Dossier').replace(/[^\w\u00C0-\u017F-]+/g,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
   var blob=new Blob([buildPdf(lastData)],{type:'application/pdf'});
   var url=URL.createObjectURL(blob), a=document.createElement('a');
   a.href=url; a.download=name; document.body.appendChild(a); a.click();
