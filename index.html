@@ -127,7 +127,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   color: var(--muted); font-size: .8rem;
 }
 
-/* Barre mobile commune (Note de provision & T.P.I.) */
+/* Barre mobile commune (Calcul des Frais & T.P.I.) */
 .bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
   display: none; align-items: center; justify-content: space-between; padding: .65rem 1rem;
@@ -145,7 +145,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .bar .btn-accent:hover { background: var(--accent-dark); }
 
 /* =====================================================================
-   MODULE 1 — NOTE DE PROVISION (#app-droit)
+   MODULE 1 — Calcul des Frais (#app-droit)
    ===================================================================== */
 #app-droit .wrap { display: grid; grid-template-columns: minmax(0,1.06fr) minmax(390px,.94fr); gap: 1.25rem; align-items: start; }
 
@@ -819,7 +819,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   }
 }
 
-/* Harmonisation avec le module Note de provision */
+/* Harmonisation avec le module Calcul des Frais */
 #app-tpi .card-title { font-family: var(--font-display); font-weight: 800; letter-spacing: .01em; }
 #app-tpi .subnav-bar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 0 .5rem; margin-bottom: 1.25rem; }
 #app-tpi .subnav-inner { max-width: none; padding: 0; }
@@ -841,7 +841,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     <div class="brand-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-2 9h4l-2-9z"/><path d="M19 7l-2 9h4l-2-9z"/><path d="M8 21h8"/></svg></div>
     <div>
       <h1>Étude Notariale — Calcul Frais et IR/PI</h1>
-      <p>Note de provision (CGI 2026) · Profits immobiliers (T.P.I.)</p>
+      <p>Calcul des Frais (CGI 2026) · Profits immobiliers (T.P.I.)</p>
       <span class="author-badge">Développé par Hatim DALIL</span>
     </div>
   </div>
@@ -852,7 +852,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 </header>
 
 <nav id="shell-nav" role="tablist" aria-label="Outils">
-  <button class="module-tab active" role="tab" data-module="provision" aria-selected="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg> Note de provision</button>
+  <button class="module-tab active" role="tab" data-module="provision" aria-selected="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg> Calcul des Frais</button>
   <button class="module-tab" role="tab" data-module="tpi" aria-selected="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg> Liquidation T.P.I. (IR / PI)</button>
 </nav>
 
@@ -1636,7 +1636,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 <script>
 (function () {
   var MODS = {
-    provision: { id: 'app-droit', title: 'Note de provision' },
+    provision: { id: 'app-droit', title: 'Calcul des Frais' },
     tpi:       { id: 'app-tpi',   title: 'Liquidation T.P.I. (IR / PI)' }
   };
   var BASE = 'Étude notariale — Calcul Frais et IR/PI';
@@ -1991,7 +1991,7 @@ function calc(){
   secs.push({t: isAncfccEligible ? 'III. Étude notariale' : 'II. Étude notariale', r: [
     [honLbl,hon,'Honoraires H.T.'],[tvaLbl,tva,'TVA'],[esc(dLib),dVal,dLib]]});
 
-  var html='', txt="⚖️ *NOTE DE PROVISION (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
+  var html='', txt="⚖️ *CALCUL DES FRAIS (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
   secs.forEach(function(s){
     html+='<div class="sec">'+s.t+'</div>'; txt+="\n*"+s.t+"*\n";
     s.r.forEach(function(x){ html+='<div class="result-line"><span>'+x[0]+'</span><span>'+fmt(x[1])+'</span></div>'; txt+="• "+x[2]+" : "+fmt(x[1])+"\n"; });
@@ -2058,7 +2058,7 @@ document.addEventListener('DOMContentLoaded',function(){
   $('btnReset').addEventListener('click',reset);
   $('btnShare').addEventListener('click',function(){
     var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if(isMobile && navigator.share){ navigator.share({title:'Note de provision',text:recap}).catch(function(){}); }
+    if(isMobile && navigator.share){ navigator.share({title:'Calcul des Frais',text:recap}).catch(function(){}); }
     else {
       var w=window.open('https://wa.me/?text='+encodeURIComponent(recap),'_blank');
       if(!w && navigator.clipboard){ navigator.clipboard.writeText(recap).then(function(){toast('Récapitulatif copié')}); }
