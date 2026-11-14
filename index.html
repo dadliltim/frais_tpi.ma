@@ -1007,7 +1007,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 
 <div id="app-tpi" class="module">
-<div class="print-title"><b>Étude notariale — Liquidation IR / Profits immobiliers (T.P.I.)</b><span>Profit immobilier, réévaluation &amp; cotisation minimale (CGI)</span></div>
+<div class="print-title"><b>Étude notariale — ESTIMATION DE DECLARATION TPI (CGI 2026)</b><span>Profit immobilier, réévaluation &amp; cotisation minimale (CGI)</span></div>
 
     <!-- =====================================================================
          SUB-NAVIGATION
@@ -1722,7 +1722,7 @@ function buildPdf(d){
   T(M,792,d.subtitle||'Etude notariale  -  Code General des Impots','F1',8.5,'0.8 0.84 0.9 rg');
   var date=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   TR(808,date,'F1',9,'0.8 0.84 0.9 rg');
-  TR(792,'Developpe par Hatim DALIL','F2',8.5,'1 0.918 0.6 rg');
+  TR(792,'Développé par Hatim DALIL','F2',8.5,'1 0.918 0.6 rg');
   var y=750;
   T(M,y,(d.kind==='tpi'?'Annee / dossier : ':'Client : ')+(d.client||'Non renseigne'),'F2',11,NAVY);
   T(M,y-16,(d.kind==='tpi'?'Echeance DGI : ':'Reference : ')+(d.tf||'-'),'F1',10,INK);
@@ -1754,7 +1754,7 @@ function buildPdf(d){
   
   /* Pied de page PDF unifié avec signature Hatim DALIL */
   T(M,40,d.footer||'Document indicatif - Code General des Impots (CGI 2026).','F1',7.5,MUT);
-  TR(40,'Developpe par Hatim DALIL','F2',8,NAVY);
+  TR(40,'Développé par Hatim DALIL','F2',8,NAVY);
 
   var content=ops.join('\n');
   var objs=[
@@ -2730,7 +2730,7 @@ document.addEventListener('DOMContentLoaded',function(){
             );
             const data = {
                 kind: 'tpi',
-                title: 'DECOMPTE DE LIQUIDATION TPI (CGI 2026)',
+                title: 'ESTIMATION DE DECLARATION TPI (CGI 2026)',
                 subtitle: isMulti ? 'Acquisitions multiples - Impot sur le revenu / profits immobiliers' : 'Impot sur le revenu / profits immobiliers (Maroc)',
                 client: `${st.saleYear || '—'} | Acte : ${st.dateActeFormatted || '—'} | Paiement : ${st.datePaiementFormatted || '—'}`,
                 tf: st.dateLimiteStr || '—',
@@ -2741,7 +2741,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 enLettres: st.enLettres || '',
                 footer: 'Decompte indicatif de liquidation TPI - Code General des Impots (Maroc).'
             };
-            const filename = `${isMulti ? 'Decompte_TPI_Multi' : 'Decompte_TPI'}_${st.saleYear || new Date().getFullYear()}.pdf`;
+            const filename = `${isMulti ? 'Estimation_TPI' : 'Estimation_TPI'}_${st.saleYear || new Date().getFullYear()}.pdf`;
             const blob = new Blob([window.buildSharedProvisionPdf(data)], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
