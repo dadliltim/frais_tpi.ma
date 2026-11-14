@@ -1718,10 +1718,11 @@ function buildPdf(d){
   function line(y){ops.push('0.9 0.89 0.85 RG 0.5 w '+M+' '+y+' m '+(W-M)+' '+y+' l S');}
   ops.push(NAVY+' 0 782 '+W+' 60 re f');
   ops.push(GOLD+' 0 779 '+W+' 3 re f');
-  T(M,808,d.title||'NOTE DE PROVISION (CGI 2026)','F2',18,'1 1 1 rg');
-  T(M,792,d.subtitle||'Etude notariale  -  Code General des Impots, Greffe Tribunal','F1',8.5,'0.8 0.84 0.9 rg');
+  T(M,808,d.title||'NOTE DES FRAIS (CGI 2026)','F2',18,'1 1 1 rg');
+  T(M,792,d.subtitle||'Etude notariale  -  Code General des Impots','F1',8.5,'0.8 0.84 0.9 rg');
   var date=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   TR(808,date,'F1',9,'0.8 0.84 0.9 rg');
+  TR(792,'Developpe par Hatim DALIL','F2',8.5,'1 0.918 0.6 rg');
   var y=750;
   T(M,y,(d.kind==='tpi'?'Annee / dossier : ':'Client : ')+(d.client||'Non renseigne'),'F2',11,NAVY);
   T(M,y-16,(d.kind==='tpi'?'Echeance DGI : ':'Reference : ')+(d.tf||'-'),'F1',10,INK);
