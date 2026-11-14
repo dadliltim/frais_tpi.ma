@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#17364a">
-<title>Étude notariale — Suite de liquidation</title>
+<title>Étude notariale — Calcul Frais et IR/PI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -62,7 +62,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 /* =====================================================================
-   COQUE COMMUNE : EN-TÊTE, NAVIGATION, PIED
+   COQUE COMMUNE : EN-TÊTE, NAVIGATION, PIED, BARRE MOBILE
    ===================================================================== */
 #shell-header {
   min-height: 106px;
@@ -80,6 +80,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .brand h1 { font: 700 clamp(1.1rem, 2vw, 1.38rem)/1.25 var(--font-display); letter-spacing: -.025em; }
 .brand p { margin-top: .28rem; color: #c7d3d9; font-size: .88rem; }
 .clock-box { text-align: right; color: #d7e0e4; font-size: .83rem; flex-shrink: 0; }
+.author-badge {
+  display: inline-block;
+  margin-top: 0.45rem;
+  padding: 0.25rem 0.85rem;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 234, 153, 0.55);
+  border-radius: 6px;
+  color: var(--accent);
+  font: 700 0.85rem/1.3 var(--font-display);
+  letter-spacing: 0.01em;
+}       
 #current-date { color: #fff; font-weight: 700; text-transform: capitalize; }
 #current-time { font-variant-numeric: tabular-nums; color: #aebfc7; }
 
@@ -115,6 +126,23 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
   color: var(--muted); font-size: .8rem;
 }
+
+/* Barre mobile commune (Note de provision & T.P.I.) */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  display: none; align-items: center; justify-content: space-between; padding: .65rem 1rem;
+  background: var(--primary); color: #fff; border-top: 3px solid var(--accent);
+  box-shadow: 0 -4px 16px rgba(16, 41, 58, 0.25);
+}
+.bar small { display: block; color: #c7d3d9; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; }
+.bar b { color: var(--accent); font: 800 1.2rem var(--font-display); font-variant-numeric: tabular-nums; }
+.bar .btn-accent {
+  min-height: 38px; padding: .5rem .85rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 7px; font-size: .84rem; font-weight: 700;
+  background: var(--accent); border: 1px solid var(--accent-line); color: #263943;
+}
+.bar .btn-accent:hover { background: var(--accent-dark); }
 
 /* =====================================================================
    MODULE 1 — NOTE DE PROVISION (#app-droit)
@@ -169,7 +197,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   border: 1px solid #e8d27d; background: #fff9dc; color: #5d4d1c; font-size: .75rem; font-weight: 700; white-space: nowrap;
 }
 
-/* Panneaux colorés (jaune doux #FFEA99, comme le module T.P.I.) */
+/* Panneaux colorés (jaune doux #FFEA99) */
 #app-droit .panel-yellow {
   margin-top: 1rem; padding: .9rem 1.05rem; display: flex; align-items: center; gap: 1rem;
   background: var(--accent); border: 1px solid #e6c95c; border-radius: 10px; box-shadow: 0 2px 6px rgba(255,234,153,.35);
@@ -255,14 +283,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 #app-droit .acts { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; margin-top: 1.1rem; }
 #app-droit .acts .span2 { grid-column: span 2; }
 
-/* Barre mobile */
-#app-droit .bar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-  display: none; align-items: center; justify-content: space-between; padding: .65rem 1rem;
-  background: var(--primary); color: #fff; border-top: 3px solid var(--accent);
-}
-#app-droit .bar small { display: block; color: #c7d3d9; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; }
-#app-droit .bar b { color: var(--accent); font: 800 1.2rem var(--font-display); font-variant-numeric: tabular-nums; }
 #app-droit .toast {
   position: fixed; left: 50%; bottom: 96px; z-index: 60; transform: translateX(-50%);
   padding: .55rem 1rem; border-radius: 8px; background: var(--text); color: #fff; font-size: .84rem;
@@ -276,8 +296,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @media (max-width: 960px) {
   #app-droit .wrap { grid-template-columns: minmax(0,1fr); }
   #app-droit .sum { position: static; scroll-margin-top: 70px; }
-  #app-droit .bar { display: flex; }
-  #app-droit { padding-bottom: 78px; }
+  .bar { display: flex; }
+  #app-droit, #app-tpi { padding-bottom: 78px; }
 }
 @media (max-width: 640px) {
   #shell-header { min-height: 90px; padding: 1rem; }
@@ -297,12 +317,27 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 
 /* =====================================================================
-   IMPRESSION
+   IMPRESSION (UNIFIÉE POUR LES DEUX MODULES + SIGNATURE)
    ===================================================================== */
 @page { size: A4; margin: 14mm; }
 @media print {
-  body { background: #fff; color: #17242c; font-size: 10pt; }
-  #shell-header, #shell-nav, #shell-footer { display: none !important; }
+  body { background: #fff; color: #17242c; font-size: 10pt; padding-bottom: 14mm; }
+  #shell-header, #shell-nav, .bar { display: none !important; }
+  #shell-footer {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 3mm 0 0 0;
+    border-top: 1px solid #cbd5e1;
+    background: #fff;
+    font-size: 8.5pt;
+    color: #4b5a63;
+  }
   #shell-main { width: 100%; max-width: none; margin: 0; padding: 0; }
   .module:not(.active) { display: none !important; }
   .module.active { animation: none; }
@@ -312,7 +347,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
   #app-droit { padding-bottom: 0; }
   #app-droit .wrap { display: block; }
-  #app-droit .left, #app-droit .acts, #app-droit .bar, #app-droit .toast { display: none !important; }
+  #app-droit .left, #app-droit .acts, #app-droit .toast { display: none !important; }
   #app-droit .sum { position: static; }
   #app-droit .pdate { display: block; }
   #app-droit .card { box-shadow: none; break-inside: avoid; }
@@ -342,247 +377,248 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   --cds-shadow-md: 0 14px 30px -12px rgba(22,43,55,.4);
   font-family: var(--font);
 }
-.mono-fix {}
 
 #app-tpi .mono {
-            font-family: 'Manrope', 'DM Sans', sans-serif; font-variant-numeric: tabular-nums;
-            font-variant-numeric: tabular-nums;
-        }
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+}
 #app-tpi .subnav-bar {
-            background: var(--cds-bg-surface);
-            border-bottom: 1px solid var(--cds-border);
-            padding: 0 2rem;
-            box-shadow: var(--cds-shadow-xs);
-        }
+  background: var(--cds-bg-surface);
+  border-bottom: 1px solid var(--cds-border);
+  padding: 0 2rem;
+  box-shadow: var(--cds-shadow-xs);
+}
 #app-tpi .subnav-inner {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
 #app-tpi .tabs-list { display: flex; gap: 0.25rem; overflow-x: auto; }
 #app-tpi .tab-btn {
-            padding: 0.9rem 1.15rem;
-            border: none;
-            background: transparent;
-            font-family: inherit;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--cds-text-secondary);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.18s ease;
-            white-space: nowrap;
-        }
+  padding: 0.9rem 1.15rem;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cds-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
 #app-tpi .tab-btn:hover { color: var(--cds-brand-800); background: var(--cds-bg-subtle); }
 #app-tpi .tab-btn.active { color: var(--cds-brand-800); border-bottom-color: var(--cds-gold-600); }
 #app-tpi .tab-step {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 0.72rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--cds-bg-muted);
-            color: var(--cds-text-secondary);
-        }
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cds-bg-muted);
+  color: var(--cds-text-secondary);
+}
 #app-tpi .tab-btn.active .tab-step { background: var(--cds-brand-800); color: #ffffff; }
 #app-tpi .view-section { display: none; animation: fadeIn 0.2s ease; }
 #app-tpi .view-section.active { display: block; }
 #app-tpi .split-layout {
-            display: grid;
-            grid-template-columns: 1.12fr 0.88fr;
-            gap: 1.75rem;
-            align-items: start;
-        }
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 1.75rem;
+  align-items: start;
+}
 #app-tpi .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 #app-tpi .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 #app-tpi .card {
-            background: var(--cds-bg-surface);
-            border: 1px solid var(--cds-border);
-            border-radius: var(--cds-radius-lg);
-            box-shadow: var(--cds-shadow-sm);
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-        }
+  background: var(--cds-bg-surface);
+  border: 1px solid var(--cds-border);
+  border-radius: var(--cds-radius-lg);
+  box-shadow: var(--cds-shadow-sm);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
 #app-tpi .card-header {
-            padding: 1.05rem 1.35rem;
-            border-bottom: 1px solid var(--cds-border);
-            background: var(--cds-bg-subtle);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
+  padding: 1.05rem 1.35rem;
+  border-bottom: 1px solid var(--cds-border);
+  background: var(--cds-bg-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
 #app-tpi .card-title-group { display: flex; align-items: center; gap: 0.6rem; }
 #app-tpi .card-title { font-size: 0.92rem; font-weight: 700; color: var(--cds-brand-900); letter-spacing: -0.01em; }
 #app-tpi .card-body { padding: 1.4rem; }
 #app-tpi .form-section-label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--cds-text-muted);
-            margin-bottom: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cds-text-muted);
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 #app-tpi .form-section-label::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: var(--cds-border);
-        }
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--cds-border);
+}
 #app-tpi .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            margin-bottom: 0.95rem;
-        }
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.95rem;
+}
 #app-tpi label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--cds-text-secondary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cds-text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 #app-tpi .coef-pill {
-            font-family: 'Manrope', 'DM Sans', sans-serif; font-variant-numeric: tabular-nums;
-            font-size: 0.72rem;
-            background: var(--cds-brand-50);
-            color: var(--cds-brand-700);
-            padding: 0.1rem 0.45rem;
-            border-radius: 4px;
-            border: 1px solid var(--cds-brand-100);
-        }
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+  background: var(--cds-brand-50);
+  color: var(--cds-brand-700);
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid var(--cds-brand-100);
+}
 #app-tpi .input-wrapper { position: relative; display: flex; align-items: center; }
 #app-tpi input[type="text"], #app-tpi input[type="number"], #app-tpi input[type="date"], #app-tpi input[type="tel"], #app-tpi select {
-            width: 100%;
-            height: 38px;
-            padding: 0 0.8rem;
-            font-family: inherit;
-            font-size: 0.86rem;
-            color: var(--cds-text-primary);
-            background: var(--cds-bg-surface);
-            border: 1px solid var(--cds-border-strong);
-            border-radius: var(--cds-radius-sm);
-            transition: border-color 0.15s, box-shadow 0.15s;
-        }
+  width: 100%;
+  height: 38px;
+  padding: 0 0.8rem;
+  font-family: inherit;
+  font-size: 0.86rem;
+  color: var(--cds-text-primary);
+  background: var(--cds-bg-surface);
+  border: 1px solid var(--cds-border-strong);
+  border-radius: var(--cds-radius-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
 #app-tpi input.num-input {
-            font-family: 'Manrope', 'DM Sans', sans-serif; font-variant-numeric: tabular-nums;
-            font-weight: 600;
-            text-align: right;
-            padding-right: 2.6rem;
-        }
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+  padding-right: 2.6rem;
+}
 #app-tpi .input-suffix {
-            position: absolute;
-            right: 0.7rem;
-            font-size: 0.74rem;
-            font-weight: 600;
-            color: var(--cds-text-muted);
-            pointer-events: none;
-        }
+  position: absolute;
+  right: 0.7rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--cds-text-muted);
+  pointer-events: none;
+}
 #app-tpi input:focus, #app-tpi select:focus {
-            outline: none;
-            border-color: var(--cds-brand-700);
-            box-shadow: 0 0 0 3px rgba(36, 79, 102, 0.12);
-        }
+  outline: none;
+  border-color: var(--cds-brand-700);
+  box-shadow: 0 0 0 3px rgba(36, 79, 102, 0.12);
+}
 #app-tpi input[readonly] {
-            background-color: var(--cds-bg-subtle);
-            color: var(--cds-brand-900);
-            font-weight: 600;
-            border-color: var(--cds-border);
-            cursor: default;
-        }
+  background-color: var(--cds-bg-subtle);
+  color: var(--cds-brand-900);
+  font-weight: 600;
+  border-color: var(--cds-border);
+  cursor: default;
+}
 #app-tpi .options-panel-yellow {
-            background-color: #FFEA99;
-            border: 1px solid #e6c95c;
-            border-radius: var(--cds-radius-md);
-            padding: 0.9rem 1.05rem;
-            margin-bottom: 1.2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.65rem;
-            box-shadow: 0 2px 6px rgba(255, 234, 153, 0.35);
-        }
+  background-color: #FFEA99;
+  border: 1px solid #e6c95c;
+  border-radius: var(--cds-radius-md);
+  padding: 0.9rem 1.05rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  box-shadow: 0 2px 6px rgba(255, 234, 153, 0.35);
+}
 #app-tpi .checkbox-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.65rem;
-            cursor: pointer;
-            font-size: 0.83rem;
-            color: #10293a;
-            font-weight: 600;
-            justify-content: flex-start;
-        }
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  cursor: pointer;
+  font-size: 0.83rem;
+  color: #10293a;
+  font-weight: 600;
+  justify-content: flex-start;
+}
 #app-tpi .checkbox-row input[type="checkbox"] {
-            width: 17px;
-            height: 17px;
-            margin-top: 2px;
-            accent-color: #10293a;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  accent-color: #10293a;
+  cursor: pointer;
+  flex-shrink: 0;
+}
 #app-tpi .btn {
-            height: 36px;
-            padding: 0 0.85rem;
-            border-radius: var(--cds-radius-sm);
-            font-family: inherit;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid transparent;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            transition: all 0.15s ease;
-            white-space: nowrap;
-        }
+  height: 36px;
+  padding: 0 0.85rem;
+  border-radius: var(--cds-radius-sm);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
 #app-tpi .btn:active { transform: translateY(1px); }
 #app-tpi .btn-primary { background: var(--cds-brand-800); color: #ffffff; }
 #app-tpi .btn-primary:hover { background: var(--cds-brand-900); }
 #app-tpi .btn-excel { background: #176b54; color: #ffffff; }
 #app-tpi .btn-excel:hover { background: #105640; }
 #app-tpi .btn-add-row {
-            background: var(--cds-brand-50);
-            color: var(--cds-brand-800);
-            border: 1px dashed var(--cds-brand-700);
-            width: 100%;
-            margin-top: 0.65rem;
-            height: 38px;
-        }
+  background: var(--cds-brand-50);
+  color: var(--cds-brand-800);
+  border: 1px dashed var(--cds-brand-700);
+  width: 100%;
+  margin-top: 0.65rem;
+  height: 38px;
+}
 #app-tpi .btn-add-row:hover {
-            background: var(--cds-brand-100);
-            border-style: solid;
-        }
+  background: var(--cds-brand-100);
+  border-style: solid;
+}
 #app-tpi .btn-pdf {
-            background: var(--cds-brand-900);
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(16, 41, 58, 0.22);
-        }
+  background: var(--cds-brand-900);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(16, 41, 58, 0.22);
+}
 #app-tpi .btn-pdf:hover { background: #244f66; }
 #app-tpi .btn-whatsapp {
-            background: var(--cds-whatsapp);
-            color: #ffffff;
-            box-shadow: 0 2px 6px rgba(23, 107, 84, 0.22);
-        }
+  background: var(--cds-whatsapp);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(23, 107, 84, 0.22);
+}
 #app-tpi .btn-whatsapp:hover { background: var(--cds-whatsapp-hv); }
 #app-tpi .btn-print {
-            background: #ffffff;
-            border-color: var(--cds-brand-700);
-            color: var(--cds-brand-900);
-        }
+  background: #ffffff;
+  border-color: var(--cds-brand-700);
+  color: var(--cds-brand-900);
+}
 #app-tpi .btn-print:hover { background: var(--cds-brand-50); }
 #app-tpi .btn-outline { background: #ffffff; border-color: var(--cds-border-strong); color: var(--cds-text-primary); }
 #app-tpi .btn-outline:hover { background: var(--cds-bg-muted); }
@@ -593,16 +629,16 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 #app-tpi .action-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
 #app-tpi .ledger-group { display: flex; flex-direction: column; gap: 0.45rem; }
 #app-tpi .ledger-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.62rem 0.88rem;
-            border-radius: var(--cds-radius-sm);
-            background: var(--cds-bg-subtle);
-            border: 1px solid var(--cds-border);
-            font-size: 0.84rem;
-            transition: all 0.2s ease;
-        }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.62rem 0.88rem;
+  border-radius: var(--cds-radius-sm);
+  background: var(--cds-bg-subtle);
+  border: 1px solid var(--cds-border);
+  font-size: 0.84rem;
+  transition: all 0.2s ease;
+}
 #app-tpi .ledger-row .lbl { color: var(--cds-text-secondary); font-weight: 500; }
 #app-tpi .ledger-row .val { font-family: 'Manrope', 'DM Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--cds-text-primary); }
 #app-tpi .ledger-row.subtotal { background: var(--cds-brand-50); border-color: var(--cds-brand-100); }
@@ -612,261 +648,175 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 #app-tpi .ledger-row.profit-row .val { font-size: 0.96rem; font-weight: 700; }
 #app-tpi .comparison-grid { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.85rem 0; }
 #app-tpi .comp-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.68rem 0.92rem;
-            border-radius: var(--cds-radius-sm);
-            border: 1px solid var(--cds-border);
-            background: #ffffff;
-            font-size: 0.83rem;
-            transition: all 0.2s;
-        }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.68rem 0.92rem;
+  border-radius: var(--cds-radius-sm);
+  border: 1px solid var(--cds-border);
+  background: #ffffff;
+  font-size: 0.83rem;
+  transition: all 0.2s;
+}
 #app-tpi .comp-item.winner {
-            background: var(--cds-success-50);
-            border-color: #a8d0bd;
-            box-shadow: inset 3px 0 0 var(--cds-success-700);
-        }
+  background: var(--cds-success-50);
+  border-color: #a8d0bd;
+  box-shadow: inset 3px 0 0 var(--cds-success-700);
+}
 #app-tpi .comp-item.winner .comp-title, #app-tpi .comp-item.winner .val { color: var(--cds-success-700); font-weight: 700; }
 #app-tpi .comp-item.dimmed { opacity: 0.48; background: var(--cds-bg-subtle); }
 #app-tpi .winner-tag {
-            display: none;
-            font-size: 0.67rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            background: var(--cds-success-100);
-            color: var(--cds-success-700);
-            padding: 0.14rem 0.45rem;
-            border-radius: 4px;
-            margin-left: 0.45rem;
-        }
+  display: none;
+  font-size: 0.67rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--cds-success-100);
+  color: var(--cds-success-700);
+  padding: 0.14rem 0.45rem;
+  border-radius: 4px;
+  margin-left: 0.45rem;
+}
 #app-tpi .comp-item.winner .winner-tag { display: inline-block; }
 #app-tpi .hero-tax-box {
-            background: linear-gradient(135deg, var(--cds-brand-900) 0%, var(--cds-brand-800) 100%);
-            color: #ffffff;
-            border-radius: var(--cds-radius-md);
-            padding: 1.2rem 1.3rem;
-            margin-top: 0.75rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: var(--cds-shadow-md);
-        }
+  background: linear-gradient(135deg, var(--cds-brand-900) 0%, var(--cds-brand-800) 100%);
+  color: #ffffff;
+  border-radius: var(--cds-radius-md);
+  padding: 1.2rem 1.3rem;
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--cds-shadow-md);
+}
 #app-tpi .hero-tax-meta { font-size: 0.74rem; color: #b9cfd9; margin-bottom: 0.2rem; }
 #app-tpi .hero-tax-label { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.02em; }
 #app-tpi .hero-tax-amount {
-            font-family: 'Manrope', 'DM Sans', sans-serif; font-variant-numeric: tabular-nums;
-            font-size: 1.42rem;
-            font-weight: 700;
-            color: #FFEA99;
-            white-space: nowrap;
-        }
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.42rem;
+  font-weight: 700;
+  color: #FFEA99;
+  white-space: nowrap;
+}
 #app-tpi .words-box {
-            margin-top: 0.85rem;
-            padding: 0.78rem 1rem;
-            background: var(--cds-gold-50);
-            border: 1px solid #e8d27d;
-            border-radius: var(--cds-radius-sm);
-            font-size: 0.8rem;
-        }
+  margin-top: 0.85rem;
+  padding: 0.78rem 1rem;
+  background: var(--cds-gold-50);
+  border: 1px solid #e8d27d;
+  border-radius: var(--cds-radius-sm);
+  font-size: 0.8rem;
+}
 #app-tpi .words-box span {
-            color: var(--cds-gold-600);
-            display: block;
-            font-size: 0.71rem;
-            font-weight: 600;
-            margin-bottom: 0.15rem;
-        }
+  color: var(--cds-gold-600);
+  display: block;
+  font-size: 0.71rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
 #app-tpi .words-box strong { color: var(--cds-brand-900); text-transform: uppercase; letter-spacing: 0.02em; }
 #app-tpi .badge {
-            padding: 0.24rem 0.65rem;
-            border-radius: 999px;
-            font-size: 0.73rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
+  padding: 0.24rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
 #app-tpi .badge-ok { background: var(--cds-success-100); color: var(--cds-success-700); }
 #app-tpi .badge-late { background: var(--cds-danger-100); color: var(--cds-danger-700); }
 #app-tpi .table-wrap { border: 1px solid var(--cds-border); border-radius: var(--cds-radius-md); overflow: auto; }
 #app-tpi table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
 #app-tpi th {
-            background: var(--cds-bg-subtle);
-            color: var(--cds-text-secondary);
-            font-size: 0.73rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            text-align: left;
-            padding: 0.7rem 0.75rem;
-            border-bottom: 1px solid var(--cds-border);
-            position: sticky;
-            top: 0;
-        }
+  background: var(--cds-bg-subtle);
+  color: var(--cds-text-secondary);
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--cds-border);
+  position: sticky;
+  top: 0;
+}
 #app-tpi td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--cds-border); }
 #app-tpi tbody tr:hover { background: var(--cds-bg-subtle); }
 #app-tpi .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.55);
-            backdrop-filter: blur(3px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            padding: 1rem;
-        }
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
 #app-tpi .modal-backdrop.open { display: flex; }
 #app-tpi .modal-card {
-            background: #ffffff;
-            border-radius: var(--cds-radius-lg);
-            width: 100%;
-            max-width: 540px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            overflow: hidden;
-            animation: fadeIn 0.18s ease;
-        }
+  background: #ffffff;
+  border-radius: var(--cds-radius-lg);
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+  animation: fadeIn 0.18s ease;
+}
 #app-tpi .modal-header {
-            padding: 1.1rem 1.4rem;
-            background: var(--cds-bg-subtle);
-            border-bottom: 1px solid var(--cds-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  padding: 1.1rem 1.4rem;
+  background: var(--cds-bg-subtle);
+  border-bottom: 1px solid var(--cds-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 #app-tpi .modal-body { padding: 1.4rem; }
 #app-tpi .wa-preview {
-            width: 100%;
-            height: 230px;
-            padding: 0.85rem;
-            border: 1px solid var(--cds-border-strong);
-            border-radius: var(--cds-radius-sm);
-            font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
-            font-size: 0.82rem;
-            line-height: 1.45;
-            background: #e8f3ee;
-            color: #0f4a39;
-            resize: vertical;
-        }
+  width: 100%;
+  height: 230px;
+  padding: 0.85rem;
+  border: 1px solid var(--cds-border-strong);
+  border-radius: var(--cds-radius-sm);
+  font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  background: #e8f3ee;
+  color: #0f4a39;
+  resize: vertical;
+}
 #app-tpi .modal-footer {
-            padding: 1rem 1.4rem;
-            background: var(--cds-bg-subtle);
-            border-top: 1px solid var(--cds-border);
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.6rem;
-        }
-#app-tpi #pdf-export-wrapper {
-            position: fixed;
-            left: -9999px;
-            top: 0;
-            width: 794px;
-            background: #ffffff;
-        }
-#app-tpi .pdf-sheet {
-            padding: 36px 42px;
-            font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
-            color: #0f172a;
-            background: #ffffff;
-        }
-#app-tpi .pdf-top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 2px solid #10293a;
-            padding-bottom: 16px;
-            margin-bottom: 20px;
-        }
-#app-tpi .pdf-office-title { font-size: 16px; font-weight: 700; color: #10293a; text-transform: uppercase; letter-spacing: 0.5px; }
-#app-tpi .pdf-office-sub { font-size: 11px; color: #475569; margin-top: 3px; }
-#app-tpi .pdf-doc-badge { background: #10293a; color: #ffffff; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; text-align: right; }
-#app-tpi .pdf-meta-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            font-size: 11.5px;
-        }
-#app-tpi .pdf-section-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            color: #10293a;
-            background: #e2e8f0;
-            padding: 6px 10px;
-            border-radius: 4px;
-            margin: 16px 0 8px;
-        }
-#app-tpi .pdf-table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 12px; }
-#app-tpi .pdf-table td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; }
-#app-tpi .pdf-table td.num { text-align: right; font-family: 'Manrope', 'DM Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight: 600; }
-#app-tpi .pdf-table tr.highlight td { background: #f0f5ff; font-weight: 700; color: #10293a; }
-#app-tpi .pdf-table tr.winner td { background: #e8f3ee; font-weight: 700; color: #176b54; }
-#app-tpi .pdf-total-banner {
-            background: #10293a;
-            color: #ffffff;
-            padding: 14px 18px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 14px;
-        }
-#app-tpi .pdf-words {
-            margin-top: 12px;
-            padding: 10px 14px;
-            background: #fff9dc;
-            border: 1px solid #e8d27d;
-            border-radius: 4px;
-            font-size: 11px;
-        }
-#app-tpi .pdf-footer {
-            margin-top: 32px;
-            padding-top: 12px;
-            border-top: 1px solid #cbd5e1;
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            color: #64748b;
-        }
+  padding: 1rem 1.4rem;
+  background: var(--cds-bg-subtle);
+  border-top: 1px solid var(--cds-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
 #app-tpi .print-footer-note { display: none; }
 @media (max-width: 1060px) {
-#app-tpi .split-layout { grid-template-columns: 1fr; }
+  #app-tpi .split-layout { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-#app-tpi .subnav-bar { padding-left: 1rem; padding-right: 1rem; }
-#app-tpi .grid-2, #app-tpi .grid-3 { grid-template-columns: 1fr; }
-#app-tpi .hero-tax-box { flex-direction: column; align-items: flex-start; }
+  #app-tpi .subnav-bar { padding-left: 1rem; padding-right: 1rem; }
+  #app-tpi .grid-2, #app-tpi .grid-3 { grid-template-columns: 1fr; }
+  #app-tpi .hero-tax-box { flex-direction: column; align-items: flex-start; }
 }
 @media print {
-#app-tpi .subnav-bar, #app-tpi .no-print { display: none !important; }
-#app-tpi .card { box-shadow: none; border: 1px solid #cbd5e1; break-inside: avoid; }
-#app-tpi .options-panel-yellow {
-                background-color: #FFEA99 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-#app-tpi .hero-tax-box {
-                background: #10293a !important;
-                color: #ffffff !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-#app-tpi .print-footer-note {
-                display: flex !important;
-                justify-content: space-between;
-                margin-top: 1.5rem;
-                padding-top: 0.75rem;
-                border-top: 1px solid #cbd5e1;
-                font-size: 0.75rem;
-                color: #64748b;
-            }
+  #app-tpi .subnav-bar, #app-tpi .no-print { display: none !important; }
+  #app-tpi .card { box-shadow: none; border: 1px solid #cbd5e1; break-inside: avoid; }
+  #app-tpi .options-panel-yellow {
+    background-color: #FFEA99 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #app-tpi .hero-tax-box {
+    background: #10293a !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
 
 /* Harmonisation avec le module Note de provision */
@@ -882,7 +832,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 #app-tpi .workspace { padding: 0; }
 @media (max-width: 640px) { #app-tpi .subnav-bar { padding: 0 .25rem; } }
 @media print { #app-tpi .subnav-bar { display: none !important; } }
-
 </style>
 </head>
 <body>
@@ -891,8 +840,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   <div class="brand">
     <div class="brand-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-2 9h4l-2-9z"/><path d="M19 7l-2 9h4l-2-9z"/><path d="M8 21h8"/></svg></div>
     <div>
-      <h1>Étude Notariale — Suite de liquidation</h1>
+      <h1>Étude Notariale — Calcul Frais et IR/PI</h1>
       <p>Note de provision (CGI 2026) · Profits immobiliers (T.P.I.)</p>
+      <span class="author-badge">Développé par Hatim DALIL</span>
     </div>
   </div>
   <div class="clock-box">
@@ -974,7 +924,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           </div>
           <div class="note" id="paiementNote"></div>
 
-          <!-- Frais de Greffe & publicité (constitution de société, apports, FDC) -->
+          <!-- Frais de Greffe & publicité -->
           <div class="panel-soft" id="greffeContainer">
             <div class="panel-title">Frais de greffe &amp; publications légales (tarifs officiels)</div>
             <div class="row r2">
@@ -1058,10 +1008,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 <div id="app-tpi" class="module">
 <div class="print-title"><b>Étude notariale — Liquidation IR / Profits immobiliers (T.P.I.)</b><span>Profit immobilier, réévaluation &amp; cotisation minimale (CGI)</span></div>
-<!-- =====================================================================
-         HEADER CLARITY
-         ===================================================================== -->
-    
 
     <!-- =====================================================================
          SUB-NAVIGATION
@@ -1112,7 +1058,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                         </div>
 
                         <div class="card-body">
-                            <div class="form-section-label">1. Valeur de Cession & Régime Fiscal</div>
+                            <div class="form-section-label">1. Valeur de Cession &amp; Régime Fiscal</div>
                             <div class="grid-2">
                                 <div class="form-group">
                                     <label>Prix de Cession / Vente *</label>
@@ -1143,7 +1089,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 </label>
                             </div>
 
-                            <div class="form-section-label">2. Coût d'Acquisition & Réévaluation DGI</div>
+                            <div class="form-section-label">2. Coût d'Acquisition &amp; Réévaluation DGI</div>
                             <div class="grid-2">
                                 <div class="form-group">
                                     <label>Prix d'Acquisition Historique</label>
@@ -1198,7 +1144,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                 </div>
 
                 <!-- COLONNE DROITE : LIQUIDATION -->
-                <div>
+                <div id="tpi-detail-single">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title-group">
@@ -1214,7 +1160,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                                     WhatsApp
                                 </button>
-                                <button class="btn btn-print" onclick="window.print()">
+                                <button class="btn btn-print" onclick="printTpi()">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                                     Imprimer
                                 </button>
@@ -1290,7 +1236,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title-group">
-                                <span class="card-title">Délai Légal (30 Jours) & Pénalités (Art. 184 / 208)</span>
+                                <span class="card-title">Délai Légal (30 Jours) &amp; Pénalités (Art. 184 / 208)</span>
                             </div>
                             <span id="badge-delai" class="badge badge-ok">● Dans le délai légal (30j)</span>
                         </div>
@@ -1349,7 +1295,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                         </div>
 
                         <div class="card-body">
-                            <div class="form-section-label">1. Valeur de Cession Globale & Régime Fiscal</div>
+                            <div class="form-section-label">1. Valeur de Cession Globale &amp; Régime Fiscal</div>
                             <div class="grid-2">
                                 <div class="form-group">
                                     <label>Prix de Cession Global / Vente *</label>
@@ -1451,7 +1397,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                 </div>
 
                 <!-- COLONNE DROITE : LIQUIDATION MULTI-ACQUISITIONS -->
-                <div>
+                <div id="tpi-detail-multi">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title-group">
@@ -1467,7 +1413,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                                     WhatsApp
                                 </button>
-                                <button class="btn btn-print" onclick="window.print()">
+                                <button class="btn btn-print" onclick="printTpi()">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                                     Imprimer
                                 </button>
@@ -1543,7 +1489,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title-group">
-                                <span class="card-title">Délai Légal (30 Jours) & Pénalités (Art. 184 / 208)</span>
+                                <span class="card-title">Délai Légal (30 Jours) &amp; Pénalités (Art. 184 / 208)</span>
                             </div>
                             <span id="multi-badge-delai" class="badge badge-ok">● Dans le délai légal (30j)</span>
                         </div>
@@ -1640,12 +1586,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                 </div>
             </div>
         </section>
+    </div>
 
-        <!-- Pied de page toujours imprimé -->
-        <div class="print-footer-note">
-            <span>Liquidation IR / PI (T.P.I. Maroc) — Code Général des Impôts</span>
-            <span>Développé par Hatim DALIL</span>
-        </div>
+    <!-- Barre fixe mobile pour T.P.I. -->
+    <div class="bar" id="tpi-bar">
+      <div><small>Total général à payer (DGI)</small><b id="tpiBarTotal">0 DH</b></div>
+      <button class="btn btn-accent" id="btnTpiDetail" type="button" onclick="scrollToTpiDetail()">Voir le détail ↓</button>
     </div>
 
     <!-- =====================================================================
@@ -1674,122 +1620,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                 <button class="btn btn-outline" onclick="copyWhatsAppText()">📋 Copier le texte</button>
                 <button class="btn btn-whatsapp" onclick="launchWhatsApp()">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    Ouvrir WhatsApp & Envoyer
+                    Ouvrir WhatsApp &amp; Envoyer
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- =====================================================================
-         GABARIT OFF-SCREEN POUR GÉNÉRATION PDF A4 PRO (AVEC EN-TÊTE)
-         ===================================================================== -->
-    <div id="pdf-export-wrapper">
-        <div id="pdf-document" class="pdf-sheet">
-            <div class="pdf-top-bar">
-                <div>
-                    <div class="pdf-office-title">Étude Notariale — Liquidateur Fiscal</div>
-                    <div class="pdf-office-sub" id="pdf-subtitle-mode">Décompte de Liquidation — Impôt sur le Revenu / Profits Immobiliers (T.P.I. Maroc)</div>
-                    <div class="pdf-author-badge">Développé par Hatim DALIL</div>
-                </div>
-                <div class="pdf-doc-badge">
-                    DÉCOMPTE IR / PI<br>
-                    <span id="pdf-date-edition" style="font-weight:400; font-size:10px;"></span>
-                </div>
-            </div>
-
-            <div class="pdf-meta-grid">
-                <div><strong>Année de Cession :</strong> <span id="pdf-annee-vente">—</span></div>
-                <div><strong>Date Acte :</strong> <span id="pdf-dates">—</span></div>
-                <div><strong>Date Paiement DGI :</strong> <span id="pdf-date_paiement">—</span></div>
-               
-                
-            </div>
-
-            <div class="pdf-section-title">I. Détermination du Coût d'Acquisition & du Profit Imposable</div>
-            <table class="pdf-table">
-                <tr>
-                    <td>Prix de cession déclaré</td>
-                    <td class="num" id="pdf-prix-cession">0,00 DH</td>
-                </tr>
-                <tr>
-                    <td id="pdf-acq-detail-lbl">Prix d'acquisition réévalué</td>
-                    <td class="num" id="pdf-prix-act">0,00 DH</td>
-                </tr>
-                <tr>
-                    <td>Frais forfaitaires d'acquisition (15%)</td>
-                    <td class="num" id="pdf-frais-15">0,00 DH</td>
-                </tr>
-                <tr>
-                    <td id="pdf-inv-detail-lbl">Dépenses d'investissement réévaluées</td>
-                    <td class="num" id="pdf-inv-act">0,00 DH</td>
-                </tr>
-                <tr class="highlight">
-                    <td>Coût d'acquisition total déductible</td>
-                    <td class="num" id="pdf-cout-total">0,00 DH</td>
-                </tr>
-                <tr class="highlight">
-                    <td>PROFIT IMMOBILIER NET IMPOSABLE</td>
-                    <td class="num" id="pdf-profit">0,00 DH</td>
-                </tr>
-            </table>
-
-            <div id="pdf-multi-tranches-block" style="display:none;">
-                <div class="pdf-section-title">Détail des Acquisitions / Quittances Prises en Compte</div>
-                <table class="pdf-table" id="pdf-multi-tranches-table"></table>
-            </div>
-
-            <div class="pdf-section-title">II. Comparaison des Bases & Liquidation des Droits (CGI)</div>
-            <table class="pdf-table">
-                <tr id="pdf-row-taux">
-                    <td>1. Impôt calculé sur le profit net (<span id="pdf-taux-lbl">20</span>%)</td>
-                    <td class="num" id="pdf-droit-taux">0,00 DH</td>
-                </tr>
-                <tr id="pdf-row-cm3">
-                    <td>2. Cotisation Minimale légale (3% du prix de cession)</td>
-                    <td class="num" id="pdf-cm-3">0,00 DH</td>
-                </tr>
-                <tr id="pdf-row-cm5">
-                    <td>3. Seuil comparatif (5% du prix de cession)</td>
-                    <td class="num" id="pdf-cm-5">0,00 DH</td>
-                </tr>
-                <tr class="highlight">
-                    <td>Base retenue : <strong id="pdf-base-retenue"></strong></td>
-                    <td class="num" id="pdf-droit-exigible">0 DH</td>
-                </tr>
-            </table>
-
-            <div class="pdf-section-title">III. Pénalités et Majorations de Retard (<span id="pdf-retard-lbl">0 jour</span>)</div>
-            <table class="pdf-table">
-                <tr>
-                    <td id="pdf-lbl-maj-assiette">Majoration d'assiette (Art. 184)</td>
-                    <td class="num" id="pdf-maj-assiette">0,00 DH</td>
-                </tr>
-                <tr>
-                    <td id="pdf-lbl-pen-paiement">Pénalité de paiement (Art. 208)</td>
-                    <td class="num" id="pdf-pen-paiement">0,00 DH</td>
-                </tr>
-                <tr>
-                    <td id="pdf-lbl-maj-mensuelle">Majorations mensuelles (Art. 208)</td>
-                    <td class="num" id="pdf-maj-mensuelle">0,00 DH</td>
-                </tr>
-            </table>
-
-            <div class="pdf-total-banner">
-                <div>
-                    <div style="font-size:10px; opacity:0.85; text-transform:uppercase;">Montant Net à Verser au Trésor (DGI)</div>
-                    <div style="font-size:13px; font-weight:700;">TOTAL GÉNÉRAL EXIGIBLE</div>
-                </div>
-                <div style="font-family: 'Manrope', 'DM Sans', sans-serif; font-variant-numeric: tabular-nums; font-size:18px; font-weight:700; color:#FFEA99;" id="pdf-total-payer">0 DH</div>
-            </div>
-
-            <div class="pdf-words">
-                <span style="color:#825a20; font-weight:600;">Arrêté le présent décompte à la somme de :</span><br>
-                <strong id="pdf-en-lettres" style="color:#10293a; text-transform:uppercase;">ZÉRO DIRHAM</strong>
-            </div>
-
-            <div class="pdf-footer">
-                <span>Document généré à titre de liquidation notariale conformément au Code Général des Impôts (Maroc).</span>
-                <span>Développé par Hatim DALIL</span>
             </div>
         </div>
     </div>
@@ -1802,13 +1634,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 </footer>
 
 <script>
-
 (function () {
   var MODS = {
     provision: { id: 'app-droit', title: 'Note de provision' },
     tpi:       { id: 'app-tpi',   title: 'Liquidation T.P.I. (IR / PI)' }
   };
-  var BASE = 'Étude notariale — Suite de liquidation';
+  var BASE = 'Étude notariale — Calcul Frais et IR/PI';
   var tabs = document.querySelectorAll('.module-tab');
 
   function show(key, updateHash) {
@@ -1839,8 +1670,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   show(location.hash.replace('#', '') || 'provision', false);
   document.getElementById('footer-year').textContent = new Date().getFullYear();
 })();
-
 </script>
+
 <script>
 (function(){
 
@@ -1898,8 +1729,18 @@ function buildPdf(d){
   y-=62;
   d.secs.forEach(function(s){
     T(M,y,s.t.toUpperCase(),'F2',8.5,GOLD); y-=6; line(y); y-=15;
-    var rowSize=d.kind==='tpi'?8.5:10,rowGap=d.kind==='tpi'?3:6,rowAfter=d.kind==='tpi'?10:14;s.r.forEach(function(x){T(M,y,x[2],'F1',rowSize,INK);TR(y,typeof x[1]==='string'?x[1]:fmt(x[1]),'F2',rowSize,INK);y-=rowGap;line(y);y-=rowAfter;});
-    if(s.st){var sumSize=d.kind==='tpi'?8.5:10;T(M,y,s.st[0],'F2',sumSize,NAVY);TR(y,fmt(s.st[1]),'F2',sumSize,NAVY);y-=d.kind==='tpi'?7:10;}
+    var rowSize=d.kind==='tpi'?8.5:10,rowGap=d.kind==='tpi'?3:6,rowAfter=d.kind==='tpi'?10:14;
+    s.r.forEach(function(x){
+      T(M,y,x[2],'F1',rowSize,INK);
+      TR(y,typeof x[1]==='string'?x[1]:fmt(x[1]),'F2',rowSize,INK);
+      y-=rowGap;line(y);y-=rowAfter;
+    });
+    if(s.st){
+      var sumSize=d.kind==='tpi'?8.5:10;
+      T(M,y,s.st[0],'F2',sumSize,NAVY);
+      TR(y,fmt(s.st[1]),'F2',sumSize,NAVY);
+      y-=d.kind==='tpi'?7:10;
+    }
     y-=d.kind==='tpi'?8:12;
   });
   y-=4;
@@ -1909,7 +1750,11 @@ function buildPdf(d){
   TR(y-8,fmt(d.total),'F2',15,NAVY);
   if(d.kind==='tpi' && d.enLettres) T(M+14,y-20,d.enLettres.toUpperCase(),'F2',7.5,NAVY);
   else if(d.prix>0) T(M+14,y-20,(d.total/d.prix*100).toFixed(2).replace('.',',')+" % de la base",'F1',8,MUT);
-  T(M,40,d.footer||'Document indicatif - montants sous reserve de la reglementation en vigueur (CGI 2026).','F1',7.5,MUT);
+  
+  /* Pied de page PDF unifié avec signature Hatim DALIL */
+  T(M,40,d.footer||'Document indicatif - Code General des Impots (CGI 2026).','F1',7.5,MUT);
+  TR(40,'Developpe par Hatim DALIL','F2',8,NAVY);
+
   var content=ops.join('\n');
   var objs=[
     '<< /Type /Catalog /Pages 2 0 R >>',
@@ -1930,15 +1775,11 @@ function buildPdf(d){
   return u;
 }
 window.buildSharedProvisionPdf = buildPdf;
+
 function exportPdf(){
   if(!lastData){calc();}
   var name='Note_Provision_'+(($('clientInfo').value.trim()||'Dossier').replace(/[^\w\u00C0-\u017F-]+/g,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
   var blob=new Blob([buildPdf(lastData)],{type:'application/pdf'});
-  var file; try{ file=new File([blob],name,{type:'application/pdf'}); }catch(e){}
-  if(file && navigator.canShare && navigator.canShare({files:[file]})){
-    navigator.share({files:[file],title:'Note de provision'}).catch(function(){});
-    return;
-  }
   var url=URL.createObjectURL(blob), a=document.createElement('a');
   a.href=url; a.download=name; document.body.appendChild(a); a.click();
   setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1500);
@@ -2012,19 +1853,14 @@ function calc(){
   var aide = daamCheckbox.checked && isHabitation;
   var tE=nature();
 
-  // Déterminer si l'acte implique la Conservation Foncière (ANCFCC)
-  // Exclu pour : Cession fonds de commerce (6), Constitution/Apport sans immeuble (0.5), Cession parts sociales (5_parts), Marchés publics (0.1)
-  // Maintenu pour : Contrat d'apport d'immeuble en société (0.5_immo) et actes immobiliers
   var isAncfccEligible = !(selVal === '6' || selVal === '0.5' || selVal === '5_parts' || selVal === '0.1');
 
-  // Gérer l'affichage des blocs ANCFCC dans l'interface
   $('detailsCredit').style.display = isAncfccEligible ? 'block' : 'none';
   $('nbrTfBox').style.display = isAncfccEligible ? 'flex' : 'none';
   $('tauxCfBox').style.display = isAncfccEligible ? 'flex' : 'none';
 
   var tC = isAncfccEligible ? num('tauxCf') : 0;
 
-  // Gestion affichage frais de Greffe & Publicité (Constitution sté / Apports '0.5' et '0.5_immo', ou FDC '6')
   var isGreffeEligible = (selVal === '6' || selVal === '0.5' || selVal === '0.5_immo');
   var greffeContainer = $('greffeContainer');
   if (isGreffeEligible) {
@@ -2160,7 +1996,7 @@ function calc(){
     s.r.forEach(function(x){ html+='<div class="result-line"><span>'+x[0]+'</span><span>'+fmt(x[1])+'</span></div>'; txt+="• "+x[2]+" : "+fmt(x[1])+"\n"; });
     if(s.st){ html+='<div class="result-line subtotal"><span>'+s.st[0]+'</span><span>'+fmt(s.st[1])+'</span></div>'; txt+="• "+s.st[0]+" : *"+fmt(s.st[1])+"*\n"; }
   });
-  txt+="\n💰 *TOTAL PROVISION : "+fmt(total)+"*";
+  txt+="\n💰 *TOTAL PROVISION : "+fmt(total)+"*\n\n_Développé par Hatim DALIL_";
   recap=txt; $('lines').innerHTML=html;
   lastData={client:client,tf:tf,prix:prix,total:total,secs:secs};
 
@@ -2173,6 +2009,7 @@ function calc(){
 }
 
 function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){t.classList.remove('show')},2200); }
+window.toast = toast;
 
 function reset(){
   ['clientInfo','titreFoncier'].forEach(function(i){$(i).value=''});
@@ -2219,7 +2056,8 @@ document.addEventListener('DOMContentLoaded',function(){
   $('btnPdf').addEventListener('click',exportPdf);
   $('btnReset').addEventListener('click',reset);
   $('btnShare').addEventListener('click',function(){
-    if(navigator.share){ navigator.share({title:'Note de provision',text:recap}).catch(function(){}); }
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if(isMobile && navigator.share){ navigator.share({title:'Note de provision',text:recap}).catch(function(){}); }
     else {
       var w=window.open('https://wa.me/?text='+encodeURIComponent(recap),'_blank');
       if(!w && navigator.clipboard){ navigator.clipboard.writeText(recap).then(function(){toast('Récapitulatif copié')}); }
@@ -2230,8 +2068,8 @@ document.addEventListener('DOMContentLoaded',function(){
 
 })();
 </script>
-<script>
 
+<script>
         // =====================================================================
         // 1. STRUCTURE MATRICIELLE VIDE PAR DÉFAUT (PRÊTE POUR IMPORT EXCEL)
         // =====================================================================
@@ -2262,8 +2100,8 @@ document.addEventListener('DOMContentLoaded',function(){
             populateAcquisitionSelectForMultiInv();
             initMultiTable4Rows();
 
-            calculateAll();
             calculateMultiAll();
+            calculateAll();
             renderCoefficients();
 
             setInterval(updateClock, 1000);
@@ -2283,6 +2121,31 @@ document.addEventListener('DOMContentLoaded',function(){
             document.querySelectorAll('#app-tpi .tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             e.currentTarget.classList.add('active');
+
+            const tpiBar = document.getElementById('tpi-bar');
+            if (tabName === 'coefficients') {
+                tpiBar.style.visibility = 'hidden';
+            } else {
+                tpiBar.style.visibility = 'visible';
+                if (tabName === 'calculateur') calculateAll();
+                if (tabName === 'multi') calculateMultiAll();
+            }
+        }
+
+        function scrollToTpiDetail() {
+            const activeTab = document.querySelector('#app-tpi .view-section.active');
+            if (!activeTab) return;
+            const target = activeTab.id === 'tab-multi'
+                ? document.getElementById('tpi-detail-multi')
+                : document.getElementById('tpi-detail-single');
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function printTpi() {
+            const old = document.title;
+            document.title = 'Liquidation_TPI_' + new Date().toISOString().slice(0, 10);
+            try { window.print(); } catch (e) { alert('Impression indisponible : utilisez le bouton PDF.'); }
+            setTimeout(function () { document.title = old; }, 1500);
         }
 
         function populateSaleYearSelects() {
@@ -2390,19 +2253,19 @@ document.addEventListener('DOMContentLoaded',function(){
         function computeDelayAndPenalties(dateActeStr, datePaiementStr, droitExigible) {
             if (!dateActeStr) {
                 return {
-                dateActeFormatted: dateActe.toLocaleDateString('fr-FR'),
-                datePaiementFormatted: datePaiement.toLocaleDateString('fr-FR'),
-                dateLimiteStr,
-                retardLabel,
-                isLate,
-                majAssiette,
-                majAssietteLabel,
-                penPaiement,
-                penPaiementLabel,
-                majMensuelle,
-                majMensuelleLabel,
-                totalPenalites,
-                totalPayer: droitExigible + totalPenalites
+                    dateActeFormatted: '—',
+                    datePaiementFormatted: '—',
+                    dateLimiteStr: '—',
+                    retardLabel: '0 jour',
+                    isLate: false,
+                    majAssiette: 0,
+                    majAssietteLabel: "Majoration d'assiette (Art. 184)",
+                    penPaiement: 0,
+                    penPaiementLabel: "Pénalité de paiement (Art. 208)",
+                    majMensuelle: 0,
+                    majMensuelleLabel: "Majorations mensuelles (Art. 208)",
+                    totalPenalites: 0,
+                    totalPayer: droitExigible
                 };
             }
 
@@ -2535,6 +2398,10 @@ document.addEventListener('DOMContentLoaded',function(){
             document.getElementById('lbl-maj-mensuelle').textContent = pen.majMensuelleLabel;
             document.getElementById('res-maj-mensuelle').textContent = formatDH(pen.majMensuelle);
             document.getElementById('res-total-payer').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+
+            if (document.getElementById('tab-calculateur').classList.contains('active')) {
+                document.getElementById('tpiBarTotal').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+            }
 
             const badge = document.getElementById('badge-delai');
             badge.className = pen.isLate ? 'badge badge-late' : 'badge badge-ok';
@@ -2777,6 +2644,10 @@ document.addEventListener('DOMContentLoaded',function(){
             document.getElementById('multi-res-maj-mensuelle').textContent = formatDH(pen.majMensuelle);
             document.getElementById('multi-res-total-payer').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
 
+            if (document.getElementById('tab-multi').classList.contains('active')) {
+                document.getElementById('tpiBarTotal').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+            }
+
             const badge = document.getElementById('multi-badge-delai');
             badge.className = pen.isLate ? 'badge badge-late' : 'badge badge-ok';
             badge.textContent = pen.isLate ? '● Hors délai (Majorations)' : '● Dans le délai légal (30j)';
@@ -2811,7 +2682,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         // =====================================================================
-        // 5. EXPORT PDF TPI (même flux natif que la note de provision)
+        // 5. EXPORT PDF TPI (UNIFIÉ PC & MOBILE)
         // =====================================================================
         function exportToPDF(mode) {
             const isMulti = mode === 'multi';
@@ -2867,16 +2738,10 @@ document.addEventListener('DOMContentLoaded',function(){
                 total: st.totalPayer || 0,
                 totalLabel: 'TOTAL GENERAL A PAYER',
                 enLettres: st.enLettres || '',
-                footer: 'Décompte indicatif de liquidation TPI - Code Général des Impôts (Maroc).'
+                footer: 'Decompte indicatif de liquidation TPI - Code General des Impots (Maroc).'
             };
             const filename = `${isMulti ? 'Decompte_TPI_Multi' : 'Decompte_TPI'}_${st.saleYear || new Date().getFullYear()}.pdf`;
             const blob = new Blob([window.buildSharedProvisionPdf(data)], { type: 'application/pdf' });
-            let file;
-            try { file = new File([blob], filename, { type: 'application/pdf' }); } catch (error) {}
-            if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-                navigator.share({ files: [file], title: isMulti ? 'Décompte TPI — acquisitions multiples' : 'Décompte TPI' }).catch(function () {});
-                return;
-            }
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -3198,7 +3063,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
             return res.trim();
         }
-    
 </script>
 </body>
 </html>
