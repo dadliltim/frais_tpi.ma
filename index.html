@@ -65,7 +65,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
    COQUE COMMUNE : EN-TÊTE, NAVIGATION, PIED, BARRE MOBILE
    ===================================================================== */
 #shell-header {
-  min-height: 106px;
+  min-height: 110px;
   padding: 1.35rem max(1.25rem, calc((100vw - 1320px) / 2));
   display: flex; justify-content: space-between; align-items: center; gap: 1rem;
   color: #fff; background: var(--primary);
@@ -75,45 +75,48 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .brand-icon {
   width: 48px; height: 48px; flex: 0 0 48px;
   display: grid; place-items: center;
-  border: 1px solid rgba(255,255,255,.28); border-radius: 10px; color: var(--accent);
+  border: 1px solid rgba(255,234,153,.35); border-radius: 10px; color: var(--accent);
 }
-.brand h1 { font: 700 clamp(1.1rem, 2vw, 1.38rem)/1.25 var(--font-display); letter-spacing: -.025em; }
-.brand p { margin-top: .28rem; color: #c7d3d9; font-size: .88rem; }
-.clock-box { text-align: right; color: #d7e0e4; font-size: .83rem; flex-shrink: 0; }
+.brand h1 { font: 700 clamp(1.15rem, 2vw, 1.42rem)/1.25 var(--font-display); letter-spacing: -.025em; }
+.brand p { margin-top: .22rem; color: #c7d3d9; font-size: .86rem; }
 .author-badge {
   display: inline-block;
-  margin-top: 0.45rem;
-  padding: 0.25rem 0.85rem;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 234, 153, 0.55);
+  margin-top: .45rem;
+  padding: .2rem .75rem;
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 234, 153, .55);
   border-radius: 6px;
   color: var(--accent);
-  font: 700 0.85rem/1.3 var(--font-display);
-  letter-spacing: 0.01em;
-}       
+  font: 700 .78rem/1.3 var(--font-display);
+}
+.clock-box { text-align: right; color: #d7e0e4; font-size: .83rem; flex-shrink: 0; }
 #current-date { color: #fff; font-weight: 700; text-transform: capitalize; }
 #current-time { font-variant-numeric: tabular-nums; color: #aebfc7; }
 
 #shell-nav {
   position: sticky; top: 0; z-index: 20;
-  display: flex; gap: .35rem; overflow-x: auto;
+  display: flex; gap: 0; overflow-x: auto;
   padding: 0 max(1rem, calc((100vw - 1320px) / 2));
-  background: rgba(255,255,255,.96);
+  background: #ffffff;
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 3px 12px rgba(22,43,55,.035);
-  scrollbar-width: thin;
+  box-shadow: 0 3px 12px rgba(22,43,55,.04);
 }
 .module-tab {
-  min-height: 54px; padding: .8rem 1.05rem;
-  display: inline-flex; align-items: center; gap: .55rem;
-  border: 0; border-bottom: 3px solid transparent;
-  background: transparent; color: var(--muted);
+  min-height: 52px; padding: .8rem 1.25rem;
+  display: inline-flex; align-items: center; gap: .6rem;
+  border: 0; border-right: 1px solid var(--border);
+  background: #eef4f6;
+  color: var(--text-2);
   font-weight: 600; white-space: nowrap;
-  transition: color .18s, border-color .18s, background .18s;
+  transition: all .18s ease;
 }
-.module-tab svg { flex: none; opacity: .75; }
-.module-tab:hover { color: var(--primary); background: var(--subtle); }
-.module-tab.active { color: var(--primary); border-bottom-color: var(--accent-dark); }
+.module-tab:hover { color: var(--primary); background: #e2ecf0; }
+.module-tab.active {
+  background: var(--primary);
+  color: var(--accent);
+  font-weight: 700;
+}
+.module-tab.active svg { opacity: 1; color: var(--accent); }
 .module-tab.active svg { opacity: 1; }
 
 #shell-main { width: min(1320px, 100%); margin: 1.65rem auto 2rem; padding: 0 1.4rem; }
@@ -821,7 +824,42 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 /* Harmonisation avec le module Calcul des Frais */
 #app-tpi .card-title { font-family: var(--font-display); font-weight: 800; letter-spacing: .01em; }
-#app-tpi .subnav-bar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 0 .5rem; margin-bottom: 1.25rem; }
+#app-tpi .subnav-bar {
+  background: #e9eff1;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: .35rem;
+  margin-bottom: 1.25rem;
+}
+#app-tpi .tabs-list { display: flex; gap: .35rem; width: 100%; }
+#app-tpi .tab-btn {
+  min-height: 42px;
+  padding: .5rem 1.1rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 600;
+}
+#app-tpi .tab-btn:hover { background: rgba(255,255,255,.6); color: var(--primary); }
+#app-tpi .tab-btn.active {
+  background: var(--accent);
+  color: var(--primary-dark);
+  border-color: var(--accent-line);
+  box-shadow: 0 2px 6px rgba(22,43,55,.08);
+  font-weight: 700;
+}
+#app-tpi .tab-step {
+  width: 22px; height: 22px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  background: #d5dfe2;
+  color: var(--text-2);
+}
+#app-tpi .tab-btn.active .tab-step {
+  background: var(--primary);
+  color: var(--accent);
+}
 #app-tpi .subnav-inner { max-width: none; padding: 0; }
 #app-tpi .tab-btn { min-height: 52px; border-bottom-width: 3px; }
 #app-tpi .tab-btn.active { border-bottom-color: var(--accent-dark); }
