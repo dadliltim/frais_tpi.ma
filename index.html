@@ -967,6 +967,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
               <label for="tauxEnreg">Nature de l'acte / Bien (CGI)</label>
               <select id="tauxEnreg">
                 <option value="4" selected>4,00 % — Local construit (habitation / pro / commercial)</option>
+                <option value="mourabaha">4,00 % — Acquisition Mourabaha (2 actes : Banque + Client)</option>
                 <option value="5">5,00 % — Terrain nu, Agricole ou terrain à démolir</option>
                 <option value="1.5_agri">1,50 % — Terrain agricole (co-indivisaires ou cohéritiers)</option>
                 <option value="3">3,00 % — 1ère vente logement social / FVI</option>
@@ -1019,11 +1020,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       </section>
 
       <details class="card" id="detailsCredit">
-        <summary><span class="step-num">3</span><span class="card-title">Crédit &amp; hypothèques</span><small>(optionnel)</small></summary>
+        <summary><span class="step-num">3</span><span class="card-title">Crédit &amp; hypothèques</span><small id="creditSubLbl">(optionnel)</small></summary>
         <div class="card-body">
           <div class="row r4">
-            <div class="f"><label for="pr1">Prêt rang 1</label><input type="text" id="pr1" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h1"></span></div>
-            <div class="f"><label for="pr2">Prêt rang 2</label><input type="text" id="pr2" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h2"></span></div>
+            <div class="f"><label for="pr1" id="lblPr1">Prêt rang 1</label><input type="text" id="pr1" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h1"></span></div>
+            <div class="f"><label for="pr2" id="lblPr2">Prêt rang 2</label><input type="text" id="pr2" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h2"></span></div>
             <div class="f"><label for="pr3">Prêt rang 3</label><input type="text" id="pr3" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h3"></span></div>
             <div class="f"><label for="pr4">Prêt rang 4</label><input type="text" id="pr4" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h4"></span></div>
           </div>
@@ -1964,6 +1965,7 @@ function up(v){ if(v<=0) return 0; var e=Math.floor(v); return v-e===0 ? e : e+1
 function nature(){
   var v=$('tauxEnreg').value;
   if(v==='custom') return Math.max(0,num('tauxCustom'));
+  if(v==='mourabaha') return 4;
   if(v==='5_parts') return 5;
   if(v==='0.5_immo') return 0.5;
   if(v==='1.5_agri') return 1.5;
@@ -2000,20 +2002,20 @@ function buildPdf(d){
   T(M,y-32,(d.kind==='tpi'?'Prix de cession : ':'Montant de base : ')+fmt(d.prix)+(d.echeance ? '   |   Echeance Enreg. : '+d.echeance : ''),'F1',10,INK);
   y-=62;
   d.secs.forEach(function(s){
-    T(M,y,s.t.toUpperCase(),'F2',8.5,GOLD); y-=6; line(y); y-=15;
-    var rowSize=d.kind==='tpi'?8.5:10,rowGap=d.kind==='tpi'?3:6,rowAfter=d.kind==='tpi'?10:14;
+    T(M,y,s.t.toUpperCase(),'F2',8.5,GOLD); y-=6; line(y); y-=13;
+    var rowSize=d.isMourabaha?8.5:(d.kind==='tpi'?8.5:10),rowGap=d.isMourabaha?2.5:(d.kind==='tpi'?3:6),rowAfter=d.isMourabaha?9:(d.kind==='tpi'?10:14);
     s.r.forEach(function(x){
       T(M,y,x[2],'F1',rowSize,INK);
       TR(y,typeof x[1]==='string'?x[1]:fmt(x[1]),'F2',rowSize,INK);
       y-=rowGap;line(y);y-=rowAfter;
     });
     if(s.st){
-      var sumSize=d.kind==='tpi'?8.5:10;
+      var sumSize=d.isMourabaha?8.5:(d.kind==='tpi'?8.5:10);
       T(M,y,s.st[0],'F2',sumSize,NAVY);
       TR(y,fmt(s.st[1]),'F2',sumSize,NAVY);
-      y-=d.kind==='tpi'?7:10;
+      y-=d.isMourabaha?6:(d.kind==='tpi'?7:10);
     }
-    y-=d.kind==='tpi'?8:12;
+    y-=d.isMourabaha?7:(d.kind==='tpi'?8:12);
   });
   y-=4;
   ops.push('0.969 0.945 0.89 rg '+M+' '+(y-26)+' '+(W-2*M)+' 42 re f');
@@ -2070,15 +2072,25 @@ function resetDefaults(){
   $('dpa').value="200"; $('fraisDiversLib').value=DEF_LIB; $('fraisDiversVal').value=DEF_VAL;
 }
 function applyAide(prix){
-  setTaux('4');
+  var isMourabaha = ($('tauxEnreg').value === 'mourabaha');
+  if(!isMourabaha) setTaux('4');
+
   if(prix<=300000){
-    $('regimeBadge').textContent="Aide 100 000 DH";
-    $('dpa').value="400"; $('pr1').value="100 000,00";
-    $('fraisDiversLib').value="Certificat de pté. et frais banque"; $('fraisDiversVal').value="335";
+    $('regimeBadge').textContent = isMourabaha ? "Mourabaha + Aide 100 000 DH" : "Aide 100 000 DH";
+    $('pr1').value="100 000,00";
+    if(!isMourabaha){
+      $('dpa').value="400";
+      $('fraisDiversLib').value="Certificat de pté. et frais banque";
+      $('fraisDiversVal').value="335";
+    }
   } else {
-    $('regimeBadge').textContent="Aide 70 000 DH";
-    $('dpa').value="200"; $('pr1').value="70 000,00";
-    $('fraisDiversLib').value=DEF_LIB; $('fraisDiversVal').value=DEF_VAL;
+    $('regimeBadge').textContent = isMourabaha ? "Mourabaha + Aide 70 000 DH" : "Aide 70 000 DH";
+    $('pr1').value="70 000,00";
+    if(!isMourabaha){
+      $('dpa').value="200";
+      $('fraisDiversLib').value=DEF_LIB;
+      $('fraisDiversVal').value=DEF_VAL;
+    }
   }
   $('detailsCredit').open = true;
 }
@@ -2086,20 +2098,45 @@ function noRegime(){ $('regimeBadge').textContent="Droit commun"; }
 
 function onPrix(){
   var prix=num('prixVente'), cb=$('aideLogement');
-  var isHabitation = ($('tauxEnreg').value === '4' || $('tauxEnreg').value === '3');
+  var isHabitation = ($('tauxEnreg').value === '4' || $('tauxEnreg').value === '3' || $('tauxEnreg').value === 'mourabaha');
   if(cb.checked && isHabitation){
-    if(prix>700000){ cb.checked=false; resetDefaults(); noRegime(); $('daamNote').style.display='block'; }
-    else { $('daamNote').style.display='none'; applyAide(prix); }
+    if(prix>700000){
+      cb.checked=false; resetDefaults();
+      if($('tauxEnreg').value === 'mourabaha'){
+        $('tauxHon').value = '0.5';
+        $('fraisDiversLib').value = 'Frais et timbre';
+        $('fraisDiversVal').value = '2700';
+        $('regimeBadge').textContent = 'Mourabaha (2 actes)';
+      } else {
+        noRegime();
+      }
+      $('daamNote').style.display='block';
+    } else {
+      $('daamNote').style.display='none';
+      applyAide(prix);
+    }
   }
   calc();
 }
 function onAide(){
   var prix=num('prixVente'), cb=$('aideLogement');
-  var isHabitation = ($('tauxEnreg').value === '4' || $('tauxEnreg').value === '3');
+  var isHabitation = ($('tauxEnreg').value === '4' || $('tauxEnreg').value === '3' || $('tauxEnreg').value === 'mourabaha');
   if(cb.checked && isHabitation){
     if(prix>700000){ cb.checked=false; $('daamNote').style.display='block'; return; }
     $('daamNote').style.display='none'; applyAide(prix);
-  } else { resetDefaults(); noRegime(); $('daamNote').style.display='none'; }
+  } else {
+    resetDefaults();
+    if($('tauxEnreg').value === 'mourabaha'){
+      $('tauxHon').value = '0.5';
+      $('fraisDiversLib').value = 'Frais et timbre';
+      $('fraisDiversVal').value = '2700';
+      $('regimeBadge').textContent = 'Mourabaha (2 actes)';
+      $('detailsCredit').open = true;
+    } else {
+      noRegime();
+    }
+    $('daamNote').style.display='none';
+  }
   calc();
 }
 
@@ -2108,8 +2145,9 @@ function calc(){
   var client=$('clientInfo').value.trim(), tf=$('titreFoncier').value.trim();
   var nbr=Math.max(1,Math.floor(num('nbrTf'))||1), prix=num('prixVente');
   var selVal = $('tauxEnreg').value;
+  var isMourabaha = (selVal === 'mourabaha');
 
-  var isHabitation = (selVal === '4' || selVal === '3');
+  var isHabitation = (selVal === '4' || selVal === '3' || isMourabaha);
   var daamContainer = $('daamContainer');
   var daamCheckbox = $('aideLogement');
   var daamNote = $('daamNote');
@@ -2125,11 +2163,27 @@ function calc(){
   var aide = daamCheckbox.checked && isHabitation;
   var tE=nature();
 
+  // Mise à jour des libellés des rangs d'hypothèque selon Mourabaha / Daam Sakane
+  if (isMourabaha && aide) {
+    $('lblPr1').textContent = 'Prêt rang 1 (État / Daam Sakane)';
+    $('lblPr2').textContent = 'Prêt rang 2 (Banque Mourabaha)';
+  } else if (isMourabaha) {
+    $('lblPr1').textContent = 'Prêt rang 1 (Banque Mourabaha)';
+    $('lblPr2').textContent = 'Prêt rang 2';
+  } else if (aide) {
+    $('lblPr1').textContent = 'Prêt rang 1 (État / Daam Sakane)';
+    $('lblPr2').textContent = 'Prêt rang 2 (Banque)';
+  } else {
+    $('lblPr1').textContent = 'Prêt rang 1';
+    $('lblPr2').textContent = 'Prêt rang 2';
+  }
+
   var isAncfccEligible = !(selVal === '6' || selVal === '0.5' || selVal === '5_parts' || selVal === '0.1');
 
   $('detailsCredit').style.display = isAncfccEligible ? 'block' : 'none';
   $('nbrTfBox').style.display = isAncfccEligible ? 'flex' : 'none';
   $('tauxCfBox').style.display = isAncfccEligible ? 'flex' : 'none';
+  $('creditSubLbl').textContent = isMourabaha ? '(Acte 2 — Revente Client)' : '(optionnel)';
 
   var tC = isAncfccEligible ? num('tauxCf') : 0;
 
@@ -2144,7 +2198,7 @@ function calc(){
   var fraisGreffe = isGreffeEligible ? num('fraisGreffeVal') : 0;
   var fraisPub = isGreffeEligible ? num('fraisPubVal') : 0;
 
-  var isVenteImmoOuFDC = (selVal === '4' || selVal === '5' || selVal === '6' || selVal === '3' || selVal === '1.5_agri');
+  var isVenteImmoOuFDC = (selVal === '4' || selVal === '5' || selVal === '6' || selVal === '3' || selVal === '1.5_agri' || isMourabaha);
   var modePaiementSelect = $('modePaiement');
   var montantNonConformeInput = $('montantNonConforme');
 
@@ -2228,73 +2282,153 @@ function calc(){
     delaiProvNote.style.display = 'none';
   }
 
-  var cfTot = 0;
-  var cfSecLines = [];
-  if (isAncfccEligible) {
-    var cfRaw = prix * tC / 100 + 100;
-    var cfBase = (prix > 0 && tC > 0) ? (cfRaw < 500 ? 500 : up(cfRaw)) : 0;
-    var certif = nbr * 100;
+  // Calcul des prêts / hypothèques depuis la section 3 (Crédit & hypothèques)
+  var hLines = [], hTot = 0;
+  for (var i = 1; i <= 4; i++) {
+    var m = num('pr' + i), r = hyp(m); hTot += r.d;
+    $('h' + i).textContent = m > 0 ? fmt(r.d) + ' · ' + r.t : '';
+    $('h' + i).className = 'hint' + (m > 0 ? ' on' : '');
+    if (m > 0) {
+      var roleSuffix = '';
+      if (i === 1 && aide) roleSuffix = ' — État / Daam Sakane';
+      else if (i === 1 && isMourabaha && !aide) roleSuffix = ' — Banque Mourabaha';
+      else if (i === 2 && isMourabaha && aide) roleSuffix = ' — Banque Mourabaha';
+      else if (i === 2 && aide && !isMourabaha) roleSuffix = ' — Banque';
 
-    var hLines = [], hTot = 0;
-    for (var i = 1; i <= 4; i++) {
-      var m = num('pr' + i), r = hyp(m); hTot += r.d;
-      $('h' + i).textContent = m > 0 ? fmt(r.d) + ' · ' + r.t : '';
-      $('h' + i).className = 'hint' + (m > 0 ? ' on' : '');
-      if (m > 0) hLines.push(['Hypothèque rang ' + i + ' <small>(' + fmtInt(m) + ')</small>', r.d, 'Hypothèque rang ' + i + ' (' + fmtInt(m) + ')']);
+      hLines.push([
+        'Hypothèque rang ' + i + roleSuffix + ' <small>(' + fmtInt(m) + ')</small>',
+        r.d,
+        'Hypothèque rang ' + i + roleSuffix + ' (' + fmtInt(m) + ')'
+      ]);
     }
-    cfTot = cfBase + certif + hTot;
-    cfSecLines = [
-      ['Droits ad valorem <small>(' + tC + ' % + 100 DH)</small>', cfBase, 'Droits ad valorem'],
-      ['Certificats de propriété <small>(' + nbr + ' × 100)</small>', certif, 'Certificats de propriété (' + nbr + ')']
-    ].concat(hLines);
   }
 
-  var tH=num('tauxHon'), rem=num('remiseHon'), hon, tva, honLbl, tvaLbl;
-  if(prix>0&&prix<=300000&&aide){
-    $('honorairesHT').value="2500.00"; hon=Math.max(0,2500*(1-rem/100)); tva=0;
-    $('honBadge').textContent="Forfait 2 500 DH, sans TVA";
-    honLbl='Honoraires forfaitaires <small>(exonéré TVA)</small>'; tvaLbl='TVA sur honoraires (néant)';
+  var tH = num('tauxHon'), rem = num('remiseHon');
+  var dLib = $('fraisDiversLib').value || "Frais et timbre", dVal = num('fraisDiversVal');
+  var total = 0, secs = [];
+
+  if (isMourabaha) {
+    // --- VOLET 1 : ACHAT PAR LA BANQUE PARTICIPATIVE ---
+    // Droits ad valorem ANCFCC = (prix d'acquisition × 1,5 % + 100 × Nb. TF) (min. 500 DH)
+    var certif1 = nbr * 100;
+    var cfRaw1 = prix * tC / 100 + certif1;
+    var cfBase1 = (prix > 0 && tC > 0) ? (cfRaw1 < 500 ? 500 : up(cfRaw1)) : 0;
+    var cfTot1 = cfBase1 + certif1;
+
+    var b1 = prix * tH / 100;
+    $('honorairesHT').value = b1.toFixed(2);
+    var hon1 = Math.max(0, b1 * (1 - rem / 100));
+    var tva1 = up(hon1 * 0.2);
+    $('honBadge').textContent = tH + " % + TVA 20 % (× 2 actes)";
+
+    var rActe1 = [
+      ['Enregistrement <small>(4 %, min. 100 DH)</small>', enreg, 'Enregistrement (4%)']
+    ];
+    if (maj2pct > 0) rActe1.push([majLabelHtml, maj2pct, majLabelTxt]);
+    if (penEnreg.totalPenalites > 0) {
+      rActe1.push([penEnreg.majAssietteLabel, penEnreg.majAssiette, penEnreg.majAssietteLabel, true]);
+      rActe1.push([penEnreg.penPaiementLabel, penEnreg.penPaiement, penEnreg.penPaiementLabel, true]);
+      rActe1.push([penEnreg.majMensuelleLabel, penEnreg.majMensuelle, penEnreg.majMensuelleLabel, true]);
+    }
+    rActe1.push(
+      ['Droit par acte', dpa, 'Droit par acte'],
+      ['Droits ad valorem <small>(' + tC + ' % + 100 × ' + nbr + ' TF)</small>', cfBase1, 'Droits ad valorem (' + tC + '% + 100×' + nbr + ')'],
+      ['Certificats de propriété <small>(' + nbr + ' × 100)</small>', certif1, 'Certificats de propriété (' + nbr + ')'],
+      ['Honoraires Banque H.T. <small>(' + tH + ' %)</small>', hon1, 'Honoraires Banque H.T. (' + tH + '%)'],
+      ['TVA sur honoraires (20 %)', tva1, 'TVA Banque (20%)'],
+      [esc(dLib), dVal, dLib]
+    );
+    var sousTotalBanque = enreg + maj2pct + penEnreg.totalPenalites + dpa + cfTot1 + hon1 + tva1 + dVal;
+
+    // --- VOLET 2 : ACHAT DÉFINITIF PAR LE CLIENT (REVENTE MOURABAHA) ---
+    var enreg2 = 200; // Droit fixe Art. 135-II-15° CGI
+    var dpa2 = 200;   // Droit par acte
+    var droitMourabaha = 1000; // Droit ANCFCC Mourabaha
+    var certif2 = nbr * 100;
+
+    var hon2 = hon1;
+    var tva2 = tva1;
+    var rActe2 = [
+      ['Enregistrement fixe <small>(Art. 135-II-15° CGI)</small>', enreg2, 'Enregistrement fixe (200 DH)'],
+      ['Droit par acte', dpa2, 'Droit par acte (200 DH)'],
+      ['Mourabaha <small>(ANCFCC fixe)</small>', droitMourabaha, 'Mourabaha (1 000 DH)'],
+      ['Certificats de propriété <small>(' + nbr + ' × 100)</small>', certif2, 'Certificats de propriété (' + nbr + ')']
+    ].concat(hLines).concat([
+      ['Honoraires Client H.T. <small>(' + tH + ' %)</small>', hon2, 'Honoraires Client H.T. (' + tH + '%)'],
+      ['TVA sur honoraires (20 %)', tva2, 'TVA Client (20%)'],
+      [esc(dLib), dVal, dLib]
+    ]);
+    var sousTotalClient = enreg2 + dpa2 + droitMourabaha + certif2 + hTot + hon2 + tva2 + dVal;
+
+    total = sousTotalBanque + sousTotalClient;
+    secs = [
+      { t: '1. Achat par la Banque (1er Acte)', r: rActe1, st: ['Sous-total Acte Banque', sousTotalBanque] },
+      { t: '2. Achat définitif par le Client (Revente Mourabaha)', r: rActe2, st: ['Sous-total Acte Client', sousTotalClient] }
+    ];
   } else {
-    var b=prix*tH/100; $('honorairesHT').value=b.toFixed(2);
-    hon=Math.max(0,b*(1-rem/100)); tva=up(hon*0.2);
-    $('honBadge').textContent=tH+" % + TVA 20 %";
-    honLbl='Honoraires nets H.T. <small>('+tH+' %)</small>'; tvaLbl='TVA sur honoraires (20 %)';
-  }
-  var dLib=$('fraisDiversLib').value||"Frais divers", dVal=num('fraisDiversVal');
-  var dpaLbl=aide?"Droits de timbre & DPA":"Droit par acte";
-  
-  var total = enreg + maj2pct + penEnreg.totalPenalites + dpa + cfTot + hon + tva + dVal + fraisGreffe + fraisPub;
+    // --- CALCUL STANDARD (1 SEUL ACTE) ---
+    var cfTot = 0;
+    var cfSecLines = [];
+    if (isAncfccEligible) {
+      var certif = nbr * 100;
+      var cfRaw = prix * tC / 100 + certif;
+      var cfBase = (prix > 0 && tC > 0) ? (cfRaw < 500 ? 500 : up(cfRaw)) : 0;
 
-  var rEnregList = [['Enregistrement <small>('+tE+' %, min. 100 DH)</small>', enreg, 'Enregistrement ('+tE+'%)']];
-  if(maj2pct > 0){
-    rEnregList.push([majLabelHtml, maj2pct, majLabelTxt]);
-  }
-  if(penEnreg.totalPenalites > 0){
-    rEnregList.push([penEnreg.majAssietteLabel, penEnreg.majAssiette, penEnreg.majAssietteLabel, true]);
-    rEnregList.push([penEnreg.penPaiementLabel, penEnreg.penPaiement, penEnreg.penPaiementLabel, true]);
-    rEnregList.push([penEnreg.majMensuelleLabel, penEnreg.majMensuelle, penEnreg.majMensuelleLabel, true]);
-  }
-  rEnregList.push([dpaLbl, dpa, dpaLbl]);
-  
-  if(fraisGreffe > 0) {
-    rEnregList.push(['Frais de Greffe Tribunal', fraisGreffe, 'Frais de Greffe Tribunal']);
-  }
-  if(fraisPub > 0) {
-    rEnregList.push(['Annonces Légales (JAL & B.O.)', fraisPub, 'Annonces Légales (JAL & B.O.)']);
+      cfTot = cfBase + certif + hTot;
+      cfSecLines = [
+        ['Droits ad valorem <small>(' + tC + ' % + 100 × ' + nbr + ' TF)</small>', cfBase, 'Droits ad valorem (' + tC + '% + 100×' + nbr + ')'],
+        ['Certificats de propriété <small>(' + nbr + ' × 100)</small>', certif, 'Certificats de propriété (' + nbr + ')']
+      ].concat(hLines);
+    }
+
+    var hon, tva, honLbl, tvaLbl;
+    if(prix>0&&prix<=300000&&aide){
+      $('honorairesHT').value="2500.00"; hon=Math.max(0,2500*(1-rem/100)); tva=0;
+      $('honBadge').textContent="Forfait 2 500 DH, sans TVA";
+      honLbl='Honoraires forfaitaires <small>(exonéré TVA)</small>'; tvaLbl='TVA sur honoraires (néant)';
+    } else {
+      var b=prix*tH/100; $('honorairesHT').value=b.toFixed(2);
+      hon=Math.max(0,b*(1-rem/100)); tva=up(hon*0.2);
+      $('honBadge').textContent=tH+" % + TVA 20 %";
+      honLbl='Honoraires nets H.T. <small>('+tH+' %)</small>'; tvaLbl='TVA sur honoraires (20 %)';
+    }
+    var dpaLbl=aide?"Droits de timbre & DPA":"Droit par acte";
+    
+    total = enreg + maj2pct + penEnreg.totalPenalites + dpa + cfTot + hon + tva + dVal + fraisGreffe + fraisPub;
+
+    var rEnregList = [['Enregistrement <small>('+tE+' %, min. 100 DH)</small>', enreg, 'Enregistrement ('+tE+'%)']];
+    if(maj2pct > 0){
+      rEnregList.push([majLabelHtml, maj2pct, majLabelTxt]);
+    }
+    if(penEnreg.totalPenalites > 0){
+      rEnregList.push([penEnreg.majAssietteLabel, penEnreg.majAssiette, penEnreg.majAssietteLabel, true]);
+      rEnregList.push([penEnreg.penPaiementLabel, penEnreg.penPaiement, penEnreg.penPaiementLabel, true]);
+      rEnregList.push([penEnreg.majMensuelleLabel, penEnreg.majMensuelle, penEnreg.majMensuelleLabel, true]);
+    }
+    rEnregList.push([dpaLbl, dpa, dpaLbl]);
+    
+    if(fraisGreffe > 0) {
+      rEnregList.push(['Frais de Greffe Tribunal', fraisGreffe, 'Frais de Greffe Tribunal']);
+    }
+    if(fraisPub > 0) {
+      rEnregList.push(['Annonces Légales (JAL & B.O.)', fraisPub, 'Annonces Légales (JAL & B.O.)']);
+    }
+
+    secs = [
+      {t:'I. Administration fiscale (CGI 2026)', r: rEnregList}
+    ];
+
+    if (isAncfccEligible) {
+      secs.push({t:'II. Conservation foncière (ANCFCC)', r: cfSecLines, st:['Sous-total C.F.', cfTot]});
+    }
+
+    secs.push({t: isAncfccEligible ? 'III. Étude notariale' : 'II. Étude notariale', r: [
+      [honLbl,hon,'Honoraires H.T.'],[tvaLbl,tva,'TVA'],[esc(dLib),dVal,dLib]]});
   }
 
-  var secs = [
-    {t:'I. Administration fiscale (CGI 2026)', r: rEnregList}
-  ];
-
-  if (isAncfccEligible) {
-    secs.push({t:'II. Conservation foncière (ANCFCC)', r: cfSecLines, st:['Sous-total C.F.', cfTot]});
-  }
-
-  secs.push({t: isAncfccEligible ? 'III. Étude notariale' : 'II. Étude notariale', r: [
-    [honLbl,hon,'Honoraires H.T.'],[tvaLbl,tva,'TVA'],[esc(dLib),dVal,dLib]]});
-
-  var html='', txt="⚖️ *CALCUL DES FRAIS (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+(dateActeStr?"Échéance Enreg. (J+30) : "+penEnreg.dateLimiteStr+(penEnreg.isPrescrit?" [Acte prescrit > 10 ans : pénalités exonérées]":"")+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
+  // Affichage conditionnel de Échéance Enreg. uniquement en cas de retard (penEnreg.isLate)
+  var showEcheance = Boolean(dateActeStr && penEnreg.isLate);
+  var html='', txt="⚖️ *CALCUL DES FRAIS (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+(showEcheance?"Échéance Enreg. (J+30) : "+penEnreg.dateLimiteStr+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
   secs.forEach(function(s){
     html+='<div class="sec">'+s.t+'</div>'; txt+="\n*"+s.t+"*\n";
     s.r.forEach(function(x){
@@ -2306,12 +2440,12 @@ function calc(){
   });
   txt+="\n💰 *TOTAL PROVISION : "+fmt(total)+"*\n\n_Développé par Hatim DALIL_";
   recap=txt; $('lines').innerHTML=html;
-  lastData={client:client,tf:tf,prix:prix,echeance:dateActeStr?penEnreg.dateLimiteStr:'',total:total,secs:secs};
+  lastData={client:client,tf:tf,prix:prix,echeance:showEcheance?penEnreg.dateLimiteStr:'',total:total,secs:secs,isMourabaha:isMourabaha};
 
   $('mClient').innerHTML='Client : <b>'+esc(client||'Non renseigné')+'</b>';
   $('mTf').innerHTML='Réf. : <b>'+esc(tf||'—')+'</b>';
   $('mPrix').innerHTML="Montant de base : <b>"+fmt(prix)+'</b>';
-  $('mEcheance').innerHTML=dateActeStr ? 'Échéance Enreg. : <b>'+esc(penEnreg.dateLimiteStr)+'</b>' : '';
+  $('mEcheance').innerHTML=showEcheance ? 'Échéance Enreg. : <b>'+esc(penEnreg.dateLimiteStr)+'</b>' : '';
   $('totalGeneral').textContent=fmt(total); $('barTotal').textContent=fmt(total);
   $('subSummary').textContent = prix>0 ? "Soit "+(total/prix*100).toFixed(2).replace('.',',')+" % de la base" : "";
   $('pdate').textContent="Établie le "+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
@@ -2349,6 +2483,7 @@ document.addEventListener('DOMContentLoaded',function(){
   $('prixVente').addEventListener('blur',function(){ var v=num('prixVente'),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; });
   ['pr1','pr2','pr3','pr4'].forEach(function(id){ $(id).addEventListener('blur',function(){ var v=num(id),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; }); $(id).addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); }); });
   $('prixVente').addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); });
+
   $('aideLogement').addEventListener('change',onAide);
   $('modePaiement').addEventListener('change',function(){
     var isPartiel = (this.value === 'partiel');
@@ -2364,7 +2499,27 @@ document.addEventListener('DOMContentLoaded',function(){
     var c=this.value==='custom'; $('customBox').style.display=c?'flex':'none';
     if(c) $('tauxCustom').focus();
     
-    var isHabitation = (this.value === '4' || this.value === '3');
+    var isMourabaha = (this.value === 'mourabaha');
+    if(isMourabaha){
+      $('tauxHon').value = '0.5';
+      $('fraisDiversLib').value = 'Frais et timbre';
+      $('fraisDiversVal').value = '2700';
+      $('detailsCredit').open = true;
+      if($('aideLogement').checked && num('prixVente') <= 700000){
+        applyAide(num('prixVente'));
+      } else {
+        $('regimeBadge').textContent = 'Mourabaha (2 actes)';
+      }
+    } else {
+      if($('tauxHon').value === '0.5') $('tauxHon').value = '1';
+      if($('aideLogement').checked && num('prixVente') <= 700000){
+        applyAide(num('prixVente'));
+      } else {
+        noRegime();
+      }
+    }
+
+    var isHabitation = (this.value === '4' || this.value === '3' || isMourabaha);
     if(!isHabitation){
       $('aideLogement').checked = false;
       noRegime();
