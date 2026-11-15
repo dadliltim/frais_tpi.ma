@@ -1,0 +1,3609 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17364a">
+<title>Étude notariale — Calcul Frais et IR/PI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<!-- Export PDF (module T.P.I.) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Lecture / écriture Excel (.xlsx, .xls, .csv) (module T.P.I.) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* =====================================================================
+   DESIGN TOKENS — issus de calcul_tpi.css
+   ===================================================================== */
+:root {
+  color-scheme: light;
+  --primary: #17364a;
+  --primary-dark: #10293a;
+  --primary-light: #244f66;
+  --accent: #FFEA99;
+  --accent-dark: #F4D96F;
+  --accent-line: #e4ca66;
+  --whatsapp: #176b54;
+  --bg: #f3f4f1;
+  --card: #ffffff;
+  --subtle: #f7f8f6;
+  --text: #1c2932;
+  --text-2: #394b55;
+  --muted: #65727b;
+  --border: #dce2e2;
+  --border-strong: #cbd5d7;
+  --success: #176b54;
+  --success-bg: #e8f3ee;
+  --danger: #a53b3b;
+  --danger-bg: #fbefed;
+  --warning: #825a20;
+  --warning-bg: #faf3e5;
+  --radius: 12px;
+  --shadow: 0 12px 34px rgba(22, 43, 55, .055), 0 1px 2px rgba(22, 43, 55, .04);
+  --font: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Manrope', 'DM Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { min-width: 320px; scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 400 15px/1.55 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; }
+button, select, input[type="checkbox"] { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline: 3px solid rgba(167, 122, 61, .36);
+  outline-offset: 2px;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* =====================================================================
+   COQUE COMMUNE : EN-TÊTE, NAVIGATION, PIED, BARRE MOBILE
+   ===================================================================== */
+#shell-header {
+  min-height: 110px;
+  padding: 1.35rem max(1.25rem, calc((100vw - 1320px) / 2));
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  color: #fff; background: var(--primary);
+  border-bottom: 3px solid var(--accent);
+}
+.brand { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.brand-icon {
+  width: 48px; height: 48px; flex: 0 0 48px;
+  display: grid; place-items: center;
+  border: 1px solid rgba(255,234,153,.35); border-radius: 10px; color: var(--accent);
+}
+.brand h1 { font: 700 clamp(1.15rem, 2vw, 1.42rem)/1.25 var(--font-display); letter-spacing: -.025em; }
+.brand p { margin-top: .22rem; color: #c7d3d9; font-size: .86rem; }
+.author-badge {
+  display: inline-block;
+  margin-top: .45rem;
+  padding: .2rem .75rem;
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 234, 153, .55);
+  border-radius: 6px;
+  color: var(--accent);
+  font: 700 .78rem/1.3 var(--font-display);
+}
+.clock-box { text-align: right; color: #d7e0e4; font-size: .83rem; flex-shrink: 0; }
+#current-date { color: #fff; font-weight: 700; text-transform: capitalize; }
+#current-time { font-variant-numeric: tabular-nums; color: #aebfc7; }
+
+#shell-nav {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; gap: 0; overflow-x: auto;
+  padding: 0 max(1rem, calc((100vw - 1320px) / 2));
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 3px 12px rgba(22,43,55,.04);
+}
+.module-tab {
+  min-height: 52px; padding: .8rem 1.25rem;
+  display: inline-flex; align-items: center; gap: .6rem;
+  border: 0; border-right: 1px solid var(--border);
+  background: #eef4f6;
+  color: var(--text-2);
+  font-weight: 600; white-space: nowrap;
+  transition: all .18s ease;
+}
+.module-tab:hover { color: var(--primary); background: #e2ecf0; }
+.module-tab.active {
+  background: var(--primary);
+  color: var(--accent);
+  font-weight: 700;
+}
+.module-tab.active svg { opacity: 1; color: var(--accent); }
+
+#shell-main { width: min(1320px, 100%); margin: 1.65rem auto 2rem; padding: 0 1.4rem; }
+.module { display: none; }
+.module.active { display: block; animation: fadeIn .2s ease; }
+.print-title { display: none; }
+
+#shell-footer {
+  width: min(1320px, 100%); margin: 0 auto 2.5rem; padding: 1rem 1.4rem 0;
+  display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  color: var(--muted); font-size: .8rem;
+}
+
+/* Barre mobile commune (Calcul des Frais & T.P.I.) */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  display: none; align-items: center; justify-content: space-between; padding: .65rem 1rem;
+  background: var(--primary); color: #fff; border-top: 3px solid var(--accent);
+  box-shadow: 0 -4px 16px rgba(16, 41, 58, 0.25);
+}
+.bar small { display: block; color: #c7d3d9; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; }
+.bar b { color: var(--accent); font: 800 1.2rem var(--font-display); font-variant-numeric: tabular-nums; }
+.bar .btn-accent {
+  min-height: 38px; padding: .5rem .85rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 7px; font-size: .84rem; font-weight: 700;
+  background: var(--accent); border: 1px solid var(--accent-line); color: #263943;
+}
+.bar .btn-accent:hover { background: var(--accent-dark); }
+
+/* =====================================================================
+   MODULE 1 — Calcul des Frais (#app-droit)
+   ===================================================================== */
+#app-droit .wrap { display: grid; grid-template-columns: minmax(0,1.06fr) minmax(390px,.94fr); gap: 1.25rem; align-items: start; }
+
+#app-droit .card {
+  min-width: 0; margin-bottom: 1.25rem; overflow: hidden;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+#app-droit .card-header {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem;
+  padding: 1.05rem 1.35rem; background: var(--subtle); border-bottom: 1px solid var(--border);
+}
+#app-droit .card-title-group { display: flex; align-items: center; gap: .7rem; min-width: 0; }
+#app-droit .card-title { color: var(--primary); font: 800 .92rem/1.35 var(--font-display); letter-spacing: .01em; }
+#app-droit .card-body { padding: 1.35rem; }
+#app-droit .step-num {
+  width: 24px; height: 24px; flex: none; display: grid; place-items: center;
+  border-radius: 50%; background: var(--primary); color: #fff; font: 700 .74rem/1 var(--font-display);
+}
+
+#app-droit .row { display: grid; gap: .9rem; }
+#app-droit .r2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+#app-droit .r3 { grid-template-columns: 1.6fr 1fr .7fr; }
+#app-droit .r3-eq { grid-template-columns: repeat(3, minmax(0,1fr)); }
+#app-droit .r4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+#app-droit .gap-top { margin-top: 1rem; }
+#app-droit .f { min-width: 0; display: flex; flex-direction: column; gap: .38rem; }
+#app-droit label { color: var(--text-2); font-size: .84rem; font-weight: 600; line-height: 1.4; }
+
+#app-droit input[type="text"], #app-droit input[type="date"], #app-droit select {
+  width: 100%; min-height: 43px; padding: .62rem .76rem;
+  border: 1px solid var(--border-strong); border-radius: 7px;
+  color: var(--text); background: #fff; font-size: .93rem;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+}
+#app-droit input[type="text"]:hover, #app-droit input[type="date"]:hover, #app-droit select:hover { border-color: #9eafb4; }
+#app-droit input[type="text"]:focus, #app-droit input[type="date"]:focus, #app-droit select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(36,79,102,.12); outline: none; }
+#app-droit input[readonly] { background: #f2f5f4; color: #334750; font-weight: 600; }
+#app-droit select:disabled, #app-droit input:disabled { background: #f2f5f4; color: var(--muted); cursor: not-allowed; }
+
+#app-droit .price {
+  position: relative;
+  max-width: 280px;
+}
+#app-droit .price input {
+  min-height: 43px;
+  padding-left: .85rem;
+  padding-right: 2.8rem;
+  background-color: #eef4f6;
+  border-color: #cbd5d7;
+  font: 700 1.05rem var(--font-display);
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+#app-droit .price input:focus {
+  background-color: #fffdf2;
+  border-color: var(--primary-light);
+}
+#app-droit .price span {
+  position: absolute;
+  right: .85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 700;
+  font-size: .82rem;
+  color: var(--warning);
+  pointer-events: none;
+}
+
+#app-droit .hint { min-height: 1em; color: var(--muted); font-size: .75rem; }
+#app-droit .hint.on { color: var(--warning); font-weight: 600; }
+#app-droit .note { display: none; margin-top: .85rem; padding: .65rem .85rem; border-left: 3px solid var(--accent-line); border-radius: 7px; background: var(--warning-bg); color: var(--warning); font-size: .84rem; }
+#app-droit .note.late { border-left-color: var(--danger); background: var(--danger-bg); color: var(--danger); font-weight: 600; }
+#app-droit .note.prescrit { border-left-color: var(--success); background: var(--success-bg); color: var(--success); font-weight: 600; }
+
+#app-droit .badge {
+  display: inline-flex; align-items: center; padding: .3rem .7rem; border-radius: 999px;
+  border: 1px solid #e8d27d; background: #fff9dc; color: #5d4d1c; font-size: .75rem; font-weight: 700; white-space: nowrap;
+}
+#app-droit .badge-ok { border-color: #a8d0bd; background: var(--success-bg); color: var(--success); }
+#app-droit .badge-late { border-color: #f4d9d5; background: var(--danger-bg); color: var(--danger); }
+
+/* Panneaux colorés (jaune doux #FFEA99) */
+#app-droit .panel-yellow {
+  margin-top: 1rem; padding: .9rem 1.05rem; display: flex; align-items: center; gap: 1rem;
+  background: var(--accent); border: 1px solid #e6c95c; border-radius: 10px; box-shadow: 0 2px 6px rgba(255,234,153,.35);
+}
+#app-droit .panel-yellow > div { flex: 1; min-width: 0; }
+#app-droit .panel-yellow b { display: block; color: var(--primary-dark); font-size: .88rem; }
+#app-droit .panel-yellow small { color: #5d4d1c; font-size: .78rem; }
+#app-droit .panel-soft { display: none; margin-top: 1rem; padding: 1rem 1.05rem; background: #fff9dc; border: 1px solid #e8d27d; border-radius: 10px; }
+#app-droit .panel-soft .panel-title { margin-bottom: .7rem; color: #5d4d1c; font: 800 .84rem var(--font-display); }
+
+/* Interrupteur */
+#app-droit .sw { position: relative; width: 50px; height: 28px; flex: none; }
+#app-droit .sw input { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+#app-droit .sw i { position: absolute; inset: 0; border-radius: 30px; background: #b9c4c7; transition: .25s; }
+#app-droit .sw i:before { content: ""; position: absolute; width: 22px; height: 22px; left: 3px; top: 3px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: .25s; }
+#app-droit .sw input:checked ~ i { background: var(--primary); }
+#app-droit .sw input:checked ~ i:before { transform: translateX(22px); }
+#app-droit .sw input:focus-visible ~ i { outline: 3px solid rgba(167,122,61,.36); outline-offset: 2px; }
+
+/* Sections repliables */
+#app-droit details.card { margin-bottom: 1.25rem; }
+#app-droit summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; gap: .7rem;
+  padding: 1.05rem 1.35rem; background: var(--subtle);
+}
+#app-droit summary::-webkit-details-marker { display: none; }
+#app-droit summary:after { content: "+"; margin-left: auto; color: var(--primary); font: 600 1.3rem/1 var(--font); }
+#app-droit details[open] > summary { border-bottom: 1px solid var(--border); }
+#app-droit details[open] > summary:after { content: "−"; }
+#app-droit summary small { color: var(--muted); font-size: .78rem; font-weight: 500; }
+#app-droit summary .badge { margin-left: auto; }
+#app-droit summary:has(.badge):after { margin-left: .6rem; }
+
+/* Colonne résultat */
+#app-droit .sum { position: sticky; top: 70px; }
+#app-droit .total {
+  margin-bottom: 1.25rem; padding: 1.4rem 1.5rem;
+  background: var(--primary); color: #fff; border-radius: var(--radius); border-bottom: 3px solid var(--accent);
+  box-shadow: 0 14px 30px -12px rgba(22,43,55,.45);
+}
+#app-droit .total .lbl { color: #c7d3d9; font: 700 .72rem var(--font-display); letter-spacing: .12em; text-transform: uppercase; }
+#app-droit .total .amt { margin: .25rem 0; color: var(--accent); font: 800 2.15rem/1.15 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+#app-droit .total .sub { color: #c7d3d9; font-size: .82rem; }
+
+#app-droit .meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-bottom: .55rem; color: var(--muted); font-size: .84rem; }
+#app-droit .meta b { color: var(--primary); }
+#app-droit .meta.first { padding-bottom: .55rem; border-bottom: 1px solid #e8ecea; }
+#app-droit .pdate { display: none; color: var(--muted); font-size: .8rem; }
+
+#app-droit .sec {
+  display: flex; align-items: center; gap: .6rem; margin: 1.15rem 0 .7rem;
+  color: var(--muted); font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+#app-droit .sec:first-child { margin-top: .6rem; }
+#app-droit .sec::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+#app-droit .result-line {
+  min-width: 0; display: flex; justify-content: space-between; align-items: flex-start; gap: .8rem;
+  margin-bottom: .45rem; padding: .66rem .85rem;
+  border: 1px solid #e5eae8; border-radius: 7px; background: var(--subtle); font-size: .9rem;
+}
+#app-droit .result-line > :last-child { text-align: right; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#app-droit .result-line small { color: var(--muted); }
+#app-droit .result-line.subtotal { background: #eef4f6; border-color: #d9e5ea; color: var(--primary); font-weight: 700; }
+#app-droit .result-line.danger-line { background: var(--danger-bg); border-color: #f4d9d5; color: var(--danger); }
+
+/* Boutons */
+#app-droit .btn {
+  min-height: 42px; padding: .57rem .9rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+  border: 1px solid transparent; border-radius: 7px;
+  font-size: .85rem; font-weight: 700; line-height: 1.25; text-decoration: none;
+  transition: background .18s, color .18s, border-color .18s, transform .18s;
+}
+#app-droit .btn:hover { transform: translateY(-1px); }
+#app-droit .btn-primary { background: var(--primary); color: #fff; }
+#app-droit .btn-primary:hover { background: var(--primary-light); }
+#app-droit .btn-whatsapp { background: var(--whatsapp); color: #fff; }
+#app-droit .btn-whatsapp:hover { background: #105640; }
+#app-droit .btn-outline { background: #fff; border-color: var(--border-strong); color: var(--primary); }
+#app-droit .btn-outline:hover { background: #f4f7f6; border-color: #9eafb4; }
+#app-droit .btn-accent { background: var(--accent); border-color: var(--accent-line); color: #263943; }
+#app-droit .btn-accent:hover { background: var(--accent-dark); }
+#app-droit .acts { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; margin-top: 1.1rem; }
+#app-droit .acts .span2 { grid-column: span 2; }
+
+#app-droit .toast {
+  position: fixed; left: 50%; bottom: 96px; z-index: 60; transform: translateX(-50%);
+  padding: .55rem 1rem; border-radius: 8px; background: var(--text); color: #fff; font-size: .84rem;
+  opacity: 0; pointer-events: none; transition: .25s;
+}
+#app-droit .toast.show { opacity: 1; }
+
+/* =====================================================================
+   RESPONSIVE
+   ===================================================================== */
+@media (max-width: 960px) {
+  #app-droit .wrap { grid-template-columns: minmax(0,1fr); }
+  #app-droit .sum { position: static; scroll-margin-top: 70px; }
+  .bar { display: flex; }
+  #app-droit, #app-tpi { padding-bottom: 78px; }
+}
+@media (max-width: 640px) {
+  #shell-header { min-height: 90px; padding: 1rem; }
+  .brand { gap: .7rem; }
+  .brand-icon { width: 42px; height: 42px; flex-basis: 42px; }
+  .brand p { max-width: 260px; font-size: .77rem; }
+  .clock-box { display: none; }
+  #shell-main { margin: 1rem auto 1.5rem; padding: 0 .8rem; }
+  #shell-footer { padding: .5rem .8rem 0; }
+  #app-droit .card-body { padding: 1rem; }
+  #app-droit .r2, #app-droit .r3, #app-droit .r3-eq { grid-template-columns: minmax(0,1fr); }
+  #app-droit .r4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  #app-droit .total .amt { font-size: 1.85rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* =====================================================================
+   IMPRESSION (UNIFIÉE POUR LES DEUX MODULES + SIGNATURE)
+   ===================================================================== */
+@page { size: A4; margin: 14mm; }
+@media print {
+  body { background: #fff; color: #17242c; font-size: 10pt; padding-bottom: 14mm; }
+  #shell-header, #shell-nav, .bar { display: none !important; }
+  #shell-footer {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 3mm 0 0 0;
+    border-top: 1px solid #cbd5e1;
+    background: #fff;
+    font-size: 8.5pt;
+    color: #4b5a63;
+  }
+  #shell-main { width: 100%; max-width: none; margin: 0; padding: 0; }
+  .module:not(.active) { display: none !important; }
+  .module.active { animation: none; }
+  .print-title { display: block; margin-bottom: 8mm; padding-bottom: 3mm; border-bottom: 2px solid var(--primary); color: var(--primary); }
+  .print-title b { display: block; font: 800 13pt var(--font-display); letter-spacing: .02em; }
+  .print-title span { color: #4b5a63; font-size: 9pt; }
+
+  #app-droit { padding-bottom: 0; }
+  #app-droit .wrap { display: block; }
+  #app-droit .left, #app-droit .acts, #app-droit .toast, #prov-wa-modal { display: none !important; }
+  #app-droit .sum { position: static; }
+  #app-droit .pdate { display: block; }
+  #app-droit .card { box-shadow: none; break-inside: avoid; }
+  #app-droit .total { background: #fff9dc !important; color: #17242c !important; border: 2px solid var(--primary); box-shadow: none; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  #app-droit .total .lbl, #app-droit .total .sub { color: #4b5a63 !important; }
+  #app-droit .total .amt { color: var(--primary) !important; }
+  #app-droit .result-line { break-inside: avoid; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+
+
+/* =====================================================================
+   MODULE 2 — LIQUIDATION T.P.I. (#app-tpi)
+   ===================================================================== */
+
+#app-tpi {
+  --cds-bg-canvas: var(--bg); --cds-bg-surface: #ffffff; --cds-bg-subtle: #f7f8f6; --cds-bg-muted: #eef1ef;
+  --cds-brand-900: #10293a; --cds-brand-800: var(--primary); --cds-brand-700: var(--primary-light);
+  --cds-brand-100: #d9e5ea; --cds-brand-50: #eef4f6;
+  --cds-gold-600: #825a20; --cds-gold-500: #a77a3d; --cds-gold-50: #fff9dc; --cds-highlight-soft: var(--accent);
+  --cds-success-700: var(--success); --cds-success-100: #d3e8df; --cds-success-50: var(--success-bg);
+  --cds-danger-700: var(--danger); --cds-danger-100: #f4d9d5; --cds-danger-50: var(--danger-bg);
+  --cds-whatsapp: var(--whatsapp); --cds-whatsapp-hv: #105640;
+  --cds-text-primary: var(--text); --cds-text-secondary: var(--text-2); --cds-text-muted: var(--muted);
+  --cds-border: var(--border); --cds-border-strong: var(--border-strong);
+  --cds-radius-sm: 7px; --cds-radius-md: 9px; --cds-radius-lg: var(--radius);
+  --cds-shadow-xs: 0 1px 2px rgba(22,43,55,.04); --cds-shadow-sm: var(--shadow);
+  --cds-shadow-md: 0 14px 30px -12px rgba(22,43,55,.4);
+  font-family: var(--font);
+}
+
+#app-tpi .mono {
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+#app-tpi .subnav-bar {
+  background: var(--cds-bg-surface);
+  border-bottom: 1px solid var(--cds-border);
+  padding: 0 2rem;
+  box-shadow: var(--cds-shadow-xs);
+}
+#app-tpi .subnav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+#app-tpi .tabs-list { display: flex; gap: 0.25rem; overflow-x: auto; }
+#app-tpi .tab-btn {
+  padding: 0.9rem 1.15rem;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cds-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+#app-tpi .tab-btn:hover { color: var(--cds-brand-800); background: var(--cds-bg-subtle); }
+#app-tpi .tab-btn.active { color: var(--cds-brand-800); border-bottom-color: var(--cds-gold-600); }
+#app-tpi .tab-step {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cds-bg-muted);
+  color: var(--cds-text-secondary);
+}
+#app-tpi .tab-btn.active .tab-step { background: var(--cds-brand-800); color: #ffffff; }
+#app-tpi .view-section { display: none; animation: fadeIn 0.2s ease; }
+#app-tpi .view-section.active { display: block; }
+#app-tpi .split-layout {
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+#app-tpi .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+#app-tpi .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+#app-tpi .card {
+  background: var(--cds-bg-surface);
+  border: 1px solid var(--cds-border);
+  border-radius: var(--cds-radius-lg);
+  box-shadow: var(--cds-shadow-sm);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+#app-tpi .card-header {
+  padding: 1.05rem 1.35rem;
+  border-bottom: 1px solid var(--cds-border);
+  background: var(--cds-bg-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+#app-tpi .card-title-group { display: flex; align-items: center; gap: 0.6rem; }
+#app-tpi .card-title { font-size: 0.92rem; font-weight: 700; color: var(--cds-brand-900); letter-spacing: -0.01em; }
+#app-tpi .card-body { padding: 1.4rem; }
+#app-tpi .form-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cds-text-muted);
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+#app-tpi .form-section-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--cds-border);
+}
+#app-tpi .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.95rem;
+}
+#app-tpi label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cds-text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#app-tpi .coef-pill {
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+  background: var(--cds-brand-50);
+  color: var(--cds-brand-700);
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid var(--cds-brand-100);
+}
+#app-tpi .input-wrapper { position: relative; display: flex; align-items: center; }
+#app-tpi input[type="text"], #app-tpi input[type="number"], #app-tpi input[type="date"], #app-tpi input[type="tel"], #app-tpi select {
+  width: 100%;
+  height: 38px;
+  padding: 0 0.8rem;
+  font-family: inherit;
+  font-size: 0.86rem;
+  color: var(--cds-text-primary);
+  background: var(--cds-bg-surface);
+  border: 1px solid var(--cds-border-strong);
+  border-radius: var(--cds-radius-sm);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+#app-tpi input.num-input {
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: right;
+  padding-right: 2.6rem;
+}
+#app-tpi .input-suffix {
+  position: absolute;
+  right: 0.7rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--cds-text-muted);
+  pointer-events: none;
+}
+#app-tpi input:focus, #app-tpi select:focus {
+  outline: none;
+  border-color: var(--cds-brand-700);
+  box-shadow: 0 0 0 3px rgba(36, 79, 102, 0.12);
+}
+#app-tpi input[readonly] {
+  background-color: var(--cds-bg-subtle);
+  color: var(--cds-brand-900);
+  font-weight: 600;
+  border-color: var(--cds-border);
+  cursor: default;
+}
+#app-tpi .options-panel-yellow {
+  background-color: #FFEA99;
+  border: 1px solid #e6c95c;
+  border-radius: var(--cds-radius-md);
+  padding: 0.9rem 1.05rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  box-shadow: 0 2px 6px rgba(255, 234, 153, 0.35);
+}
+#app-tpi .checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  cursor: pointer;
+  font-size: 0.83rem;
+  color: #10293a;
+  font-weight: 600;
+  justify-content: flex-start;
+}
+#app-tpi .checkbox-row input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  accent-color: #10293a;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#app-tpi .btn {
+  height: 36px;
+  padding: 0 0.85rem;
+  border-radius: var(--cds-radius-sm);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+#app-tpi .btn:active { transform: translateY(1px); }
+#app-tpi .btn-primary { background: var(--cds-brand-800); color: #ffffff; }
+#app-tpi .btn-primary:hover { background: var(--cds-brand-900); }
+#app-tpi .btn-excel { background: #176b54; color: #ffffff; }
+#app-tpi .btn-excel:hover { background: #105640; }
+#app-tpi .btn-add-row {
+  background: var(--cds-brand-50);
+  color: var(--cds-brand-800);
+  border: 1px dashed var(--cds-brand-700);
+  width: 100%;
+  margin-top: 0.65rem;
+  height: 38px;
+}
+#app-tpi .btn-add-row:hover {
+  background: var(--cds-brand-100);
+  border-style: solid;
+}
+#app-tpi .btn-pdf {
+  background: var(--cds-brand-900);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(16, 41, 58, 0.22);
+}
+#app-tpi .btn-pdf:hover { background: #244f66; }
+#app-tpi .btn-whatsapp {
+  background: var(--cds-whatsapp);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(23, 107, 84, 0.22);
+}
+#app-tpi .btn-whatsapp:hover { background: var(--cds-whatsapp-hv); }
+#app-tpi .btn-print {
+  background: #ffffff;
+  border-color: var(--cds-brand-700);
+  color: var(--cds-brand-900);
+}
+#app-tpi .btn-print:hover { background: var(--cds-brand-50); }
+#app-tpi .btn-outline { background: #ffffff; border-color: var(--cds-border-strong); color: var(--cds-text-primary); }
+#app-tpi .btn-outline:hover { background: var(--cds-bg-muted); }
+#app-tpi .btn-ghost { background: transparent; color: var(--cds-text-secondary); padding: 0 0.6rem; }
+#app-tpi .btn-ghost:hover { background: var(--cds-bg-muted); color: var(--cds-text-primary); }
+#app-tpi .btn-danger-soft { background: var(--cds-danger-50); color: var(--cds-danger-700); border-color: var(--cds-danger-100); }
+#app-tpi .btn-danger-soft:hover { background: var(--cds-danger-100); }
+#app-tpi .action-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
+#app-tpi .ledger-group { display: flex; flex-direction: column; gap: 0.45rem; }
+#app-tpi .ledger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.62rem 0.88rem;
+  border-radius: var(--cds-radius-sm);
+  background: var(--cds-bg-subtle);
+  border: 1px solid var(--cds-border);
+  font-size: 0.84rem;
+  transition: all 0.2s ease;
+}
+#app-tpi .ledger-row .lbl { color: var(--cds-text-secondary); font-weight: 500; }
+#app-tpi .ledger-row .val { font-family: 'Manrope', 'DM Sans', sans-serif; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--cds-text-primary); }
+#app-tpi .ledger-row.subtotal { background: var(--cds-brand-50); border-color: var(--cds-brand-100); }
+#app-tpi .ledger-row.subtotal .lbl, #app-tpi .ledger-row.subtotal .val { color: var(--cds-brand-800); font-weight: 700; }
+#app-tpi .ledger-row.profit-row { background: #ffffff; border: 1.5px solid var(--cds-border-strong); padding: 0.78rem 0.92rem; }
+#app-tpi .ledger-row.profit-row .lbl { color: var(--cds-text-primary); font-weight: 700; }
+#app-tpi .ledger-row.profit-row .val { font-size: 0.96rem; font-weight: 700; }
+#app-tpi .comparison-grid { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.85rem 0; }
+#app-tpi .comp-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.68rem 0.92rem;
+  border-radius: var(--cds-radius-sm);
+  border: 1px solid var(--cds-border);
+  background: #ffffff;
+  font-size: 0.83rem;
+  transition: all 0.2s;
+}
+#app-tpi .comp-item.winner {
+  background: var(--cds-success-50);
+  border-color: #a8d0bd;
+  box-shadow: inset 3px 0 0 var(--cds-success-700);
+}
+#app-tpi .comp-item.winner .comp-title, #app-tpi .comp-item.winner .val { color: var(--cds-success-700); font-weight: 700; }
+#app-tpi .comp-item.dimmed { opacity: 0.48; background: var(--cds-bg-subtle); }
+#app-tpi .winner-tag {
+  display: none;
+  font-size: 0.67rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--cds-success-100);
+  color: var(--cds-success-700);
+  padding: 0.14rem 0.45rem;
+  border-radius: 4px;
+  margin-left: 0.45rem;
+}
+#app-tpi .comp-item.winner .winner-tag { display: inline-block; }
+#app-tpi .hero-tax-box {
+  background: linear-gradient(135deg, var(--cds-brand-900) 0%, var(--cds-brand-800) 100%);
+  color: #ffffff;
+  border-radius: var(--cds-radius-md);
+  padding: 1.2rem 1.3rem;
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--cds-shadow-md);
+}
+#app-tpi .hero-tax-meta { font-size: 0.74rem; color: #b9cfd9; margin-bottom: 0.2rem; }
+#app-tpi .hero-tax-label { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.02em; }
+#app-tpi .hero-tax-amount {
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.42rem;
+  font-weight: 700;
+  color: #FFEA99;
+  white-space: nowrap;
+}
+#app-tpi .words-box {
+  margin-top: 0.85rem;
+  padding: 0.78rem 1rem;
+  background: var(--cds-gold-50);
+  border: 1px solid #e8d27d;
+  border-radius: var(--cds-radius-sm);
+  font-size: 0.8rem;
+}
+#app-tpi .words-box span {
+  color: var(--cds-gold-600);
+  display: block;
+  font-size: 0.71rem;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+#app-tpi .words-box strong { color: var(--cds-brand-900); text-transform: uppercase; letter-spacing: 0.02em; }
+#app-tpi .badge {
+  padding: 0.24rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+#app-tpi .badge-ok { background: var(--cds-success-100); color: var(--cds-success-700); }
+#app-tpi .badge-late { background: var(--cds-danger-100); color: var(--cds-danger-700); }
+#app-tpi .table-wrap { border: 1px solid var(--cds-border); border-radius: var(--cds-radius-md); overflow: auto; }
+#app-tpi table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+#app-tpi th {
+  background: var(--cds-bg-subtle);
+  color: var(--cds-text-secondary);
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--cds-border);
+  position: sticky;
+  top: 0;
+}
+#app-tpi td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--cds-border); }
+#app-tpi tbody tr:hover { background: var(--cds-bg-subtle); }
+#app-tpi .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+#app-tpi .modal-backdrop.open { display: flex; }
+#app-tpi .modal-card {
+  background: #ffffff;
+  border-radius: var(--cds-radius-lg);
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+  animation: fadeIn 0.18s ease;
+}
+#app-tpi .modal-header {
+  padding: 1.1rem 1.4rem;
+  background: var(--cds-bg-subtle);
+  border-bottom: 1px solid var(--cds-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#app-tpi .modal-body { padding: 1.4rem; }
+#app-tpi .wa-preview {
+  width: 100%;
+  height: 230px;
+  padding: 0.85rem;
+  border: 1px solid var(--cds-border-strong);
+  border-radius: var(--cds-radius-sm);
+  font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  background: #e8f3ee;
+  color: #0f4a39;
+  resize: vertical;
+}
+#app-tpi .modal-footer {
+  padding: 1rem 1.4rem;
+  background: var(--cds-bg-subtle);
+  border-top: 1px solid var(--cds-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+#app-tpi .print-footer-note { display: none; }
+@media (max-width: 1060px) {
+  #app-tpi .split-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  #app-tpi .subnav-bar { padding-left: 1rem; padding-right: 1rem; }
+  #app-tpi .grid-2, #app-tpi .grid-3 { grid-template-columns: 1fr; }
+  #app-tpi .hero-tax-box { flex-direction: column; align-items: flex-start; }
+}
+@media print {
+  #app-tpi .subnav-bar, #app-tpi .no-print { display: none !important; }
+  #app-tpi .card { box-shadow: none; border: 1px solid #cbd5e1; break-inside: avoid; }
+  #app-tpi .options-panel-yellow {
+    background-color: #FFEA99 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #app-tpi .hero-tax-box {
+    background: #10293a !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* Harmonisation avec le module Calcul des Frais */
+#app-tpi .card-title { font-family: var(--font-display); font-weight: 800; letter-spacing: .01em; }
+#app-tpi .subnav-bar {
+  background: #e9eff1;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: .35rem;
+  margin-bottom: 1.25rem;
+}
+#app-tpi .tabs-list { display: flex; gap: .35rem; width: 100%; }
+#app-tpi .tab-btn {
+  min-height: 42px;
+  padding: .5rem 1.1rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 600;
+}
+#app-tpi .tab-btn:hover { background: rgba(255,255,255,.6); color: var(--primary); }
+#app-tpi .tab-btn.active {
+  background: var(--accent);
+  color: var(--primary-dark);
+  border-color: var(--accent-line);
+  box-shadow: 0 2px 6px rgba(22,43,55,.08);
+  font-weight: 700;
+}
+#app-tpi .tab-step {
+  width: 22px; height: 22px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  background: #d5dfe2;
+  color: var(--text-2);
+}
+#app-tpi .tab-btn.active .tab-step {
+  background: var(--primary);
+  color: var(--accent);
+}
+#app-tpi .subnav-inner { max-width: none; padding: 0; }
+#app-tpi .tab-btn { min-height: 52px; border-bottom-width: 3px; }
+#app-tpi .tab-btn.active { border-bottom-color: var(--accent-dark); }
+#app-tpi .tab-step { font-family: var(--font-display); }
+#app-tpi .options-panel-yellow { border-color: #e6c95c; }
+#app-tpi .words-box { border-color: #e8d27d; }
+#app-tpi .hero-tax-meta { color: #c7d3d9; }
+#app-tpi .workspace { padding: 0; }
+@media (max-width: 640px) { #app-tpi .subnav-bar { padding: 0 .25rem; } }
+@media print { #app-tpi .subnav-bar { display: none !important; } }
+</style>
+</head>
+<body>
+
+<header id="shell-header">
+  <div class="brand">
+    <div class="brand-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-2 9h4l-2-9z"/><path d="M19 7l-2 9h4l-2-9z"/><path d="M8 21h8"/></svg></div>
+    <div>
+      <h1>Étude Notariale — Calcul Frais et IR/PI</h1>
+      <p>Calcul Droit Enregistrement (CGI 2026) et ANCFCC -- Profits immobiliers (T.P.I.)</p>
+      <span class="author-badge">Développé par Hatim DALIL</span>
+    </div>
+  </div>
+  <div class="clock-box">
+    <div id="current-date"></div>
+    <div id="current-time"></div>
+  </div>
+</header>
+
+<nav id="shell-nav" role="tablist" aria-label="Outils">
+  <button class="module-tab active" role="tab" data-module="provision" aria-selected="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg> Calcul des Frais</button>
+  <button class="module-tab" role="tab" data-module="tpi" aria-selected="false"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg> Liquidation T.P.I. (IR / PI)</button>
+</nav>
+
+<main id="shell-main">
+<div id="app-droit" class="module">
+  <div class="print-title"><b>Étude notariale — Note des Frais</b><span>Code Général des Impôts 2026 · ANCFCC</span></div>
+
+  <div class="wrap">
+    <div class="left">
+
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title-group"><span class="step-num">1</span><span class="card-title">Dossier &amp; Délais légaux (Enreg. 30j / C.F. 3 mois)</span></div>
+          <span class="badge badge-ok" id="badgeDelaiProv">● Dans le délai légal</span>
+        </div>
+        <div class="card-body">
+          <div class="row r3">
+            <div class="f"><label for="clientInfo">Client / Partie</label><input type="text" id="clientInfo" placeholder="Ex : Sté Atlas / M. Alami" autocomplete="off"></div>
+            <div class="f"><label for="titreFoncier">Titre foncier</label><input type="text" id="titreFoncier" placeholder="Ex : 12458/R" autocomplete="off"></div>
+            <div class="f" id="nbrTfBox"><label for="nbrTf">Nb. de titres</label><input type="text" id="nbrTf" inputmode="numeric" value="1"></div>
+          </div>
+          <div class="row r3-eq gap-top">
+            <div class="f"><label for="dateActeProv">Date de l'acte</label><input type="date" id="dateActeProv"></div>
+            <div class="f"><label for="dateDepotProv">Date dépôt Enreg.</label><input type="date" id="dateDepotProv"></div>
+            <div class="f"><label for="dateLimiteProv">Échéance Enreg. (J+30)</label><input type="text" id="dateLimiteProv" readonly style="text-align:center;"></div>
+          </div>
+          <div class="row r2 gap-top" id="cfDatesRow">
+            <div class="f"><label for="dateDepotCfProv">Date dépôt C.F. (ANCFCC)</label><input type="date" id="dateDepotCfProv"></div>
+            <div class="f"><label for="dateLimiteCfProv">Échéance C.F. (M+3)</label><input type="text" id="dateLimiteCfProv" readonly style="text-align:center;"></div>
+          </div>
+          <div class="note" id="delaiProvNote"></div>
+          <div class="note" id="delaiCfProvNote"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title-group"><span class="step-num">2</span><span class="card-title">Opération &amp; nature du bien</span></div>
+          <span class="badge" id="regimeBadge">Droit commun</span>
+        </div>
+        <div class="card-body">
+          <div class="f">
+            <label for="prixVente">Montant de la transaction</label>
+            <div class="price"><input type="text" id="prixVente" inputmode="decimal" value="500 000,00"><span>DH</span></div>
+          </div>
+          <div class="row r2 gap-top">
+            <div class="f">
+              <label for="tauxEnreg">Nature de l'acte / Bien (CGI)</label>
+              <select id="tauxEnreg">
+                <option value="4" selected>4,00 % — Local construit (habitation / pro / commercial)</option>
+                <option value="mourabaha">4,00 % — Acquisition Mourabaha (2 actes : Banque + Client)</option>
+                <option value="5">5,00 % — Terrain nu, Agricole ou terrain à démolir</option>
+                <option value="1.5_agri">1,50 % — Terrain agricole (co-indivisaires ou cohéritiers)</option>
+                <option value="3">3,00 % — 1ère vente logement social / FVI</option>
+                <option value="1.5">1,50 % — Donation / Partage (ligne directe, époux, fratrie)</option>
+                <option value="0">0,00 % — Exonéré</option>
+                <option value="custom">+ Autre taux personnalisé…</option>
+              </select>
+            </div>
+            <div class="f" id="customBox" style="display:none">
+              <label for="tauxCustom">Votre taux (%)</label>
+              <input type="text" id="tauxCustom" inputmode="decimal" placeholder="Ex : 2,5">
+              <span class="hint">Taux personnalisé applicable à l'acte.</span>
+            </div>
+          </div>
+
+          <!-- Mode de règlement conforme à l'article 11 du CGI -->
+          <div class="row r2 gap-top">
+            <div class="f">
+              <label for="modePaiement">Mode de règlement (Art. 11 &amp; 133-III CGI)</label>
+              <select id="modePaiement">
+                <option value="total" selected>Conforme en totalité à l'article 11</option>
+                <option value="partiel">Conforme en partie à l'article 11</option>
+                <option value="non_conforme">Ne respecte pas l'article 11 (non traçable)</option>
+              </select>
+            </div>
+            <div class="f" id="partielBox" style="display:none">
+              <label for="montantNonConforme">Montant non conforme (DH)</label>
+              <input type="text" id="montantNonConforme" inputmode="decimal" value="0,00" placeholder="Part payée hors art. 11">
+              <span class="hint">Part du prix non justifiée par un moyen traçable.</span>
+            </div>
+          </div>
+          <div class="note" id="paiementNote"></div>
+
+          <!-- Frais de Greffe & publicité -->
+          <div class="panel-soft" id="greffeContainer">
+            <div class="panel-title">Frais de greffe &amp; publications légales (tarifs officiels)</div>
+            <div class="row r2">
+              <div class="f"><label for="fraisGreffeVal">Frais de Greffe / Tribunal (DH)</label><input type="text" id="fraisGreffeVal" inputmode="decimal" value="350" class="ci"></div>
+              <div class="f"><label for="fraisPubVal">Annonces légales / JAL &amp; B.O. (DH)</label><input type="text" id="fraisPubVal" inputmode="decimal" value="700" class="ci"></div>
+            </div>
+          </div>
+
+          <!-- Aide au logement (Daam Sakane) -->
+          <div class="panel-yellow" id="daamContainer">
+            <div><b>Aide au logement (Daam Sakane)</b><small>100 000 DH si ≤ 300 000 DH · 70 000 DH si ≤ 700 000 DH</small></div>
+            <label class="sw"><input type="checkbox" id="aideLogement" aria-label="Aide au logement"><i></i></label>
+          </div>
+          <div class="note" id="daamNote">L'aide est plafonnée aux acquisitions de locaux d'habitation ≤ 700 000 DH.</div>
+        </div>
+      </section>
+
+      <details class="card" id="detailsCredit">
+        <summary><span class="step-num">3</span><span class="card-title">Crédit &amp; hypothèques</span><small id="creditSubLbl">(optionnel)</small></summary>
+        <div class="card-body">
+          <div class="row r4">
+            <div class="f"><label for="pr1" id="lblPr1">Prêt rang 1</label><input type="text" id="pr1" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h1"></span></div>
+            <div class="f"><label for="pr2" id="lblPr2">Prêt rang 2</label><input type="text" id="pr2" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h2"></span></div>
+            <div class="f"><label for="pr3">Prêt rang 3</label><input type="text" id="pr3" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h3"></span></div>
+            <div class="f"><label for="pr4">Prêt rang 4</label><input type="text" id="pr4" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h4"></span></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="card" id="detailsHon">
+        <summary><span class="step-num">4</span><span class="card-title">Honoraires &amp; frais</span><span class="badge" id="honBadge">1 % + TVA 20 %</span></summary>
+        <div class="card-body">
+          <div class="row r4">
+            <div class="f"><label for="tauxHon">Taux honoraires (%)</label><input type="text" id="tauxHon" inputmode="decimal" value="1" class="ci"></div>
+            <div class="f"><label for="honorairesHT">Honoraires H.T.</label><input type="text" id="honorairesHT" readonly></div>
+            <div class="f"><label for="remiseHon">Remise (%)</label><input type="text" id="remiseHon" inputmode="decimal" value="0,00" class="ci"></div>
+            <div class="f"><label for="dpa">Droit par acte (DH)</label><input type="text" id="dpa" inputmode="decimal" value="200" class="ci"></div>
+          </div>
+          <div class="row r3 gap-top">
+            <div class="f"><label for="fraisDiversLib">Libellé frais divers</label><input type="text" id="fraisDiversLib" class="ci"></div>
+            <div class="f"><label for="fraisDiversVal">Montant (DH)</label><input type="text" id="fraisDiversVal" inputmode="decimal" class="ci"></div>
+            <div class="f" id="tauxCfBox"><label for="tauxCf">Taux C.F. (%)</label><input type="text" id="tauxCf" inputmode="decimal" value="1.5" class="ci"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <aside class="sum" id="note">
+      <div class="total">
+        <div class="lbl">Total Frais à consigner</div>
+        <div class="amt" id="totalGeneral">0,00 DH</div>
+        <div class="sub" id="subSummary"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Frais d'acquisition détaillé</span>
+          <span class="pdate" id="pdate"></span>
+        </div>
+        <div class="card-body">
+          <div class="meta first"><div id="mClient"></div><div id="mTf"></div></div>
+          <div class="meta"><div id="mPrix"></div><div id="mEcheance"></div></div>
+          <div id="lines"></div>
+          <div class="acts">
+            <button class="btn btn-whatsapp span2" id="btnShare" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>WhatsApp</button>
+            <button class="btn btn-primary" id="btnPdf" type="button">Exporter en PDF</button>
+            <button class="btn btn-outline" id="btnPrint" type="button">Imprimer</button>
+            <button class="btn btn-outline span2" id="btnReset" type="button">Réinitialiser</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="bar">
+    <div><small>Total provision</small><b id="barTotal">0,00 DH</b></div>
+    <button class="btn btn-accent" id="btnDetail" type="button">Voir le détail ↓</button>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div id="prov-wa-modal" style="position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:#fff;border-radius:12px;width:100%;max-width:540px;box-shadow:0 20px 40px rgba(0,0,0,.2);overflow:hidden">
+      <div style="padding:1.1rem 1.4rem;background:var(--subtle);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--primary-dark)">
+          <span style="color:var(--whatsapp);font-size:1.2rem">💬</span>
+          <span>Envoyer le Décompte des Frais via WhatsApp</span>
+        </div>
+        <button type="button" id="provWaClose" style="border:0;background:transparent;font-size:1.1rem;color:var(--muted)">✕</button>
+      </div>
+      <div style="padding:1.4rem">
+        <div class="f" style="margin-bottom:.95rem">
+          <label for="provWaPhone">Numéro WhatsApp du destinataire (Optionnel — ex: 212661000000)</label>
+          <input type="text" id="provWaPhone" inputmode="tel" placeholder="Laisser vide pour choisir le contact dans WhatsApp">
+        </div>
+        <div class="f">
+          <label for="provWaPreview">Aperçu du message formaté (modifiable avant envoi)</label>
+          <textarea id="provWaPreview" style="width:100%;height:230px;padding:.85rem;border:1px solid var(--border-strong);border-radius:7px;font-size:.82rem;line-height:1.45;background:#e8f3ee;color:#0f4a39;resize:vertical"></textarea>
+        </div>
+      </div>
+      <div style="padding:1rem 1.4rem;background:var(--subtle);border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.6rem">
+        <button type="button" class="btn btn-outline" id="provWaCopy">📋 Copier le texte</button>
+        <button type="button" class="btn btn-whatsapp" id="provWaSend">Ouvrir WhatsApp &amp; Envoyer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="app-tpi" class="module">
+<div class="print-title"><b>Étude notariale — ESTIMATION DE DECLARATION TPI (CGI 2026)</b><span>Profit immobilier, réévaluation &amp; cotisation minimale (CGI)</span></div>
+
+    <!-- =====================================================================
+         SUB-NAVIGATION
+         ===================================================================== -->
+    <div class="subnav-bar">
+        <div class="subnav-inner">
+            <div class="tabs-list">
+                <button class="tab-btn active" onclick="switchTab(event, 'calculateur')">
+                    <span class="tab-step">1</span> Calcul Principal
+                </button>
+                <button class="tab-btn" onclick="switchTab(event, 'multi')">
+                    <span class="tab-step">2</span> Acquisitions Multiples
+                </button>
+                <button class="tab-btn" onclick="switchTab(event, 'coefficients')">
+                    <span class="tab-step">3</span> Référentiel des Coefficients (DGI)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MAIN WORKSPACE
+         ===================================================================== -->
+    <div class="workspace">
+
+        <!-- =================================================================
+             VUE 1 : CALCUL PRINCIPAL
+             ================================================================= -->
+        <section id="tab-calculateur" class="view-section active">
+            <div class="split-layout">
+
+                <!-- COLONNE GAUCHE : SAISIE -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cds-brand-800)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+                                <span class="card-title">Paramètres de l'Acte (Calcul Principal)</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <label for="annee_vente" style="margin:0; font-size:0.78rem; color:var(--cds-brand-800);">Année Cession :</label>
+                                <select id="annee_vente" onchange="onAnneeVenteChange()" style="width:92px; height:34px; font-weight:700; border-color:var(--cds-brand-700);"></select>
+                                <button class="btn btn-outline no-print" onclick="resetForm()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                    Réinitialiser
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="form-section-label">1. Valeur de Cession &amp; Régime Fiscal</div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Prix de Cession / Vente *</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="prix_cession" class="num-input" value="0" step="0.01" oninput="calculateAll()">
+                                        <span class="input-suffix">DH</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Taux d'Imposition (CGI)</label>
+                                    <select id="taux_ir" onchange="calculateAll()">
+                                        <option value="20" selected>20% — Taux de droit commun</option>
+                                        <option value="30">30% — Terrains urbains non bâtis (1ère cession)</option>
+                                        <option value="25">25% — Ancien barème / Cas spécifique</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- FOND COLORÉ EN #FFEA99 -->
+                            <div class="options-panel-yellow">
+                                <label class="checkbox-row">
+                                    <input type="checkbox" id="chk_habitation_principale" onchange="calculateAll()">
+                                    <span>Habitation Principale occupée ≥ 6 ans (Exonération jusqu'à 4.000.000 DH, 3% sur le surplus)</span>
+                                </label>
+                                <label class="checkbox-row">
+                                    <input type="checkbox" id="chk_include_5pct" checked onchange="calculateAll()">
+                                    <span>Comparer également avec le seuil de 5% du Prix de Vente (retenir la valeur supérieure)</span>
+                                </label>
+                            </div>
+
+                            <div class="form-section-label">2. Coût d'Acquisition &amp; Réévaluation DGI</div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Prix d'Acquisition Historique</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="prix_acquisition" class="num-input" value="0" step="0.01" oninput="calculateAll()">
+                                        <span class="input-suffix">DH</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <span>Année d'Acquisition</span>
+                                        <span class="coef-pill">Coef: <strong id="disp-coef-acq">1.000</strong></span>
+                                    </label>
+                                    <select id="annee_acquisition" onchange="calculateAll()"></select>
+                                </div>
+                            </div>
+
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Dépenses d'Investissement Justifiées</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="investissement" class="num-input" value="0" step="0.01" oninput="calculateAll()">
+                                        <span class="input-suffix">DH</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <span>Année d'Investissement</span>
+                                        <span class="coef-pill">Coef: <strong id="disp-coef-inv">1.000</strong></span>
+                                    </label>
+                                    <select id="annee_investissement" onchange="calculateAll()"></select>
+                                </div>
+                            </div>
+
+                            <div class="form-section-label">3. Dates Légales (Délai 30 Jours + Jours Fériés / Week-ends)</div>
+                            <div class="grid-3">
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Date de l'Acte</label>
+                                    <input type="date" id="date_acte" onchange="onDateActeChange()">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Date Paiement DGI</label>
+                                    <input type="date" id="date_paiement" onchange="calculateAll()">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Échéance Légale (J+30)</label>
+                                    <input type="text" id="date_limite" readonly class="mono" style="text-align:center;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLONNE DROITE : LIQUIDATION -->
+                <div id="tpi-detail-single">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="card-title">Décompte de Liquidation</span>
+                            </div>
+
+                            <div class="action-toolbar no-print">
+                                <button class="btn btn-pdf" onclick="exportToPDF('single')" id="btn-export-pdf-single">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    PDF
+                                </button>
+                                <button class="btn btn-whatsapp" onclick="openWhatsAppModal('single')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                    WhatsApp
+                                </button>
+                                <button class="btn btn-print" onclick="printTpi()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                                    Imprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="ledger-group">
+                                <div class="ledger-row">
+                                    <span class="lbl">Prix d'acquisition réévalué</span>
+                                    <span class="val" id="res-prix-act">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl">Frais forfaitaires d'acquisition (15%)</span>
+                                    <span class="val" id="res-frais-15">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl">Investissements réévalués</span>
+                                    <span class="val" id="res-inv-act">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row subtotal">
+                                    <span class="lbl">Coût d'Acquisition Total Déductible</span>
+                                    <span class="val" id="res-cout-total">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row profit-row">
+                                    <span class="lbl">Profit Immobilier Net Imposable</span>
+                                    <span class="val" id="res-profit">0,00 DH</span>
+                                </div>
+                            </div>
+
+                            <div class="comparison-grid">
+                                <div id="box-droit-taux" class="comp-item">
+                                    <div>
+                                        <span class="comp-title">1. Droit sur profit (<span id="lbl-taux-ir">20</span>%)</span>
+                                        <span class="winner-tag">Retenu</span>
+                                    </div>
+                                    <span class="val" id="res-droit-taux">0,00 DH</span>
+                                </div>
+
+                                <div id="box-cm-3" class="comp-item">
+                                    <div>
+                                        <span class="comp-title">2. Cotisation Minimale (3% du prix de vente)</span>
+                                        <span class="winner-tag">Retenu</span>
+                                    </div>
+                                    <span class="val" id="res-cm-3">0,00 DH</span>
+                                </div>
+
+                                <div id="box-cm-5" class="comp-item">
+                                    <div>
+                                        <span class="comp-title">3. Seuil 5% (Prix de vente × 5%)</span>
+                                        <span class="winner-tag">Retenu</span>
+                                    </div>
+                                    <span class="val" id="res-cm-5">0,00 DH</span>
+                                </div>
+                            </div>
+
+                            <div class="hero-tax-box">
+                                <div>
+                                    <div class="hero-tax-meta" id="lbl-base-retenue">Base retenue : Valeur supérieure</div>
+                                    <div class="hero-tax-label">DROIT EXIGIBLE (Arrondi au DH sup.)</div>
+                                </div>
+                                <div class="hero-tax-amount" id="res-droit-exigible">0 DH</div>
+                            </div>
+
+                            <div class="words-box">
+                                <span>Arrêté la présente liquidation à la somme de :</span>
+                                <strong id="res-en-lettres">ZÉRO DIRHAM</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLOC DÉLAI LÉGAL & PÉNALITÉS (ART. 184 & ART. 208) -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="card-title">Délai Légal (30 Jours) &amp; Pénalités (Art. 184 / 208)</span>
+                            </div>
+                            <span id="badge-delai" class="badge badge-ok">● Dans le délai légal (30j)</span>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="ledger-group">
+                                <div class="ledger-row">
+                                    <span class="lbl">Retard constaté après échéance (J+30)</span>
+                                    <span class="val" id="retard_jours">0 jour</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl" id="lbl-maj-assiette">Majoration d'assiette (Art. 184)</span>
+                                    <span class="val" id="res-maj-assiette" style="color:var(--cds-danger-700);">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl" id="lbl-pen-paiement">Pénalité de paiement (Art. 208)</span>
+                                    <span class="val" id="res-pen-paiement" style="color:var(--cds-danger-700);">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl" id="lbl-maj-mensuelle">Majorations mensuelles (Art. 208)</span>
+                                    <span class="val" id="res-maj-mensuelle" style="color:var(--cds-danger-700);">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row" style="background:var(--cds-danger-50); border-color:var(--cds-danger-100); padding:0.85rem 1rem;">
+                                    <span class="lbl" style="color:var(--cds-danger-700); font-weight:700;">TOTAL GÉNÉRAL À PAYER (DGI)</span>
+                                    <span class="val" id="res-total-payer" style="color:var(--cds-danger-700); font-size:1.15rem; font-weight:700;">0 DH</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             VUE 2 : ACQUISITIONS MULTIPLES
+             ================================================================= -->
+        <section id="tab-multi" class="view-section">
+            <div class="split-layout">
+
+                <!-- COLONNE GAUCHE : PARAMÈTRES + 4 LIGNES EXTENSIBLES -->
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cds-brand-800)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                <span class="card-title">Acquisitions Multiples</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <label for="multi_annee_vente" style="margin:0; font-size:0.78rem; color:var(--cds-brand-800);">Année Cession :</label>
+                                <select id="multi_annee_vente" onchange="onMultiAnneeVenteChange()" style="width:92px; height:34px; font-weight:700; border-color:var(--cds-brand-700);"></select>
+                                <button class="btn btn-outline no-print" onclick="resetMultiForm()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                    Réinitialiser
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="form-section-label">1. Valeur de Cession Globale &amp; Régime Fiscal</div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Prix de Cession Global / Vente *</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="multi_prix_cession" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()">
+                                        <span class="input-suffix">DH</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Taux d'Imposition (CGI)</label>
+                                    <select id="multi_taux_ir" onchange="calculateMultiAll()">
+                                        <option value="20" selected>20% — Taux de droit commun</option>
+                                        <option value="30">30% — Terrains urbains non bâtis (1ère cession)</option>
+                                        <option value="25">25% — Ancien barème / Cas spécifique</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- FOND COLORÉ EN #FFEA99 -->
+                            <div class="options-panel-yellow">
+                                <label class="checkbox-row">
+                                    <input type="checkbox" id="multi_chk_habitation" onchange="calculateMultiAll()">
+                                    <span>Habitation Principale occupée ≥ 6 ans (Exonération jusqu'à 4.000.000 DH, 3% sur le surplus)</span>
+                                </label>
+                                <label class="checkbox-row">
+                                    <input type="checkbox" id="multi_chk_include_5pct" checked onchange="calculateMultiAll()">
+                                    <span>Comparer également avec le seuil de 5% du Prix de Vente (retenir la valeur supérieure)</span>
+                                </label>
+                            </div>
+
+                            <!-- 4 LIGNES INITIALES + AJOUT DYNAMIQUE -->
+                            <div class="form-section-label">2. Acquisitions / Quittances Successives (4 lignes de base)</div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width:18%;">Tranche</th>
+                                            <th style="width:30%;">Montant Acq. (DH)</th>
+                                            <th style="width:20%;">Année Acq.</th>
+                                            <th style="width:12%;">Coef.</th>
+                                            <th style="width:20%; text-align:right;">Actualisé</th>
+                                            <th style="width:36px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="multi-rows"></tbody>
+                                    <tfoot>
+                                        <tr style="background:var(--cds-bg-muted); font-weight:700;">
+                                            <td>TOTAL</td>
+                                            <td id="multi-sum-brut" class="mono" style="text-align:right;">0,00 DH</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td id="multi-sum-act" class="mono" style="text-align:right; color:var(--cds-brand-800);">0,00 DH</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <button type="button" class="btn btn-add-row no-print" onclick="addMultiRow()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                Ajouter une autre acquisition / quittance
+                            </button>
+
+                            <div class="form-section-label" style="margin-top:1.25rem;">3. Dépenses d'Investissement Complémentaires</div>
+                            <div class="grid-2">
+                                <div class="form-group">
+                                    <label>Dépenses d'Investissement Justifiées</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="multi_investissement" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()">
+                                        <span class="input-suffix">DH</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <span>Année d'Investissement</span>
+                                        <span class="coef-pill">Coef: <strong id="multi-disp-coef-inv">1.000</strong></span>
+                                    </label>
+                                    <select id="multi_annee_investissement" onchange="calculateMultiAll()"></select>
+                                </div>
+                            </div>
+
+                            <div class="form-section-label">4. Dates Légales (Délai 30 Jours + Jours Fériés / Week-ends)</div>
+                            <div class="grid-3">
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Date de l'Acte</label>
+                                    <input type="date" id="multi_date_acte" onchange="onMultiDateActeChange()">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Date Paiement DGI</label>
+                                    <input type="date" id="multi_date_paiement" onchange="calculateMultiAll()">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Échéance Légale (J+30)</label>
+                                    <input type="text" id="multi_date_limite" readonly class="mono" style="text-align:center;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLONNE DROITE : LIQUIDATION MULTI-ACQUISITIONS -->
+                <div id="tpi-detail-multi">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="card-title">Liquidation Acquisitions Multiples</span>
+                            </div>
+
+                            <div class="action-toolbar no-print">
+                                <button class="btn btn-pdf" onclick="exportToPDF('multi')" id="btn-export-pdf-multi">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    PDF
+                                </button>
+                                <button class="btn btn-whatsapp" onclick="openWhatsAppModal('multi')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                    WhatsApp
+                                </button>
+                                <button class="btn btn-print" onclick="printTpi()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                                    Imprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="ledger-group">
+                                <div class="ledger-row">
+                                    <span class="lbl">Somme des acquisitions réévaluées (<span id="multi-count-lbl">4</span> lignes)</span>
+                                    <span class="val" id="multi-res-prix-act">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl">Frais forfaitaires d'acquisition (15%)</span>
+                                    <span class="val" id="multi-res-frais-15">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl">Investissements réévalués</span>
+                                    <span class="val" id="multi-res-inv-act">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row subtotal">
+                                    <span class="lbl">Coût d'Acquisition Total Déductible</span>
+                                    <span class="val" id="multi-res-cout-total">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row profit-row">
+                                    <span class="lbl">Profit Immobilier Net Imposable</span>
+                                    <span class="val" id="multi-res-profit">0,00 DH</span>
+                                </div>
+                            </div>
+
+                            <div class="comparison-grid">
+                                <div id="multi-box-droit-taux" class="comp-item">
+                                    <div>
+                                        <span class="comp-title">1. Droit sur profit (<span id="multi-lbl-taux-ir">20</span>%)</span>
+                                        <span class="winner-tag">Retenu</span>
+                                    </div>
+                                    <span class="val" id="multi-res-droit-taux">0,00 DH</span>
+                                </div>
+
+                                <div id="multi-box-cm-3" class="comp-item">
+                                    <div>
+                                        <span class="comp-title">2. Cotisation Minimale (3% du prix de vente)</span>
+                                        <span class="winner-tag">Retenu</span>
+                                    </div>
+                                    <span class="val" id="multi-res-cm-3">0,00 DH</span>
+                                </div>
+
+                                <div id="multi-box-cm-5" class="comp-item">
+                                    <div>
+                                        <span class="comp-title">3. Seuil 5% (Prix de vente × 5%)</span>
+                                        <span class="winner-tag">Retenu</span>
+                                    </div>
+                                    <span class="val" id="multi-res-cm-5">0,00 DH</span>
+                                </div>
+                            </div>
+
+                            <div class="hero-tax-box">
+                                <div>
+                                    <div class="hero-tax-meta" id="multi-lbl-base-retenue">Base retenue : Valeur supérieure</div>
+                                    <div class="hero-tax-label">DROIT EXIGIBLE (Arrondi au DH sup.)</div>
+                                </div>
+                                <div class="hero-tax-amount" id="multi-res-droit-exigible">0 DH</div>
+                            </div>
+
+                            <div class="words-box">
+                                <span>Arrêté la présente liquidation à la somme de :</span>
+                                <strong id="multi-res-en-lettres">ZÉRO DIRHAM</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLOC DÉLAI LÉGAL & PÉNALITÉS MULTI (ART. 184 & ART. 208) -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title-group">
+                                <span class="card-title">Délai Légal (30 Jours) &amp; Pénalités (Art. 184 / 208)</span>
+                            </div>
+                            <span id="multi-badge-delai" class="badge badge-ok">● Dans le délai légal (30j)</span>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="ledger-group">
+                                <div class="ledger-row">
+                                    <span class="lbl">Retard constaté après échéance (J+30)</span>
+                                    <span class="val" id="multi_retard_jours">0 jour</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl" id="multi-lbl-maj-assiette">Majoration d'assiette (Art. 184)</span>
+                                    <span class="val" id="multi-res-maj-assiette" style="color:var(--cds-danger-700);">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl" id="multi-lbl-pen-paiement">Pénalité de paiement (Art. 208)</span>
+                                    <span class="val" id="multi-res-pen-paiement" style="color:var(--cds-danger-700);">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row">
+                                    <span class="lbl" id="multi-lbl-maj-mensuelle">Majorations mensuelles (Art. 208)</span>
+                                    <span class="val" id="multi-res-maj-mensuelle" style="color:var(--cds-danger-700);">0,00 DH</span>
+                                </div>
+                                <div class="ledger-row" style="background:var(--cds-danger-50); border-color:var(--cds-danger-100); padding:0.85rem 1rem;">
+                                    <span class="lbl" style="color:var(--cds-danger-700); font-weight:700;">TOTAL GÉNÉRAL À PAYER (DGI)</span>
+                                    <span class="val" id="multi-res-total-payer" style="color:var(--cds-danger-700); font-size:1.15rem; font-weight:700;">0 DH</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- =================================================================
+             VUE 3 : RÉFÉRENTIEL DES COEFFICIENTS (EXCEL / CSV / JSON)
+             ================================================================= -->
+        <section id="tab-coefficients" class="view-section">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Référentiel Matriciel des Coefficients (Arrêtés Ministériels)</div>
+                        <div style="font-size:0.78rem; color:var(--cds-text-muted); margin-top:0.15rem;">
+                            Importez directement un fichier <strong>Excel (.xlsx, .xls)</strong>, <strong>CSV</strong> ou <strong>JSON</strong>.
+                        </div>
+                    </div>
+                    <div class="action-toolbar">
+                        <button class="btn btn-outline" onclick="createNewSaleYear()">+ Année de Cession</button>
+                        <button class="btn btn-outline" onclick="downloadExcelTemplate()" title="Télécharger un fichier Excel vierge prêt à remplir">📥 Modèle Excel</button>
+                        <button class="btn btn-outline" onclick="exportCoefficientsExcel()">⬇️ Exporter Excel</button>
+                        <label class="btn btn-excel" style="cursor:pointer; margin:0;">
+                            ⬆️ Importer Excel / CSV / JSON
+                            <input type="file" accept=".xlsx,.xls,.csv,.json" style="display:none;" onchange="importCoefficientsFile(event)">
+                        </label>
+                        <button class="btn btn-danger-soft" onclick="clearAllCoefficients()">
+                            🗑️ Vider les coefficients
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem; background:var(--cds-bg-subtle); padding:1rem; border-radius:var(--cds-radius-md); border:1px solid var(--cds-border); margin-bottom:1.25rem;">
+                        <div class="form-group" style="min-width:220px; margin-bottom:0;">
+                            <label style="color:var(--cds-brand-800);">Année de Cession (Ans_Coefficient)</label>
+                            <select id="admin-sale-year" onchange="renderCoefficients()" style="font-weight:700; border-color:var(--cds-brand-700);"></select>
+                        </div>
+
+                        <div style="display:flex; gap:0.6rem; align-items:flex-end; flex-wrap:wrap;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Année Antérieure</label>
+                                <input type="number" id="new-coef-year" placeholder="Ex: 2015" style="width:130px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Coefficient</label>
+                                <input type="number" id="new-coef-val" placeholder="Ex: 1.108" step="0.001" style="width:130px;">
+                            </div>
+                            <button class="btn btn-primary" onclick="addOrUpdateCoefficient()">💾 Enregistrer</button>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap" style="max-height: 460px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Année de Cession</th>
+                                    <th>Année d'Acquisition</th>
+                                    <th>Coefficient DGI</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coef-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Barre fixe mobile pour T.P.I. -->
+    <div class="bar" id="tpi-bar">
+      <div><small>Total général à payer (DGI)</small><b id="tpiBarTotal">0 DH</b></div>
+      <button class="btn btn-accent" id="btnTpiDetail" type="button" onclick="scrollToTpiDetail()">Voir le détail ↓</button>
+    </div>
+
+    <!-- =====================================================================
+         MODAL ENVOI WHATSAPP
+         ===================================================================== -->
+    <div id="wa-modal" class="modal-backdrop" onclick="if(event.target===this) closeWhatsAppModal()">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700; color:var(--cds-brand-900);">
+                    <span style="color:var(--cds-whatsapp); font-size:1.2rem;">💬</span>
+                    <span>Envoyer le Décompte T.P.I. via WhatsApp</span>
+                </div>
+                <button class="btn btn-ghost" onclick="closeWhatsAppModal()" style="font-size:1.1rem;">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Numéro WhatsApp du destinataire (Optionnel — Format international, ex: 212661000000)</label>
+                    <input type="tel" id="wa-phone" placeholder="Laisser vide pour choisir le contact dans WhatsApp">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Aperçu du message formaté (modifiable avant envoi)</label>
+                    <textarea id="wa-message-preview" class="wa-preview"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="copyWhatsAppText()">📋 Copier le texte</button>
+                <button class="btn btn-whatsapp" onclick="launchWhatsApp()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Ouvrir WhatsApp &amp; Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+
+<footer id="shell-footer">
+  <span>Documents indicatifs — montants sous réserve de la réglementation en vigueur.</span>
+  <span>Développé par Hatim DALIL · <span id="footer-year"></span></span>
+</footer>
+
+<script>
+// =====================================================================
+// UTILITAIRE COMMUN : ÉCHÉANCES LÉGALES MAROC (ENREG. J+30, ANCFCC M+3, FÉRIÉS & PRESCRIPTION 10 ANS)
+// =====================================================================
+const JOURS_FERIES_FIXES_MAROC = [
+  "01-01", // Nouvel an
+  "01-11", // Manifeste de l'Indépendance
+  "01-14", // Nouvel An Amazigh (Yennayer)
+  "05-01", // Fête du Travail
+  "07-30", // Fête du Trône
+  "08-14", // Allégeance Oued Eddahab
+  "08-20", // Révolution du Roi et du Peuple
+  "08-21", // Fête de la Jeunesse
+  "11-06", // Marche Verte
+  "11-18"  // Fête de l'Indépendance
+];
+
+function isFeteReligieuseMaroc(dateObj) {
+  try {
+    const fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {
+      month: 'numeric',
+      day: 'numeric'
+    });
+    const parts = fmt.formatToParts(dateObj);
+    const hMonth = parseInt(parts.find(p => p.type === 'month').value, 10);
+    const hDay = parseInt(parts.find(p => p.type === 'day').value, 10);
+
+    // 1er Mouharram (Nouvel an hégirien)
+    if (hMonth === 1 && hDay === 1) return true;
+    // 12 & 13 Rabia al-Awal (Aïd Al Mawlid - 2 jours fériés)
+    if (hMonth === 3 && (hDay === 12 || hDay === 13)) return true;
+    // 1er & 2 Chaoual (Aïd Al-Fitr - 2 jours fériés)
+    if (hMonth === 10 && (hDay === 1 || hDay === 2)) return true;
+    // 10 & 11 Dou Al-Hijja (Aïd Al-Adha - 2 jours fériés)
+    if (hMonth === 12 && (hDay === 10 || hDay === 11)) return true;
+  } catch (e) {
+    return false;
+  }
+  return false;
+}
+
+function reporterSiNonOuvrableMaroc(d) {
+  let estReporte = false;
+  while (true) {
+    const dayOfWeek = d.getDay();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mmdd = `${mm}-${dd}`;
+
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    const isFixe = JOURS_FERIES_FIXES_MAROC.includes(mmdd);
+    const isReligieux = isFeteReligieuseMaroc(d);
+
+    if (isWeekend || isFixe || isReligieux) {
+      d.setDate(d.getDate() + 1);
+      estReporte = true;
+    } else {
+      break;
+    }
+  }
+  return estReporte;
+}
+
+window.getEcheanceLegaleMaroc = function (dateActeStr) {
+  const parts = String(dateActeStr).split('-');
+  const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+  d.setDate(d.getDate() + 30);
+  const estReporte = reporterSiNonOuvrableMaroc(d);
+  return { dateLimite: d, estReporte };
+};
+
+// Échéance ANCFCC : 3 mois à compter de la date de l'acte (Art. 65 bis)
+window.getEcheanceCfMaroc = function (dateActeStr) {
+  const parts = String(dateActeStr).split('-');
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  const d = new Date(y, m + 3, day);
+  // Gestion fin de mois (ex: 30 novembre + 3 mois -> 28/29 février)
+  if (d.getMonth() !== ((m + 3) % 12)) {
+    d.setDate(0);
+  }
+  const estReporte = reporterSiNonOuvrableMaroc(d);
+  return { dateLimite: d, estReporte };
+};
+
+// Calcul pénalité retard ANCFCC (5 % le 1er mois + 0,5 % par mois ou fraction de mois supplémentaire)
+window.computeRetardCfMaroc = function (dateActeStr, dateDepotCfStr, droitsPropCf) {
+  if (!dateActeStr) {
+    return {
+      dateLimiteStr: '—',
+      retardLabel: '0 jour',
+      isLate: false,
+      tauxPct: 0,
+      penaliteCf: 0,
+      penaliteCfLabel: 'Pénalité retard ANCFCC (Art. 65 bis)'
+    };
+  }
+
+  const { dateLimite, estReporte } = window.getEcheanceCfMaroc(dateActeStr);
+  const dateLimiteStr = dateLimite.toLocaleDateString('fr-FR') + (estReporte ? ' (Reporté)' : '');
+
+  let dateDepot;
+  if (dateDepotCfStr) {
+    const pDep = dateDepotCfStr.split('-');
+    dateDepot = new Date(parseInt(pDep[0], 10), parseInt(pDep[1], 10) - 1, parseInt(pDep[2], 10));
+  } else {
+    const now = new Date();
+    dateDepot = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  const diffDays = Math.round((dateDepot - dateLimite) / (1000 * 60 * 60 * 24));
+  let isLate = false;
+  let retardLabel = '0 jour';
+  let tauxPct = 0;
+  let penaliteCf = 0;
+  let penaliteCfLabel = 'Pénalité retard ANCFCC (Art. 65 bis)';
+
+  if (diffDays > 0 && droitsPropCf > 0) {
+    isLate = true;
+    const moisRetard = Math.ceil(diffDays / 30);
+    const moisSupp = Math.max(0, moisRetard - 1);
+    tauxPct = 5 + (moisSupp * 0.5);
+    penaliteCf = Math.ceil(droitsPropCf * (tauxPct / 100));
+    retardLabel = `${diffDays} jour(s) (${moisRetard} mois entamé(s))`;
+    const tauxStr = tauxPct.toFixed(2).replace(/\.00$/, '').replace('.', ',');
+    penaliteCfLabel = `Pénalité retard ANCFCC (${tauxStr} % — ${moisRetard} mois)`;
+  }
+
+  return {
+    dateLimiteStr,
+    retardLabel,
+    isLate,
+    tauxPct,
+    penaliteCf,
+    penaliteCfLabel
+  };
+};
+
+window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, droitBase) {
+  if (!dateActeStr) {
+    return {
+      dateActeFormatted: '—',
+      datePaiementFormatted: '—',
+      dateLimiteStr: '—',
+      retardLabel: '0 jour',
+      isLate: false,
+      isPrescrit: false,
+      majAssiette: 0,
+      majAssietteLabel: "Majoration d'assiette (Art. 184)",
+      penPaiement: 0,
+      penPaiementLabel: "Pénalité de paiement (Art. 208)",
+      majMensuelle: 0,
+      majMensuelleLabel: "Majorations mensuelles (Art. 208)",
+      totalPenalites: 0,
+      totalPayer: droitBase
+    };
+  }
+
+  const pActe = dateActeStr.split('-');
+  const dateActe = new Date(parseInt(pActe[0], 10), parseInt(pActe[1], 10) - 1, parseInt(pActe[2], 10));
+
+  const { dateLimite, estReporte } = window.getEcheanceLegaleMaroc(dateActeStr);
+  const dateLimiteStr = dateLimite.toLocaleDateString('fr-FR') + (estReporte ? ' (Reporté)' : '');
+
+  let datePaiement;
+  if (datePaiementStr) {
+    const pPai = datePaiementStr.split('-');
+    datePaiement = new Date(parseInt(pPai[0], 10), parseInt(pPai[1], 10) - 1, parseInt(pPai[2], 10));
+  } else {
+    const now = new Date();
+    datePaiement = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  const diffDays = Math.round((datePaiement - dateLimite) / (1000 * 60 * 60 * 24));
+
+  // Prescription décennale (10 ans à compter de la date de l'acte - Art. 232 CGI)
+  const datePrescription10Ans = new Date(dateActe.getFullYear() + 10, dateActe.getMonth(), dateActe.getDate());
+  const isPrescrit = (datePaiement > datePrescription10Ans);
+
+  let majAssiette = 0;
+  let majAssietteLabel = "Majoration d'assiette (Art. 184)";
+  let penPaiement = 0;
+  let penPaiementLabel = "Pénalité de paiement (Art. 208)";
+  let majMensuelle = 0;
+  let majMensuelleLabel = "Majorations mensuelles (Art. 208)";
+  let retardLabel = '0 jour';
+  let isLate = false;
+
+  if (diffDays > 0 && droitBase > 0) {
+    if (isPrescrit) {
+      isLate = false;
+      retardLabel = `${diffDays} jour(s) — Prescrit (> 10 ans, Art. 232 CGI)`;
+    } else {
+      isLate = true;
+      const moisRetard = Math.ceil(diffDays / 30);
+
+      if (diffDays <= 30) {
+        majAssiette = Math.max(500, Math.ceil(droitBase * 0.05));
+        majAssietteLabel = "Majoration d'assiette (Art. 184 — 5%, min. 500 DH)";
+
+        penPaiement = Math.ceil(droitBase * 0.05);
+        penPaiementLabel = "Pénalité de paiement (Art. 208 — 5%)";
+
+        majMensuelle = Math.ceil(droitBase * 0.05);
+        majMensuelleLabel = "Majorations mensuelles (Art. 208 — 5% 1er mois)";
+      } else {
+        majAssiette = Math.max(500, Math.ceil(droitBase * 0.15));
+        majAssietteLabel = "Majoration d'assiette (Art. 184 — 15%, min. 500 DH)";
+
+        penPaiement = Math.ceil(droitBase * 0.10);
+        penPaiementLabel = "Pénalité de paiement (Art. 208 — 10%)";
+
+        const moisSupp = Math.max(0, moisRetard - 1);
+        const tauxMensuel = 0.05 + (moisSupp * 0.005);
+        majMensuelle = Math.ceil(droitBase * tauxMensuel);
+        majMensuelleLabel = `Majorations mensuelles (Art. 208 — 5% + ${moisSupp}×0,50%)`;
+      }
+
+      retardLabel = `${diffDays} jour(s) (${moisRetard} mois entamé(s))`;
+    }
+  }
+
+  const totalPenalites = majAssiette + penPaiement + majMensuelle;
+
+  return {
+    dateActeFormatted: dateActe.toLocaleDateString('fr-FR'),
+    datePaiementFormatted: datePaiement.toLocaleDateString('fr-FR'),
+    dateLimiteStr,
+    retardLabel,
+    isLate,
+    isPrescrit,
+    majAssiette,
+    majAssietteLabel,
+    penPaiement,
+    penPaiementLabel,
+    majMensuelle,
+    majMensuelleLabel,
+    totalPenalites,
+    totalPayer: droitBase + totalPenalites
+  };
+};
+
+(function () {
+  var MODS = {
+    provision: { id: 'app-droit', title: 'Étude notariale' },
+    tpi:       { id: 'app-tpi',   title: 'Liquidation T.P.I. (IR / PI)' }
+  };
+  var BASE = 'Hatim DALIL— Calcul Frais et IR/PI';
+  var tabs = document.querySelectorAll('.module-tab');
+
+  function show(key, updateHash) {
+    if (!MODS[key]) key = 'provision';
+    Object.keys(MODS).forEach(function (k) {
+      document.getElementById(MODS[k].id).classList.toggle('active', k === key);
+    });
+    tabs.forEach(function (t) {
+      var on = t.getAttribute('data-module') === key;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+    });
+    document.title = MODS[key].title + ' · ' + BASE;
+    if (updateHash && location.hash !== '#' + key) { history.replaceState(null, '', '#' + key); }
+    window.scrollTo({ top: 0 });
+  }
+
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { show(t.getAttribute('data-module'), true); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      var n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+      n.focus(); n.click();
+    });
+  });
+  window.addEventListener('hashchange', function () { show(location.hash.replace('#', ''), false); });
+  show(location.hash.replace('#', '') || 'provision', false);
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+})();
+</script>
+
+<script>
+(function(){
+
+var $ = function(id){return document.getElementById(id)};
+var DEF_LIB = "Frais de dossier, copies & expéditions", DEF_VAL = "2700";
+
+function num(id){
+  var n = parseFloat(String($(id).value||'').replace(/\s+/g,'').replace(/,/g,'.').replace(/[^0-9.-]/g,''));
+  return isNaN(n) ? 0 : n;
+}
+function fmt(v){
+  var p = (Number(v)||0).toFixed(2).split('.');
+  return p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ') + ',' + p[1] + ' DH';
+}
+function fmtInt(v){ return String(Math.round(Number(v)||0)).replace(/\B(?=(\d{3})+(?!\d))/g,' ') + ' DH'; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
+function up(v){ if(v<=0) return 0; var e=Math.floor(v); return v-e===0 ? e : e+1; }
+
+function nature(){
+  var v=$('tauxEnreg').value;
+  if(v==='custom') return Math.max(0,num('tauxCustom'));
+  if(v==='mourabaha') return 4;
+  if(v==='5_parts') return 5;
+  if(v==='0.5_immo') return 0.5;
+  if(v==='1.5_agri') return 1.5;
+  return parseFloat(v);
+}
+function setTaux(v){ $('tauxEnreg').value=v; $('customBox').style.display='none'; }
+
+function printNote(){
+  var c=($('clientInfo').value.trim()||'Dossier').replace(/[^\w\u00C0-\u017F-]+/g,'_');
+  var old=document.title;
+  document.title='Note_Frais_'+c+'_'+new Date().toISOString().slice(0,10);
+  try{ window.print(); }catch(e){ toast('Impression indisponible : utilisez Exporter en PDF'); }
+  setTimeout(function(){document.title=old},1500);
+}
+
+function buildPdf(d){
+  var W=595,H=842,M=48,ops=[];
+  var NAVY='0.078 0.149 0.239 rg',GOLD='0.69 0.54 0.24 rg',INK='0.11 0.15 0.2 rg',MUT='0.42 0.46 0.51 rg';
+  function enc(t){return String(t).replace(/[^\x20-\x7E\u00A0-\u00FF]/g,'').replace(/[\\()]/g,'\\$&');}
+  function tw(t,size){var n=0;String(t).split('').forEach(function(c){n+=/[0-9]/.test(c)?.556:(c===' '||c===',')?.278:(c==='D'||c==='H')?.722:.55;});return n*size;}
+  function T(x,y,t,f,size,col){ops.push(col+' BT /'+f+' '+size+' Tf '+x.toFixed(2)+' '+y.toFixed(2)+' Td ('+enc(t)+') Tj ET');}
+  function TR(y,t,f,size,col){T(W-M-tw(t,size),y,t,f,size,col);}
+  function line(y){ops.push('0.9 0.89 0.85 RG 0.5 w '+M+' '+y+' m '+(W-M)+' '+y+' l S');}
+  ops.push(NAVY+' 0 782 '+W+' 60 re f');
+  ops.push(GOLD+' 0 779 '+W+' 3 re f');
+  T(M,808,d.title||'NOTE DES FRAIS (CGI 2026)','F2',18,'1 1 1 rg');
+  T(M,792,d.subtitle||'Etude notariale  -  Code General des Impots','F1',8.5,'0.8 0.84 0.9 rg');
+  var date=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  TR(808,date,'F1',9,'0.8 0.84 0.9 rg');
+  TR(792,'Développé par Hatim DALIL','F2',8.5,'1 0.918 0.6 rg');
+  var y=750;
+  T(M,y,(d.kind==='tpi'?'Annee / dossier : ':'Client : ')+(d.client||'Non renseigne'),'F2',11,NAVY);
+  T(M,y-16,(d.kind==='tpi'?'Echeance DGI : ':'Reference : ')+(d.tf||'-'),'F1',10,INK);
+  var echeancesStr = '';
+  if(d.echeance) echeancesStr += '   |   Echeance Enreg. : ' + d.echeance;
+  if(d.echeanceCf) echeancesStr += '   |   Echeance C.F. : ' + d.echeanceCf;
+  T(M,y-32,(d.kind==='tpi'?'Prix de cession : ':'Montant de base : ')+fmt(d.prix)+echeancesStr,'F1',10,INK);
+  y-=62;
+  d.secs.forEach(function(s){
+    T(M,y,s.t.toUpperCase(),'F2',8.5,GOLD); y-=6; line(y); y-=13;
+    var rowSize=d.isMourabaha?8.5:(d.kind==='tpi'?8.5:10),rowGap=d.isMourabaha?2.5:(d.kind==='tpi'?3:6),rowAfter=d.isMourabaha?9:(d.kind==='tpi'?10:14);
+    s.r.forEach(function(x){
+      T(M,y,x[2],'F1',rowSize,INK);
+      TR(y,typeof x[1]==='string'?x[1]:fmt(x[1]),'F2',rowSize,INK);
+      y-=rowGap;line(y);y-=rowAfter;
+    });
+    if(s.st){
+      var sumSize=d.isMourabaha?8.5:(d.kind==='tpi'?8.5:10);
+      T(M,y,s.st[0],'F2',sumSize,NAVY);
+      TR(y,fmt(s.st[1]),'F2',sumSize,NAVY);
+      y-=d.isMourabaha?6:(d.kind==='tpi'?7:10);
+    }
+    y-=d.isMourabaha?7:(d.kind==='tpi'?8:12);
+  });
+  y-=4;
+  ops.push('0.969 0.945 0.89 rg '+M+' '+(y-26)+' '+(W-2*M)+' 42 re f');
+  ops.push(GOLD+' '+M+' '+(y-26)+' 3 42 re f');
+  T(M+14,y-6,d.totalLabel||'TOTAL FRAIS A CONSIGNER','F2',10.5,NAVY);
+  TR(y-8,fmt(d.total),'F2',15,NAVY);
+  if(d.kind==='tpi' && d.enLettres) T(M+14,y-20,d.enLettres.toUpperCase(),'F2',7.5,NAVY);
+  else if(d.prix>0) T(M+14,y-20,(d.total/d.prix*100).toFixed(2).replace('.',',')+" % de la base",'F1',8,MUT);
+  
+  /* Pied de page PDF unifié avec signature Hatim DALIL */
+  T(M,40,d.footer||'Document indicatif - Code General des Impots (CGI 2026).','F1',7.5,MUT);
+  TR(40,'Développé par Hatim DALIL','F2',8,NAVY);
+
+  var content=ops.join('\n');
+  var objs=[
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>',
+    '<< /Length '+content.length+' >>\nstream\n'+content+'\nendstream',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'
+  ];
+  var out='%PDF-1.4\n',off=[];
+  objs.forEach(function(o,i){off.push(out.length);out+=(i+1)+' 0 obj\n'+o+'\nendobj\n';});
+  var xr=out.length;
+  out+='xref\n0 '+(objs.length+1)+'\n0000000000 65535 f \n';
+  off.forEach(function(o){out+=('0000000000'+o).slice(-10)+' 00000 n \n';});
+  out+='trailer\n<< /Size '+(objs.length+1)+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF';
+  var u=new Uint8Array(out.length);
+  for(var i=0;i<out.length;i++)u[i]=out.charCodeAt(i)&255;
+  return u;
+}
+window.buildSharedProvisionPdf = buildPdf;
+
+function exportPdf(){
+  if(!lastData){calc();}
+  var name='Note_Frais_'+(($('clientInfo').value.trim()||'Dossier').replace(/[^\w\u00C0-\u017F-]+/g,'_'))+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+  var blob=new Blob([buildPdf(lastData)],{type:'application/pdf'});
+  var url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1500);
+  toast('PDF téléchargé');
+}
+
+function hyp(m){
+  if(!m||m<=0) return {d:0,t:''};
+  if(m<=250000) return {d:up(m*0.005+100), t:'0,5 % + 100'};
+  if(m<5000000) return {d:up((m-250000)*0.015+1350), t:'1,5 % + 1 350'};
+  return {d:up((m-5000000)*0.005+72600), t:'0,5 % + 72 600'};
+}
+
+function resetDefaults(){
+  $('pr1').value=$('pr2').value=$('pr3').value=$('pr4').value="0,00";
+  $('dpa').value="200"; $('fraisDiversLib').value=DEF_LIB; $('fraisDiversVal').value=DEF_VAL;
+}
+function applyAide(prix){
+  var isMourabaha = ($('tauxEnreg').value === 'mourabaha');
+  if(!isMourabaha) setTaux('4');
+
+  if(prix<=300000){
+    $('regimeBadge').textContent = isMourabaha ? "Mourabaha + Aide 100 000 DH" : "Aide 100 000 DH";
+    $('pr1').value="100 000,00";
+    if(!isMourabaha){
+      $('dpa').value="400";
+      $('fraisDiversLib').value="Certificat de pté. et frais banque";
+      $('fraisDiversVal').value="335";
+    }
+  } else {
+    $('regimeBadge').textContent = isMourabaha ? "Mourabaha + Aide 70 000 DH" : "Aide 70 000 DH";
+    $('pr1').value="70 000,00";
+    if(!isMourabaha){
+      $('dpa').value="200";
+      $('fraisDiversLib').value=DEF_LIB;
+      $('fraisDiversVal').value=DEF_VAL;
+    }
+  }
+  $('detailsCredit').open = true;
+}
+function noRegime(){ $('regimeBadge').textContent="Droit commun"; }
+
+function onPrix(){
+  var prix=num('prixVente'), cb=$('aideLogement');
+  var isHabitation = ($('tauxEnreg').value === '4' || $('tauxEnreg').value === '3' || $('tauxEnreg').value === 'mourabaha');
+  if(cb.checked && isHabitation){
+    if(prix>700000){
+      cb.checked=false; resetDefaults();
+      if($('tauxEnreg').value === 'mourabaha'){
+        $('tauxHon').value = '0.5';
+        $('fraisDiversLib').value = 'Frais et timbre';
+        $('fraisDiversVal').value = '2700';
+        $('regimeBadge').textContent = 'Mourabaha (2 actes)';
+      } else {
+        noRegime();
+      }
+      $('daamNote').style.display='block';
+    } else {
+      $('daamNote').style.display='none';
+      applyAide(prix);
+    }
+  }
+  calc();
+}
+function onAide(){
+  var prix=num('prixVente'), cb=$('aideLogement');
+  var isHabitation = ($('tauxEnreg').value === '4' || $('tauxEnreg').value === '3' || $('tauxEnreg').value === 'mourabaha');
+  if(cb.checked && isHabitation){
+    if(prix>700000){ cb.checked=false; $('daamNote').style.display='block'; return; }
+    $('daamNote').style.display='none'; applyAide(prix);
+  } else {
+    resetDefaults();
+    if($('tauxEnreg').value === 'mourabaha'){
+      $('tauxHon').value = '0.5';
+      $('fraisDiversLib').value = 'Frais et timbre';
+      $('fraisDiversVal').value = '2700';
+      $('regimeBadge').textContent = 'Mourabaha (2 actes)';
+      $('detailsCredit').open = true;
+    } else {
+      noRegime();
+    }
+    $('daamNote').style.display='none';
+  }
+  calc();
+}
+
+var recap="", lastData=null;
+function calc(){
+  var client=$('clientInfo').value.trim(), tf=$('titreFoncier').value.trim();
+  var nbr=Math.max(1,Math.floor(num('nbrTf'))||1), prix=num('prixVente');
+  var selVal = $('tauxEnreg').value;
+  var isMourabaha = (selVal === 'mourabaha');
+
+  var isHabitation = (selVal === '4' || selVal === '3' || isMourabaha);
+  var daamContainer = $('daamContainer');
+  var daamCheckbox = $('aideLogement');
+  var daamNote = $('daamNote');
+
+  if (!isHabitation) {
+    daamContainer.style.display = 'none';
+    daamCheckbox.checked = false;
+    daamNote.style.display = 'none';
+  } else {
+    daamContainer.style.display = 'flex';
+  }
+
+  var aide = daamCheckbox.checked && isHabitation;
+  var tE=nature();
+
+  // Mise à jour des libellés des rangs d'hypothèque selon Mourabaha / Daam Sakane
+  if (isMourabaha && aide) {
+    $('lblPr1').textContent = 'Prêt rang 1 (État / Daam Sakane)';
+    $('lblPr2').textContent = 'Prêt rang 2 (Banque Mourabaha)';
+  } else if (isMourabaha) {
+    $('lblPr1').textContent = 'Prêt rang 1 (Banque Mourabaha)';
+    $('lblPr2').textContent = 'Prêt rang 2';
+  } else if (aide) {
+    $('lblPr1').textContent = 'Prêt rang 1 (État / Daam Sakane)';
+    $('lblPr2').textContent = 'Prêt rang 2 (Banque)';
+  } else {
+    $('lblPr1').textContent = 'Prêt rang 1';
+    $('lblPr2').textContent = 'Prêt rang 2';
+  }
+
+  var isAncfccEligible = !(selVal === '6' || selVal === '0.5' || selVal === '5_parts' || selVal === '0.1');
+
+  $('detailsCredit').style.display = isAncfccEligible ? 'block' : 'none';
+  $('nbrTfBox').style.display = isAncfccEligible ? 'flex' : 'none';
+  $('tauxCfBox').style.display = isAncfccEligible ? 'flex' : 'none';
+  $('cfDatesRow').style.display = isAncfccEligible ? 'grid' : 'none';
+  $('creditSubLbl').textContent = isMourabaha ? '(Acte 2 — Revente Client)' : '(optionnel)';
+
+  var tC = isAncfccEligible ? num('tauxCf') : 0;
+
+  var isGreffeEligible = (selVal === '6' || selVal === '0.5' || selVal === '0.5_immo');
+  var greffeContainer = $('greffeContainer');
+  if (isGreffeEligible) {
+    greffeContainer.style.display = 'block';
+  } else {
+    greffeContainer.style.display = 'none';
+  }
+
+  var fraisGreffe = isGreffeEligible ? num('fraisGreffeVal') : 0;
+  var fraisPub = isGreffeEligible ? num('fraisPubVal') : 0;
+
+  var isVenteImmoOuFDC = (selVal === '4' || selVal === '5' || selVal === '6' || selVal === '3' || selVal === '1.5_agri' || isMourabaha);
+  var modePaiementSelect = $('modePaiement');
+  var montantNonConformeInput = $('montantNonConforme');
+
+  if (!isVenteImmoOuFDC || prix <= 300000) {
+    modePaiementSelect.value = 'total';
+    modePaiementSelect.disabled = true;
+    montantNonConformeInput.value = '0,00';
+    montantNonConformeInput.disabled = true;
+    if (!isVenteImmoOuFDC) {
+      $('paiementNote').textContent = "Le contrôle du mode de règlement (Art. 11) s'applique exclusivement aux ventes immobilières et cessions de fonds de commerce.";
+    } else {
+      $('paiementNote').textContent = "Aucune majoration : le montant est inférieur ou égal à 300 000 DH.";
+    }
+    $('paiementNote').style.display = 'block';
+  } else {
+    modePaiementSelect.disabled = false;
+    if (modePaiementSelect.value === 'partiel') {
+      montantNonConformeInput.disabled = false;
+    } else {
+      montantNonConformeInput.disabled = true;
+      montantNonConformeInput.value = '0,00';
+    }
+    $('paiementNote').style.display = (modePaiementSelect.value !== 'total') ? 'block' : 'none';
+    if (modePaiementSelect.value === 'non_conforme') {
+      $('paiementNote').textContent = "Droit supplémentaire de 2 % appliqué sur la totalité du prix (> 300 000 DH).";
+    } else if (modePaiementSelect.value === 'partiel') {
+      $('paiementNote').textContent = "Droit supplémentaire de 2 % appliqué uniquement sur la fraction non conforme à l'article 11.";
+    }
+  }
+
+  var modePaiement = modePaiementSelect.value;
+  var dpa = num('dpa');
+
+  var enreg=(prix>0&&tE>0)?(prix*tE/100<100?100:up(prix*tE/100)):0;
+
+  var maj2pct = 0;
+  var baseNonConforme = 0;
+  var majLabelHtml = '';
+  var majLabelTxt = '';
+
+  if (isVenteImmoOuFDC && prix > 300000 && tE > 0) {
+    if (modePaiement === 'non_conforme') {
+      baseNonConforme = prix;
+      maj2pct = up(baseNonConforme * 0.02);
+      majLabelHtml = 'Droit supp. non-respect art. 11 <small>(2 % sur totalité)</small>';
+      majLabelTxt = 'Droit supp. art. 11 (2 % sur totalité)';
+    } else if (modePaiement === 'partiel') {
+      baseNonConforme = Math.min(prix, Math.max(0, num('montantNonConforme')));
+      if (baseNonConforme > 0) {
+        maj2pct = up(baseNonConforme * 0.02);
+        majLabelHtml = 'Droit supp. part non conforme art. 11 <small>(2 % sur ' + fmtInt(baseNonConforme) + ')</small>';
+        majLabelTxt = 'Droit supp. art. 11 (2 % sur ' + fmtInt(baseNonConforme) + ')';
+      }
+    }
+  }
+
+  // Calcul échéance légale Enregistrement (J+30), pénalités & prescription décennale (Art. 232 CGI)
+  var dateActeStr = $('dateActeProv').value;
+  var dateDepotStr = $('dateDepotProv').value;
+  var baseDroitsEnreg = enreg + maj2pct;
+  var penEnreg = window.computeRetardPenalitesMaroc(dateActeStr, dateDepotStr, baseDroitsEnreg);
+
+  $('dateLimiteProv').value = penEnreg.dateLimiteStr;
+  var badgeDelaiProv = $('badgeDelaiProv');
+  var delaiProvNote = $('delaiProvNote');
+  if (penEnreg.isLate) {
+    badgeDelaiProv.className = 'badge badge-late';
+    badgeDelaiProv.textContent = '● Hors délai Enreg. (' + penEnreg.retardLabel + ')';
+    delaiProvNote.className = 'note late';
+    delaiProvNote.textContent = 'Retard Enreg. de ' + penEnreg.retardLabel + ' après l\'échéance du ' + penEnreg.dateLimiteStr + ' : pénalités Art. 184 & 208 appliquées.';
+    delaiProvNote.style.display = 'block';
+  } else if (penEnreg.isPrescrit) {
+    badgeDelaiProv.className = 'badge badge-ok';
+    badgeDelaiProv.textContent = '● Pénalités prescrites (> 10 ans)';
+    delaiProvNote.className = 'note prescrit';
+    delaiProvNote.textContent = 'Acte prescrit (> 10 ans — Art. 232 CGI) : exonération des pénalités et majorations de retard (seuls les droits simples restent exigibles, sous réserve de date certaine).';
+    delaiProvNote.style.display = 'block';
+  } else {
+    badgeDelaiProv.className = 'badge badge-ok';
+    badgeDelaiProv.textContent = '● Dans le délai légal';
+    delaiProvNote.style.display = 'none';
+  }
+
+  // Calcul des prêts / hypothèques depuis la section 3 (Crédit & hypothèques)
+  var hLines = [], hTot = 0;
+  for (var i = 1; i <= 4; i++) {
+    var m = num('pr' + i), r = hyp(m); hTot += r.d;
+    $('h' + i).textContent = m > 0 ? fmt(r.d) + ' · ' + r.t : '';
+    $('h' + i).className = 'hint' + (m > 0 ? ' on' : '');
+    if (m > 0) {
+      var roleSuffix = '';
+      if (i === 1 && aide) roleSuffix = ' — État / Daam Sakane';
+      else if (i === 1 && isMourabaha && !aide) roleSuffix = ' — Banque Mourabaha';
+      else if (i === 2 && isMourabaha && aide) roleSuffix = ' — Banque Mourabaha';
+      else if (i === 2 && aide && !isMourabaha) roleSuffix = ' — Banque';
+
+      hLines.push([
+        'Hypothèque rang ' + i + roleSuffix + ' <small>(' + fmtInt(m) + ')</small>',
+        r.d,
+        'Hypothèque rang ' + i + roleSuffix + ' (' + fmtInt(m) + ')'
+      ]);
+    }
+  }
+
+  // Calcul échéance légale Conservation Foncière (M+3) et pénalité ANCFCC (5% + 0,5%/mois)
+  var dateDepotCfStr = $('dateDepotCfProv').value;
+  var certifCalc = nbr * 100;
+  var cfRawCalc = prix * tC / 100 + certifCalc;
+  var cfBaseCalc = (isAncfccEligible && prix > 0 && tC > 0) ? (cfRawCalc < 500 ? 500 : up(cfRawCalc)) : 0;
+  var assiettePenaliteCf = isAncfccEligible ? (cfBaseCalc + hTot) : 0;
+  var penCf = window.computeRetardCfMaroc(dateActeStr, dateDepotCfStr, assiettePenaliteCf);
+
+  $('dateLimiteCfProv').value = penCf.dateLimiteStr;
+  var delaiCfProvNote = $('delaiCfProvNote');
+  if (isAncfccEligible && penCf.isLate) {
+    if (!penEnreg.isLate) {
+      badgeDelaiProv.className = 'badge badge-late';
+      badgeDelaiProv.textContent = '● Hors délai C.F. (' + penCf.retardLabel + ')';
+    }
+    delaiCfProvNote.className = 'note late';
+    delaiCfProvNote.textContent = 'Retard Conservation Foncière de ' + penCf.retardLabel + ' après l\'échéance des 3 mois (' + penCf.dateLimiteStr + ') : pénalité ANCFCC de ' + penCf.tauxPct.toFixed(2).replace(/\.00$/, '').replace('.', ',') + ' % appliquée.';
+    delaiCfProvNote.style.display = 'block';
+  } else {
+    delaiCfProvNote.style.display = 'none';
+  }
+
+  var tH = num('tauxHon'), rem = num('remiseHon');
+  var dLib = $('fraisDiversLib').value || "Frais et timbre", dVal = num('fraisDiversVal');
+  var total = 0, secs = [];
+
+  if (isMourabaha) {
+    // --- VOLET 1 : ACHAT PAR LA BANQUE PARTICIPATIVE ---
+    var certif1 = nbr * 100;
+    var cfRaw1 = prix * tC / 100 + certif1;
+    var cfBase1 = (prix > 0 && tC > 0) ? (cfRaw1 < 500 ? 500 : up(cfRaw1)) : 0;
+    var penCfActe1 = (penCf.isLate && cfBase1 > 0) ? Math.ceil(cfBase1 * (penCf.tauxPct / 100)) : 0;
+    var cfTot1 = cfBase1 + certif1 + penCfActe1;
+
+    var b1 = prix * tH / 100;
+    $('honorairesHT').value = b1.toFixed(2);
+    var hon1 = Math.max(0, b1 * (1 - rem / 100));
+    var tva1 = up(hon1 * 0.2);
+    $('honBadge').textContent = tH + " % + TVA 20 % (× 2 actes)";
+
+    var rActe1 = [
+      ['Enregistrement <small>(4 %, min. 100 DH)</small>', enreg, 'Enregistrement (4%)']
+    ];
+    if (maj2pct > 0) rActe1.push([majLabelHtml, maj2pct, majLabelTxt]);
+    if (penEnreg.totalPenalites > 0) {
+      rActe1.push([penEnreg.majAssietteLabel, penEnreg.majAssiette, penEnreg.majAssietteLabel, true]);
+      rActe1.push([penEnreg.penPaiementLabel, penEnreg.penPaiement, penEnreg.penPaiementLabel, true]);
+      rActe1.push([penEnreg.majMensuelleLabel, penEnreg.majMensuelle, penEnreg.majMensuelleLabel, true]);
+    }
+    rActe1.push(
+      ['Droit par acte', dpa, 'Droit par acte'],
+      ['Droits ad valorem <small>(' + tC + ' % + 100 × ' + nbr + ' TF)</small>', cfBase1, 'Droits ad valorem (' + tC + '% + 100×' + nbr + ')'],
+      ['Certificats de propriété <small>(' + nbr + ' × 100)</small>', certif1, 'Certificats de propriété (' + nbr + ')']
+    );
+    if (penCfActe1 > 0) {
+      rActe1.push([penCf.penaliteCfLabel, penCfActe1, penCf.penaliteCfLabel, true]);
+    }
+    rActe1.push(
+      ['Honoraires Banque H.T. <small>(' + tH + ' %)</small>', hon1, 'Honoraires Banque H.T. (' + tH + '%)'],
+      ['TVA sur honoraires (20 %)', tva1, 'TVA Banque (20%)'],
+      [esc(dLib), dVal, dLib]
+    );
+    var sousTotalBanque = enreg + maj2pct + penEnreg.totalPenalites + dpa + cfTot1 + hon1 + tva1 + dVal;
+
+    // --- VOLET 2 : ACHAT DÉFINITIF PAR LE CLIENT (REVENTE MOURABAHA) ---
+    var enreg2 = 200; // Droit fixe Art. 135-II-15° CGI
+    var dpa2 = 200;   // Droit par acte
+    var droitMourabaha = 1000; // Droit ANCFCC Mourabaha
+    var certif2 = nbr * 100;
+    var penCfActe2 = (penCf.isLate && hTot > 0) ? Math.ceil(hTot * (penCf.tauxPct / 100)) : 0;
+
+    var hon2 = hon1;
+    var tva2 = tva1;
+    var rActe2 = [
+      ['Enregistrement fixe <small>(Art. 135-II-15° CGI)</small>', enreg2, 'Enregistrement fixe (200 DH)'],
+      ['Droit par acte', dpa2, 'Droit par acte (200 DH)'],
+      ['Mourabaha <small>(ANCFCC fixe)</small>', droitMourabaha, 'Mourabaha (1 000 DH)'],
+      ['Certificats de propriété <small>(' + nbr + ' × 100)</small>', certif2, 'Certificats de propriété (' + nbr + ')']
+    ].concat(hLines);
+    if (penCfActe2 > 0) {
+      rActe2.push([penCf.penaliteCfLabel + ' (Hypothèque)', penCfActe2, penCf.penaliteCfLabel + ' (Hypothèque)', true]);
+    }
+    rActe2.push(
+      ['Honoraires Client H.T. <small>(' + tH + ' %)</small>', hon2, 'Honoraires Client H.T. (' + tH + '%)'],
+      ['TVA sur honoraires (20 %)', tva2, 'TVA Client (20%)'],
+      [esc(dLib), dVal, dLib]
+    );
+    var sousTotalClient = enreg2 + dpa2 + droitMourabaha + certif2 + hTot + penCfActe2 + hon2 + tva2 + dVal;
+
+    total = sousTotalBanque + sousTotalClient;
+    secs = [
+      { t: '1. Achat par la Banque (1er Acte)', r: rActe1, st: ['Sous-total Acte Banque', sousTotalBanque] },
+      { t: '2. Achat définitif par le Client (Revente Mourabaha)', r: rActe2, st: ['Sous-total Acte Client', sousTotalClient] }
+    ];
+  } else {
+    // --- CALCUL STANDARD (1 SEUL ACTE) ---
+    var cfTot = 0;
+    var cfSecLines = [];
+    if (isAncfccEligible) {
+      var certif = nbr * 100;
+      var cfRaw = prix * tC / 100 + certif;
+      var cfBase = (prix > 0 && tC > 0) ? (cfRaw < 500 ? 500 : up(cfRaw)) : 0;
+
+      cfTot = cfBase + certif + hTot + penCf.penaliteCf;
+      cfSecLines = [
+        ['Droits ad valorem <small>(' + tC + ' % + 100 × ' + nbr + ' TF)</small>', cfBase, 'Droits ad valorem (' + tC + '% + 100×' + nbr + ')'],
+        ['Certificats de propriété <small>(' + nbr + ' × 100)</small>', certif, 'Certificats de propriété (' + nbr + ')']
+      ].concat(hLines);
+      if (penCf.penaliteCf > 0) {
+        cfSecLines.push([penCf.penaliteCfLabel, penCf.penaliteCf, penCf.penaliteCfLabel, true]);
+      }
+    }
+
+    var hon, tva, honLbl, tvaLbl;
+    if(prix>0&&prix<=300000&&aide){
+      $('honorairesHT').value="2500.00"; hon=Math.max(0,2500*(1-rem/100)); tva=0;
+      $('honBadge').textContent="Forfait 2 500 DH, sans TVA";
+      honLbl='Honoraires forfaitaires <small>(exonéré TVA)</small>'; tvaLbl='TVA sur honoraires (néant)';
+    } else {
+      var b=prix*tH/100; $('honorairesHT').value=b.toFixed(2);
+      hon=Math.max(0,b*(1-rem/100)); tva=up(hon*0.2);
+      $('honBadge').textContent=tH+" % + TVA 20 %";
+      honLbl='Honoraires nets H.T. <small>('+tH+' %)</small>'; tvaLbl='TVA sur honoraires (20 %)';
+    }
+    var dpaLbl=aide?"Droits de timbre & DPA":"Droit par acte";
+    
+    total = enreg + maj2pct + penEnreg.totalPenalites + dpa + cfTot + hon + tva + dVal + fraisGreffe + fraisPub;
+
+    var rEnregList = [['Enregistrement <small>('+tE+' %, min. 100 DH)</small>', enreg, 'Enregistrement ('+tE+'%)']];
+    if(maj2pct > 0){
+      rEnregList.push([majLabelHtml, maj2pct, majLabelTxt]);
+    }
+    if(penEnreg.totalPenalites > 0){
+      rEnregList.push([penEnreg.majAssietteLabel, penEnreg.majAssiette, penEnreg.majAssietteLabel, true]);
+      rEnregList.push([penEnreg.penPaiementLabel, penEnreg.penPaiement, penEnreg.penPaiementLabel, true]);
+      rEnregList.push([penEnreg.majMensuelleLabel, penEnreg.majMensuelle, penEnreg.majMensuelleLabel, true]);
+    }
+    rEnregList.push([dpaLbl, dpa, dpaLbl]);
+    
+    if(fraisGreffe > 0) {
+      rEnregList.push(['Frais de Greffe Tribunal', fraisGreffe, 'Frais de Greffe Tribunal']);
+    }
+    if(fraisPub > 0) {
+      rEnregList.push(['Annonces Légales (JAL & B.O.)', fraisPub, 'Annonces Légales (JAL & B.O.)']);
+    }
+
+    secs = [
+      {t:'I. Administration fiscale (CGI 2026)', r: rEnregList}
+    ];
+
+    if (isAncfccEligible) {
+      secs.push({t:'II. Conservation foncière (ANCFCC)', r: cfSecLines, st:['Sous-total C.F.', cfTot]});
+    }
+
+    secs.push({t: isAncfccEligible ? 'III. Étude notariale' : 'II. Étude notariale', r: [
+      [honLbl,hon,'Honoraires H.T.'],[tvaLbl,tva,'TVA'],[esc(dLib),dVal,dLib]]});
+  }
+
+  // Affichage conditionnel de Échéance Enreg. et Échéance C.F. uniquement en cas de retard
+  var showEcheance = Boolean(dateActeStr && penEnreg.isLate);
+  var showEcheanceCf = Boolean(dateActeStr && isAncfccEligible && penCf.isLate);
+  var html='', txt="⚖️ *CALCUL DES FRAIS (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+(showEcheance?"Échéance Enreg. (J+30) : "+penEnreg.dateLimiteStr+"\n":"")+(showEcheanceCf?"Échéance C.F. (M+3) : "+penCf.dateLimiteStr+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
+  secs.forEach(function(s){
+    html+='<div class="sec">'+s.t+'</div>'; txt+="\n*"+s.t+"*\n";
+    s.r.forEach(function(x){
+      var cls = x[3] ? 'result-line danger-line' : 'result-line';
+      html+='<div class="'+cls+'"><span>'+x[0]+'</span><span>'+fmt(x[1])+'</span></div>';
+      txt+="• "+x[2]+" : "+fmt(x[1])+"\n";
+    });
+    if(s.st){ html+='<div class="result-line subtotal"><span>'+s.st[0]+'</span><span>'+fmt(s.st[1])+'</span></div>'; txt+="• "+s.st[0]+" : *"+fmt(s.st[1])+"*\n"; }
+  });
+  txt+="\n💰 *TOTAL PROVISION : "+fmt(total)+"*\n\n_Développé par Hatim DALIL_";
+  recap=txt; $('lines').innerHTML=html;
+  lastData={
+    client:client,
+    tf:tf,
+    prix:prix,
+    echeance:showEcheance?penEnreg.dateLimiteStr:'',
+    echeanceCf:showEcheanceCf?penCf.dateLimiteStr:'',
+    total:total,
+    secs:secs,
+    isMourabaha:isMourabaha
+  };
+
+  $('mClient').innerHTML='Client : <b>'+esc(client||'Non renseigné')+'</b>';
+  $('mTf').innerHTML='Réf. : <b>'+esc(tf||'—')+'</b>';
+  $('mPrix').innerHTML="Montant de base : <b>"+fmt(prix)+'</b>';
+  var metaEchParts = [];
+  if(showEcheance) metaEchParts.push('Échéance Enreg. : <b>'+esc(penEnreg.dateLimiteStr)+'</b>');
+  if(showEcheanceCf) metaEchParts.push('Échéance C.F. : <b>'+esc(penCf.dateLimiteStr)+'</b>');
+  $('mEcheance').innerHTML = metaEchParts.join(' · ');
+  $('totalGeneral').textContent=fmt(total); $('barTotal').textContent=fmt(total);
+  $('subSummary').textContent = prix>0 ? "Soit "+(total/prix*100).toFixed(2).replace('.',',')+" % de la base" : "";
+  $('pdate').textContent="Établie le "+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+}
+
+function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){t.classList.remove('show')},2200); }
+window.toast = toast;
+
+function reset(){
+  var today = new Date().toISOString().split('T')[0];
+  ['clientInfo','titreFoncier'].forEach(function(i){$(i).value=''});
+  $('dateActeProv').value = today;
+  $('dateDepotProv').value = today;
+<<<<<<< HEAD
+  $('dateDepotCfProv').value = today;
+=======
+>>>>>>> 796f44a2745c0fa30193c4753606fecc222cb4e6
+  $('nbrTf').value='1'; $('prixVente').value='500 000,00'; $('tauxCf').value='1.5';
+  $('tauxHon').value='1'; $('remiseHon').value='0'; $('aideLogement').checked=false;
+  $('modePaiement').value='total';
+  $('montantNonConforme').value='0,00';
+  $('partielBox').style.display='none';
+  $('fraisGreffeVal').value='350';
+  $('fraisPubVal').value='700';
+  setTaux('4');
+  $('daamNote').style.display='none';
+  $('paiementNote').style.display='none';
+  resetDefaults(); noRegime(); calc();
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  var today = new Date().toISOString().split('T')[0];
+  $('dateActeProv').value = today;
+  $('dateDepotProv').value = today;
+  $('dateDepotCfProv').value = today;
+  $('dateActeProv').addEventListener('change', calc);
+  $('dateDepotProv').addEventListener('change', calc);
+  $('dateDepotCfProv').addEventListener('change', calc);
+
+  $('prixVente').addEventListener('input',onPrix);
+  $('prixVente').addEventListener('blur',function(){ var v=num('prixVente'),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; });
+  ['pr1','pr2','pr3','pr4'].forEach(function(id){ $(id).addEventListener('blur',function(){ var v=num(id),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; }); $(id).addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); }); });
+  $('prixVente').addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); });
+
+  $('aideLogement').addEventListener('change',onAide);
+  $('modePaiement').addEventListener('change',function(){
+    var isPartiel = (this.value === 'partiel');
+    $('partielBox').style.display = isPartiel ? 'flex' : 'none';
+    if(isPartiel) $('montantNonConforme').focus();
+    calc();
+  });
+  $('montantNonConforme').addEventListener('input',calc);
+  $('montantNonConforme').addEventListener('blur',function(){ var v=num('montantNonConforme'),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; });
+  $('montantNonConforme').addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); });
+  document.querySelectorAll('.ci,#clientInfo,#titreFoncier,#nbrTf,#tauxCf,#fraisGreffeVal,#fraisPubVal').forEach(function(e){ e.addEventListener('input',calc); });
+  $('tauxEnreg').addEventListener('change',function(){
+    var c=this.value==='custom'; $('customBox').style.display=c?'flex':'none';
+    if(c) $('tauxCustom').focus();
+    
+    var isMourabaha = (this.value === 'mourabaha');
+    if(isMourabaha){
+      $('tauxHon').value = '0.5';
+      $('fraisDiversLib').value = 'Frais et timbre';
+      $('fraisDiversVal').value = '2700';
+      $('detailsCredit').open = true;
+      if($('aideLogement').checked && num('prixVente') <= 700000){
+        applyAide(num('prixVente'));
+      } else {
+        $('regimeBadge').textContent = 'Mourabaha (2 actes)';
+      }
+    } else {
+      if($('tauxHon').value === '0.5') $('tauxHon').value = '1';
+      if($('aideLogement').checked && num('prixVente') <= 700000){
+        applyAide(num('prixVente'));
+      } else {
+        noRegime();
+      }
+    }
+
+    var isHabitation = (this.value === '4' || this.value === '3' || isMourabaha);
+    if(!isHabitation){
+      $('aideLogement').checked = false;
+      noRegime();
+    }
+    calc();
+  });
+  $('tauxCustom').addEventListener('input',calc);
+  $('btnDetail').addEventListener('click',function(){ $('note').scrollIntoView({behavior:'smooth'}); });
+  $('btnPrint').addEventListener('click',printNote);
+  $('btnPdf').addEventListener('click',exportPdf);
+  $('btnReset').addEventListener('click',reset);
+  $('btnShare').addEventListener('click',function(){
+    if(!recap) calc();
+    $('provWaPreview').value = recap;
+    $('prov-wa-modal').style.display = 'flex';
+  });
+  $('provWaClose').addEventListener('click',function(){ $('prov-wa-modal').style.display = 'none'; });
+  $('provWaCopy').addEventListener('click',function(){
+    var txt = $('provWaPreview'); txt.select();
+    if(navigator.clipboard) navigator.clipboard.writeText(txt.value);
+    toast('Décompte copié dans le presse-papiers !');
+  });
+  $('provWaSend').addEventListener('click',function(){
+    var phone = $('provWaPhone').value.replace(/\D/g,'');
+    var text = encodeURIComponent($('provWaPreview').value);
+    var url = phone ? 'https://wa.me/'+phone+'?text='+text : 'https://wa.me/?text='+text;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    $('prov-wa-modal').style.display = 'none';
+  });
+  resetDefaults(); noRegime(); calc();
+});
+
+})();
+</script>
+
+<script>
+        // =====================================================================
+        // 1. STRUCTURE MATRICIELLE VIDE PAR DÉFAUT (PRÊTE POUR IMPORT EXCEL)
+        // =====================================================================
+        function buildEmptyDefaultMatrix() {
+            return {
+                2026: { 2026: 1.000 },
+                2025: { 2025: 1.000 },
+                2024: { 2024: 1.000 },
+                2023: { 2023: 1.000 },
+                2022: { 2022: 1.000 }
+            };
+        }
+
+        let coefMatrix = JSON.parse(localStorage.getItem('tpi_coef_matrix_v2')) || buildEmptyDefaultMatrix();
+
+        // =====================================================================
+        // 2. INITIALISATION
+        // =====================================================================
+        window.onload = () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date_acte').value = today;
+            document.getElementById('date_paiement').value = today;
+            document.getElementById('multi_date_acte').value = today;
+            document.getElementById('multi_date_paiement').value = today;
+
+            populateSaleYearSelects();
+            populateAcquisitionSelectsForMain();
+            populateAcquisitionSelectForMultiInv();
+            initMultiTable4Rows();
+
+            calculateMultiAll();
+            calculateAll();
+            renderCoefficients();
+
+            setInterval(updateClock, 1000);
+            updateClock();
+        };
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR');
+        }
+
+        function switchTab(e, tabName) {
+            document.querySelectorAll('#app-tpi .view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#app-tpi .tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            e.currentTarget.classList.add('active');
+
+            const tpiBar = document.getElementById('tpi-bar');
+            if (tabName === 'coefficients') {
+                tpiBar.style.visibility = 'hidden';
+            } else {
+                tpiBar.style.visibility = 'visible';
+                if (tabName === 'calculateur') calculateAll();
+                if (tabName === 'multi') calculateMultiAll();
+            }
+        }
+
+        function scrollToTpiDetail() {
+            const activeTab = document.querySelector('#app-tpi .view-section.active');
+            if (!activeTab) return;
+            const target = activeTab.id === 'tab-multi'
+                ? document.getElementById('tpi-detail-multi')
+                : document.getElementById('tpi-detail-single');
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function printTpi() {
+            const old = document.title;
+            document.title = 'Liquidation_TPI_' + new Date().toISOString().slice(0, 10);
+            try { window.print(); } catch (e) { alert('Impression indisponible : utilisez le bouton PDF.'); }
+            setTimeout(function () { document.title = old; }, 1500);
+        }
+
+        function populateSaleYearSelects() {
+            const saleYears = Object.keys(coefMatrix).sort((a, b) => b - a);
+            ['annee_vente', 'multi_annee_vente', 'admin-sale-year'].forEach(id => {
+                const sel = document.getElementById(id);
+                const prevVal = sel.value;
+                sel.innerHTML = saleYears.map(y => `<option value="${y}">${y}</option>`).join('');
+                if (prevVal && saleYears.includes(prevVal)) sel.value = prevVal;
+            });
+        }
+
+        function populateAcquisitionSelectsForMain() {
+            const saleYear = document.getElementById('annee_vente').value;
+            const tableForYear = coefMatrix[saleYear] || {};
+            const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
+
+            ['annee_acquisition', 'annee_investissement'].forEach(id => {
+                const sel = document.getElementById(id);
+                const prev = sel.value;
+                sel.innerHTML = acqYears.map(y => `<option value="${y}">${y} — Coef: ${tableForYear[y].toFixed(3)}</option>`).join('');
+                if (prev && acqYears.includes(prev)) sel.value = prev;
+            });
+        }
+
+        function onAnneeVenteChange() {
+            populateAcquisitionSelectsForMain();
+            calculateAll();
+        }
+
+        function onDateActeChange() {
+            const dateActeStr = document.getElementById('date_acte').value;
+            if (dateActeStr) {
+                const yr = new Date(dateActeStr).getFullYear().toString();
+                if (coefMatrix[yr]) {
+                    document.getElementById('annee_vente').value = yr;
+                    populateAcquisitionSelectsForMain();
+                }
+            }
+            calculateAll();
+        }
+
+        // =====================================================================
+        // 3. MOTEUR DE LIQUIDATION & PÉNALITÉS (ART. 184 & ART. 208 CGI)
+        // =====================================================================
+        function formatDH(val) {
+            return new Intl.NumberFormat('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' DH';
+        }
+
+        function computeTaxLiquidation({ prixCession, prixActualise, invActualise, tauxIRPercent, isHabitationPrincipale, include5Pct }) {
+            const frais15 = prixActualise * 0.15;
+            const coutTotal = prixActualise + frais15 + invActualise;
+            const profit = Math.max(0, prixCession - coutTotal);
+
+            const tauxIR = tauxIRPercent / 100;
+            let droitTaux = profit * tauxIR;
+            let cm3Pct = prixCession * 0.03;
+            let cm5Pct = prixCession * 0.05;
+            let droitExigibleBrut = 0;
+            let labelRetenu = '';
+            let winnerKey = '';
+
+            if (isHabitationPrincipale) {
+                droitTaux = 0;
+                cm3Pct = prixCession > 4000000 ? (prixCession - 4000000) * 0.03 : 0;
+                droitExigibleBrut = cm3Pct;
+                winnerKey = 'cm3';
+                labelRetenu = 'Exonération Habitation Principale (> 4 MDH à 3%)';
+            } else {
+                const candidates = [
+                    { key: 'taux', name: `Droit sur profit (${tauxIRPercent}%)`, val: droitTaux },
+                    { key: 'cm3', name: 'Cotisation Minimale (3%)', val: cm3Pct }
+                ];
+                if (include5Pct) {
+                    candidates.push({ key: 'cm5', name: 'Seuil 5% (Prix de vente × 5%)', val: cm5Pct });
+                }
+
+                let winner = candidates[0];
+                for (const c of candidates) {
+                    if (c.val >= winner.val) winner = c;
+                }
+
+                droitExigibleBrut = winner.val;
+                winnerKey = winner.key;
+                labelRetenu = `Base retenue : ${winner.name}`;
+            }
+
+            const droitExigible = droitExigibleBrut > 0 ? Math.ceil(droitExigibleBrut) : 0;
+            const enLettres = nombreEnLettres(droitExigible) + (droitExigible > 1 ? ' DIRHAMS' : ' DIRHAM');
+
+            return {
+                frais15,
+                coutTotal,
+                profit,
+                droitTaux,
+                cm3Pct,
+                cm5Pct,
+                droitExigible,
+                winnerKey,
+                labelRetenu,
+                enLettres
+            };
+        }
+
+        function computeDelayAndPenalties(dateActeStr, datePaiementStr, droitExigible) {
+            return window.computeRetardPenalitesMaroc(dateActeStr, datePaiementStr, droitExigible);
+        }
+
+        let singleState = {};
+        let multiState = {};
+
+        // --- CALCUL ONGLET 1 : CALCUL PRINCIPAL ---
+        function calculateAll() {
+            const saleYear = document.getElementById('annee_vente').value;
+            const tableForYear = coefMatrix[saleYear] || {};
+
+            const prixCession = parseFloat(document.getElementById('prix_cession').value) || 0;
+            const prixAcq = parseFloat(document.getElementById('prix_acquisition').value) || 0;
+            const inv = parseFloat(document.getElementById('investissement').value) || 0;
+
+            const anneeAcq = document.getElementById('annee_acquisition').value;
+            const anneeInv = document.getElementById('annee_investissement').value;
+            const coefAcq = tableForYear[anneeAcq] || 1;
+            const coefInv = tableForYear[anneeInv] || 1;
+
+            document.getElementById('disp-coef-acq').textContent = coefAcq.toFixed(3);
+            document.getElementById('disp-coef-inv').textContent = coefInv.toFixed(3);
+
+            const prixActualise = prixAcq * coefAcq;
+            const invActualise = inv * coefInv;
+            const tauxIRPercent = parseInt(document.getElementById('taux_ir').value, 10);
+            const isHabitationPrincipale = document.getElementById('chk_habitation_principale').checked;
+            const include5Pct = document.getElementById('chk_include_5pct').checked;
+
+            const liq = computeTaxLiquidation({ prixCession, prixActualise, invActualise, tauxIRPercent, isHabitationPrincipale, include5Pct });
+            const pen = computeDelayAndPenalties(document.getElementById('date_acte').value, document.getElementById('date_paiement').value, liq.droitExigible);
+
+            document.getElementById('lbl-taux-ir').textContent = tauxIRPercent;
+            document.getElementById('res-prix-act').textContent = formatDH(prixActualise);
+            document.getElementById('res-frais-15').textContent = formatDH(liq.frais15);
+            document.getElementById('res-inv-act').textContent = formatDH(invActualise);
+            document.getElementById('res-cout-total').textContent = formatDH(liq.coutTotal);
+            document.getElementById('res-profit').textContent = formatDH(liq.profit);
+            document.getElementById('res-droit-taux').textContent = formatDH(liq.droitTaux);
+            document.getElementById('res-cm-3').textContent = formatDH(liq.cm3Pct);
+            document.getElementById('res-cm-5').textContent = formatDH(liq.cm5Pct);
+            document.getElementById('lbl-base-retenue').textContent = liq.labelRetenu;
+            document.getElementById('res-droit-exigible').textContent = liq.droitExigible.toLocaleString('fr-MA') + ' DH';
+            document.getElementById('res-en-lettres').textContent = liq.enLettres;
+
+            const boxDroit = document.getElementById('box-droit-taux');
+            const boxCM3 = document.getElementById('box-cm-3');
+            const boxCM5 = document.getElementById('box-cm-5');
+            boxDroit.classList.remove('winner', 'dimmed');
+            boxCM3.classList.remove('winner', 'dimmed');
+            boxCM5.classList.remove('winner', 'dimmed');
+            if (!include5Pct) boxCM5.classList.add('dimmed');
+            if (liq.droitExigible > 0) {
+                if (liq.winnerKey === 'taux') boxDroit.classList.add('winner');
+                if (liq.winnerKey === 'cm3') boxCM3.classList.add('winner');
+                if (liq.winnerKey === 'cm5') boxCM5.classList.add('winner');
+            }
+
+            document.getElementById('date_limite').value = pen.dateLimiteStr;
+            document.getElementById('retard_jours').textContent = pen.retardLabel;
+            document.getElementById('lbl-maj-assiette').textContent = pen.majAssietteLabel;
+            document.getElementById('res-maj-assiette').textContent = formatDH(pen.majAssiette);
+            document.getElementById('lbl-pen-paiement').textContent = pen.penPaiementLabel;
+            document.getElementById('res-pen-paiement').textContent = formatDH(pen.penPaiement);
+            document.getElementById('lbl-maj-mensuelle').textContent = pen.majMensuelleLabel;
+            document.getElementById('res-maj-mensuelle').textContent = formatDH(pen.majMensuelle);
+            document.getElementById('res-total-payer').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+
+            if (document.getElementById('tab-calculateur').classList.contains('active')) {
+                document.getElementById('tpiBarTotal').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+            }
+
+            const badge = document.getElementById('badge-delai');
+            badge.className = pen.isLate ? 'badge badge-late' : 'badge badge-ok';
+            badge.textContent = pen.isLate ? '● Hors délai (Majorations)' : (pen.isPrescrit ? '● Prescrit (> 10 ans)' : '● Dans le délai légal (30j)');
+
+            singleState = {
+                mode: 'single',
+                saleYear,
+                prixCession,
+                prixActualise,
+                acqLabel: `Prix d'acquisition historique (${anneeAcq || saleYear} × Coef. ${coefAcq.toFixed(3)})`,
+                invActualise,
+                invLabel: `Dépenses d'investissement réévaluées (${anneeInv || saleYear} × Coef. ${coefInv.toFixed(3)})`,
+                tauxIR: tauxIRPercent,
+                include5Pct,
+                ...liq,
+                ...pen
+            };
+        }
+
+        function resetForm() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('prix_cession').value = 0;
+            document.getElementById('prix_acquisition').value = 0;
+            document.getElementById('investissement').value = 0;
+            document.getElementById('chk_habitation_principale').checked = false;
+            document.getElementById('chk_include_5pct').checked = true;
+            document.getElementById('taux_ir').value = '20';
+            document.getElementById('date_acte').value = today;
+            document.getElementById('date_paiement').value = today;
+            onDateActeChange();
+        }
+
+        // =====================================================================
+        // 4. ONGLET 2 : ACQUISITIONS MULTIPLES (4 LIGNES + AJOUT DYNAMIQUE)
+        // =====================================================================
+        let multiRowCounter = 0;
+
+        function getMultiAcqYearOptionsHTML() {
+            const saleYear = document.getElementById('multi_annee_vente').value;
+            const tableForYear = coefMatrix[saleYear] || {};
+            const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
+            return acqYears.map(y => `<option value="${y}">${y}</option>`).join('');
+        }
+
+        function populateAcquisitionSelectForMultiInv() {
+            const saleYear = document.getElementById('multi_annee_vente').value;
+            const tableForYear = coefMatrix[saleYear] || {};
+            const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
+            const sel = document.getElementById('multi_annee_investissement');
+            const prev = sel.value;
+            sel.innerHTML = acqYears.map(y => `<option value="${y}">${y} — Coef: ${tableForYear[y].toFixed(3)}</option>`).join('');
+            if (prev && acqYears.includes(prev)) sel.value = prev;
+        }
+
+        function initMultiTable4Rows() {
+            const tbody = document.getElementById('multi-rows');
+            tbody.innerHTML = '';
+            multiRowCounter = 0;
+            for (let i = 0; i < 4; i++) {
+                addMultiRow(false);
+            }
+            renumberMultiRows();
+        }
+
+        function addMultiRow(recalc = true) {
+            multiRowCounter++;
+            const rowId = multiRowCounter;
+            const tbody = document.getElementById('multi-rows');
+            const tr = document.createElement('tr');
+            tr.id = `multi-tr-${rowId}`;
+            tr.dataset.rowId = rowId;
+
+            tr.innerHTML = `
+                <td class="row-num-cell" style="font-weight:600; color:var(--cds-brand-800);">#1</td>
+                <td>
+                    <input type="number" id="m-prix-${rowId}" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()" style="padding-right:0.65rem;">
+                </td>
+                <td>
+                    <select id="m-year-${rowId}" onchange="calculateMultiAll()">${getMultiAcqYearOptionsHTML()}</select>
+                </td>
+                <td id="m-coef-${rowId}" class="mono" style="font-size:0.8rem;">1.000</td>
+                <td id="m-act-${rowId}" class="mono" style="text-align:right; font-weight:600;">0,00 DH</td>
+                <td style="text-align:center;">
+                    <button type="button" class="btn btn-ghost btn-del-row" onclick="removeMultiRow(${rowId})" title="Supprimer cette ligne" style="height:30px; padding:0 0.45rem; color:var(--cds-danger-700);">✕</button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+            renumberMultiRows();
+            if (recalc) calculateMultiAll();
+        }
+
+        function removeMultiRow(rowId) {
+            const tbody = document.getElementById('multi-rows');
+            if (tbody.children.length <= 1) return;
+            const tr = document.getElementById(`multi-tr-${rowId}`);
+            if (tr) tr.remove();
+            renumberMultiRows();
+            calculateMultiAll();
+        }
+
+        function renumberMultiRows() {
+            const rows = document.querySelectorAll('#multi-rows tr');
+            rows.forEach((tr, idx) => {
+                tr.querySelector('.row-num-cell').textContent = `Acq. #${idx + 1}`;
+                const delBtn = tr.querySelector('.btn-del-row');
+                if (delBtn) {
+                    delBtn.style.visibility = rows.length > 1 ? 'visible' : 'hidden';
+                }
+            });
+            document.getElementById('multi-count-lbl').textContent = rows.length;
+        }
+
+        function onMultiAnneeVenteChange() {
+            const saleYear = document.getElementById('multi_annee_vente').value;
+            const tableForYear = coefMatrix[saleYear] || {};
+            const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
+            const yearOpts = acqYears.map(y => `<option value="${y}">${y}</option>`).join('');
+
+            document.querySelectorAll('#multi-rows tr').forEach(tr => {
+                const rowId = tr.dataset.rowId;
+                const sel = document.getElementById(`m-year-${rowId}`);
+                const prev = sel.value;
+                sel.innerHTML = yearOpts;
+                if (prev && acqYears.includes(prev)) sel.value = prev;
+            });
+
+            populateAcquisitionSelectForMultiInv();
+            calculateMultiAll();
+        }
+
+        function onMultiDateActeChange() {
+            const dateActeStr = document.getElementById('multi_date_acte').value;
+            if (dateActeStr) {
+                const yr = new Date(dateActeStr).getFullYear().toString();
+                if (coefMatrix[yr]) {
+                    document.getElementById('multi_annee_vente').value = yr;
+                    onMultiAnneeVenteChange();
+                    return;
+                }
+            }
+            calculateMultiAll();
+        }
+
+        function calculateMultiAll() {
+            const saleYear = document.getElementById('multi_annee_vente').value;
+            const tableForYear = coefMatrix[saleYear] || {};
+
+            let sumBrut = 0;
+            let sumAct = 0;
+            const tranchesDetails = [];
+
+            document.querySelectorAll('#multi-rows tr').forEach((tr, index) => {
+                const rowId = tr.dataset.rowId;
+                const val = parseFloat(document.getElementById(`m-prix-${rowId}`).value) || 0;
+                const yr = document.getElementById(`m-year-${rowId}`).value;
+                const coef = tableForYear[yr] || 1;
+                const act = val * coef;
+
+                document.getElementById(`m-coef-${rowId}`).textContent = coef.toFixed(3);
+                document.getElementById(`m-act-${rowId}`).textContent = formatDH(act);
+
+                sumBrut += val;
+                sumAct += act;
+
+                if (val > 0) {
+                    tranchesDetails.push({
+                        label: `Acquisition / Quittance #${index + 1}`,
+                        brut: val,
+                        year: yr,
+                        coef,
+                        act
+                    });
+                }
+            });
+
+            document.getElementById('multi-sum-brut').textContent = formatDH(sumBrut);
+            document.getElementById('multi-sum-act').textContent = formatDH(sumAct);
+
+            const inv = parseFloat(document.getElementById('multi_investissement').value) || 0;
+            const anneeInv = document.getElementById('multi_annee_investissement').value;
+            const coefInv = tableForYear[anneeInv] || 1;
+            document.getElementById('multi-disp-coef-inv').textContent = coefInv.toFixed(3);
+            const invActualise = inv * coefInv;
+
+            const prixCession = parseFloat(document.getElementById('multi_prix_cession').value) || 0;
+            const tauxIRPercent = parseInt(document.getElementById('multi_taux_ir').value, 10);
+            const isHabitationPrincipale = document.getElementById('multi_chk_habitation').checked;
+            const include5Pct = document.getElementById('multi_chk_include_5pct').checked;
+
+            const liq = computeTaxLiquidation({
+                prixCession,
+                prixActualise: sumAct,
+                invActualise,
+                tauxIRPercent,
+                isHabitationPrincipale,
+                include5Pct
+            });
+
+            const pen = computeDelayAndPenalties(
+                document.getElementById('multi_date_acte').value,
+                document.getElementById('multi_date_paiement').value,
+                liq.droitExigible
+            );
+
+            document.getElementById('multi-lbl-taux-ir').textContent = tauxIRPercent;
+            document.getElementById('multi-res-prix-act').textContent = formatDH(sumAct);
+            document.getElementById('multi-res-frais-15').textContent = formatDH(liq.frais15);
+            document.getElementById('multi-res-inv-act').textContent = formatDH(invActualise);
+            document.getElementById('multi-res-cout-total').textContent = formatDH(liq.coutTotal);
+            document.getElementById('multi-res-profit').textContent = formatDH(liq.profit);
+            document.getElementById('multi-res-droit-taux').textContent = formatDH(liq.droitTaux);
+            document.getElementById('multi-res-cm-3').textContent = formatDH(liq.cm3Pct);
+            document.getElementById('multi-res-cm-5').textContent = formatDH(liq.cm5Pct);
+            document.getElementById('multi-lbl-base-retenue').textContent = liq.labelRetenu;
+            document.getElementById('multi-res-droit-exigible').textContent = liq.droitExigible.toLocaleString('fr-MA') + ' DH';
+            document.getElementById('multi-res-en-lettres').textContent = liq.enLettres;
+
+            const boxDroit = document.getElementById('multi-box-droit-taux');
+            const boxCM3 = document.getElementById('multi-box-cm-3');
+            const boxCM5 = document.getElementById('multi-box-cm-5');
+            boxDroit.classList.remove('winner', 'dimmed');
+            boxCM3.classList.remove('winner', 'dimmed');
+            boxCM5.classList.remove('winner', 'dimmed');
+            if (!include5Pct) boxCM5.classList.add('dimmed');
+            if (liq.droitExigible > 0) {
+                if (liq.winnerKey === 'taux') boxDroit.classList.add('winner');
+                if (liq.winnerKey === 'cm3') boxCM3.classList.add('winner');
+                if (liq.winnerKey === 'cm5') boxCM5.classList.add('winner');
+            }
+
+            document.getElementById('multi_date_limite').value = pen.dateLimiteStr;
+            document.getElementById('multi_retard_jours').textContent = pen.retardLabel;
+            document.getElementById('multi-lbl-maj-assiette').textContent = pen.majAssietteLabel;
+            document.getElementById('multi-res-maj-assiette').textContent = formatDH(pen.majAssiette);
+            document.getElementById('multi-lbl-pen-paiement').textContent = pen.penPaiementLabel;
+            document.getElementById('multi-res-pen-paiement').textContent = formatDH(pen.penPaiement);
+            document.getElementById('multi-lbl-maj-mensuelle').textContent = pen.majMensuelleLabel;
+            document.getElementById('multi-res-maj-mensuelle').textContent = formatDH(pen.majMensuelle);
+            document.getElementById('multi-res-total-payer').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+
+            if (document.getElementById('tab-multi').classList.contains('active')) {
+                document.getElementById('tpiBarTotal').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+            }
+
+            const badge = document.getElementById('multi-badge-delai');
+            badge.className = pen.isLate ? 'badge badge-late' : 'badge badge-ok';
+            badge.textContent = pen.isLate ? '● Hors délai (Majorations)' : (pen.isPrescrit ? '● Prescrit (> 10 ans)' : '● Dans le délai légal (30j)');
+
+            multiState = {
+                mode: 'multi',
+                saleYear,
+                prixCession,
+                prixActualise: sumAct,
+                acqLabel: `Somme des acquisitions réévaluées (${document.querySelectorAll('#multi-rows tr').length} tranches)`,
+                invActualise,
+                invLabel: `Dépenses d'investissement réévaluées (${anneeInv || saleYear} × Coef. ${coefInv.toFixed(3)})`,
+                tauxIR: tauxIRPercent,
+                include5Pct,
+                tranchesDetails,
+                ...liq,
+                ...pen
+            };
+        }
+
+        function resetMultiForm() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('multi_prix_cession').value = 0;
+            document.getElementById('multi_investissement').value = 0;
+            document.getElementById('multi_chk_habitation').checked = false;
+            document.getElementById('multi_chk_include_5pct').checked = true;
+            document.getElementById('multi_taux_ir').value = '20';
+            document.getElementById('multi_date_acte').value = today;
+            document.getElementById('multi_date_paiement').value = today;
+            initMultiTable4Rows();
+            onMultiDateActeChange();
+        }
+
+        // =====================================================================
+        // 5. EXPORT PDF TPI (UNIFIÉ PC & MOBILE)
+        // =====================================================================
+        function exportToPDF(mode) {
+            const isMulti = mode === 'multi';
+            const st = isMulti ? multiState : singleState;
+            if (!st) return;
+            const sections = [{
+                t: 'I. Base de calcul et profit imposable',
+                r: [
+                    ['', st.prixCession, 'Prix de cession'],
+                    ['', st.prixActualise, st.acqLabel || 'Acquisitions réévaluées'],
+                    ['', st.frais15, 'Frais forfaitaires d’acquisition (15 %)'],
+                    ['', st.invActualise, st.invLabel || 'Investissements réévalués']
+                ],
+                st: ['Coût total déductible', st.coutTotal]
+            }];
+            if (isMulti && Array.isArray(st.tranchesDetails) && st.tranchesDetails.length) {
+                sections.push({
+                    t: 'Détail des acquisitions / quittances',
+                    r: st.tranchesDetails.map((item, index) => [
+                        '', `${formatDH(item.brut)} -> ${formatDH(item.act)}`,
+                        `${item.label || 'Acquisition ' + (index + 1)} - année ${item.year}, coef. ${Number(item.coef || 0).toFixed(3)}`
+                    ])
+                });
+            }
+            sections.push(
+                {
+                    t: 'II. Comparaison des bases et liquidation',
+                    r: [
+                        ['', st.droitTaux, `Droit sur profit (${st.tauxIR} %)`],
+                        ['', st.cm3Pct, 'Cotisation minimale (3 %)'],
+                        ['', st.include5Pct ? st.cm5Pct : 'Non appliqué', 'Comparatif (5 % du prix de cession)']
+                    ],
+                    st: ['Base retenue : ' + (st.labelRetenu || '—'), st.droitExigible]
+                },
+                {
+                    t: 'III. Pénalités et majorations de retard (' + (st.retardLabel || 'dans les délais') + ')',
+                    r: [
+                        ['', st.majAssiette, st.majAssietteLabel || 'Majoration d’assiette (Art. 184)'],
+                        ['', st.penPaiement, st.penPaiementLabel || 'Pénalité de paiement (Art. 208)'],
+                        ['', st.majMensuelle, st.majMensuelleLabel || 'Majorations mensuelles (Art. 208)']
+                    ],
+                    st: ['Total des pénalités', st.totalPenalites]
+                }
+            );
+            const data = {
+                kind: 'tpi',
+                title: 'ESTIMATION DE DECLARATION TPI (CGI 2026)',
+                subtitle: isMulti ? 'Acquisitions multiples - Impot sur le revenu / profits immobiliers' : 'Impot sur le revenu / profits immobiliers (Maroc)',
+                client: `${st.saleYear || '—'} | Acte : ${st.dateActeFormatted || '—'} | Paiement : ${st.datePaiementFormatted || '—'}`,
+                tf: st.dateLimiteStr || '—',
+                prix: st.prixCession || 0,
+                secs: sections,
+                total: st.totalPayer || 0,
+                totalLabel: 'TOTAL GENERAL A PAYER',
+                enLettres: st.enLettres || '',
+                footer: 'Decompte indicatif de liquidation TPI - Code General des Impots (Maroc).'
+            };
+            const filename = `${isMulti ? 'Estimation_TPI_Multi' : 'Estimation_TPI'}_${st.saleYear || new Date().getFullYear()}.pdf`;
+            const blob = new Blob([window.buildSharedProvisionPdf(data)], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(function () { document.body.removeChild(link); URL.revokeObjectURL(url); }, 1500);
+            if (typeof toast === 'function') toast('PDF téléchargé');
+        }
+
+        // =====================================================================
+        // 6. ENVOI VIA WHATSAPP (SINGLE & MULTI)
+        // =====================================================================
+        function buildWhatsAppMessage(mode) {
+            const isMulti = mode === 'multi';
+            const st = isMulti ? multiState : singleState;
+
+            let lines = [
+                isMulti
+                    ? `⚖️ *DÉCOMPTE FISCAL ACQUISITIONS MULTIPLES — IR / PI (T.P.I.)*`
+                    : `⚖️ *DÉCOMPTE FISCAL — IR / PI (T.P.I. MAROC)*`,
+                `━━━━━━━━━━━━━━━━━━━━`,
+                `📅 *Année de cession :* ${st.saleYear}`,
+                `⏳ *Date limite DGI (J+30) :* ${st.dateLimiteStr}`,
+                ``,
+                `📊 *DÉTAIL DE LIQUIDATION :*`,
+                `• Prix de cession : *${formatDH(st.prixCession)}*`
+            ];
+
+            if (isMulti && st.tranchesDetails && st.tranchesDetails.length > 0) {
+                lines.push(`• Acquisitions réévaluées (${st.tranchesDetails.length} tranches) : *${formatDH(st.prixActualise)}*`);
+            }
+            lines.push(`• Coût d'acquisition total déductible : *${formatDH(st.coutTotal)}*`);
+            lines.push(`• Profit net imposable : *${formatDH(st.profit)}*`);
+            lines.push(``);
+            lines.push(`📌 *${st.labelRetenu}*`);
+            lines.push(`💰 *DROIT EXIGIBLE : ${st.droitExigible.toLocaleString('fr-MA')} DH*`);
+            lines.push(`_(${st.enLettres})_`);
+
+            if (st.totalPenalites > 0) {
+                lines.push(``);
+                lines.push(`⚠️ *PÉNALITÉS & MAJORATIONS (${st.retardLabel}) :*`);
+                lines.push(`• ${st.majAssietteLabel} : ${formatDH(st.majAssiette)}`);
+                lines.push(`• ${st.penPaiementLabel} : ${formatDH(st.penPaiement)}`);
+                lines.push(`• ${st.majMensuelleLabel} : ${formatDH(st.majMensuelle)}`);
+                lines.push(`🚨 *TOTAL GÉNÉRAL À PAYER : ${st.totalPayer.toLocaleString('fr-MA')} DH*`);
+            }
+
+            lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+            lines.push(`_Développé par Hatim DALIL — Calcul selon le CGI Maroc._`);
+
+            return lines.join('\n');
+        }
+
+        function openWhatsAppModal(mode) {
+            document.getElementById('wa-message-preview').value = buildWhatsAppMessage(mode);
+            document.getElementById('wa-modal').classList.add('open');
+        }
+
+        function closeWhatsAppModal() {
+            document.getElementById('wa-modal').classList.remove('open');
+        }
+
+        function copyWhatsAppText() {
+            const txt = document.getElementById('wa-message-preview');
+            txt.select();
+            navigator.clipboard.writeText(txt.value);
+            alert('Décompte copié dans le presse-papiers !');
+        }
+
+        function launchWhatsApp() {
+            const rawPhone = document.getElementById('wa-phone').value.replace(/\D/g, '');
+            const text = encodeURIComponent(document.getElementById('wa-message-preview').value);
+            const url = rawPhone ? `https://wa.me/${rawPhone}?text=${text}` : `https://wa.me/?text=${text}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+            closeWhatsAppModal();
+        }
+
+        // =====================================================================
+        // 7. GESTION DE LA TABLE MATRICIELLE DES COEFFICIENTS (EXCEL/CSV/JSON)
+        // =====================================================================
+        function saveMatrix() {
+            localStorage.setItem('tpi_coef_matrix_v2', JSON.stringify(coefMatrix));
+            populateSaleYearSelects();
+            populateAcquisitionSelectsForMain();
+            onMultiAnneeVenteChange();
+            renderCoefficients();
+            calculateAll();
+            calculateMultiAll();
+        }
+
+        function renderCoefficients() {
+            const saleYear = document.getElementById('admin-sale-year').value;
+            const tableForYear = coefMatrix[saleYear] || {};
+            const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
+
+            if (acqYears.length === 0) {
+                document.getElementById('coef-tbody').innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding:1.5rem; color:var(--cds-text-muted);">
+                            Aucun coefficient enregistré pour ${saleYear}. Utilisez <strong>Importer Excel / CSV / JSON</strong> ou ajoutez une ligne manuellement.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            document.getElementById('coef-tbody').innerHTML = acqYears.map(y => `
+                <tr>
+                    <td><span class="coef-pill">${saleYear}</span></td>
+                    <td><strong>${y}</strong></td>
+                    <td class="mono">${tableForYear[y].toFixed(3)}</td>
+                    <td style="text-align:right;">
+                        <button class="btn btn-outline" style="height:30px; padding:0 0.6rem; font-size:0.76rem;" onclick="editCoef(${y})">Modifier</button>
+                        <button class="btn btn-danger-soft" style="height:30px; padding:0 0.6rem; font-size:0.76rem;" onclick="deleteCoef(${y})">✕</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function addOrUpdateCoefficient() {
+            const saleYear = document.getElementById('admin-sale-year').value;
+            const acqYear = parseInt(document.getElementById('new-coef-year').value, 10);
+            const val = parseFloat(document.getElementById('new-coef-val').value);
+            if (!saleYear || !acqYear || !val) {
+                alert("Veuillez saisir l'année antérieure et le coefficient.");
+                return;
+            }
+            if (!coefMatrix[saleYear]) coefMatrix[saleYear] = {};
+            coefMatrix[saleYear][acqYear] = val;
+            saveMatrix();
+        }
+
+        function editCoef(acqYear) {
+            const saleYear = document.getElementById('admin-sale-year').value;
+            document.getElementById('new-coef-year').value = acqYear;
+            document.getElementById('new-coef-val').value = coefMatrix[saleYear][acqYear];
+        }
+
+        function deleteCoef(acqYear) {
+            const saleYear = document.getElementById('admin-sale-year').value;
+            if (!confirm(`Supprimer l'année ${acqYear} du barème ${saleYear} ?`)) return;
+            delete coefMatrix[saleYear][acqYear];
+            saveMatrix();
+        }
+
+        function clearAllCoefficients() {
+            if (!confirm("⚠️ Voulez-vous vraiment vider tous les coefficients enregistrés ?")) return;
+            coefMatrix = buildEmptyDefaultMatrix();
+            saveMatrix();
+            alert("Tous les coefficients ont été vidés.");
+        }
+
+        function createNewSaleYear() {
+            const newYearStr = prompt("Saisissez la nouvelle Année de Cession à créer (ex: 2027) :");
+            const newYear = parseInt(newYearStr, 10);
+            if (!newYear || newYear < 1980 || newYear > 2100) return;
+
+            if (coefMatrix[newYear]) {
+                alert(`L'année de cession ${newYear} existe déjà.`);
+                document.getElementById('admin-sale-year').value = newYear;
+                renderCoefficients();
+                return;
+            }
+
+            coefMatrix[newYear] = { [newYear]: 1.000 };
+
+            saveMatrix();
+            document.getElementById('admin-sale-year').value = newYear;
+            renderCoefficients();
+            alert(`Barème créé pour l'année de cession ${newYear}.`);
+        }
+
+        // --- IMPORT EXCEL (.xlsx, .xls), CSV & JSON ---
+        function importCoefficientsFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (ext === 'json') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        coefMatrix = JSON.parse(e.target.result);
+                        saveMatrix();
+                        alert("Table JSON importée avec succès !");
+                    } catch (err) {
+                        alert("Erreur lors de la lecture du fichier JSON.");
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, raw: true });
+
+                        const count = applyRowsToMatrix(rows);
+                        if (count > 0) {
+                            saveMatrix();
+                            alert(`✅ ${count} coefficient(s) importé(s) avec succès depuis Excel/CSV !`);
+                        } else {
+                            alert("Aucune ligne valide détectée. Vérifiez les colonnes : [Année Acquisition, Coefficient] ou [Année Cession, Année Acquisition, Coefficient].");
+                        }
+                    } catch (err) {
+                        alert("Erreur lors de la lecture du fichier Excel/CSV.");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+            event.target.value = '';
+        }
+
+        function applyRowsToMatrix(rows) {
+            const currentSaleYear = document.getElementById('admin-sale-year').value;
+            let importedCount = 0;
+
+            rows.forEach(row => {
+                if (!Array.isArray(row) || row.length < 2) return;
+                const cleanCells = row
+                    .map(c => String(c ?? '').trim().replace(',', '.'))
+                    .filter(c => c !== '');
+
+                if (cleanCells.length >= 3) {
+                    const saleYr = parseInt(cleanCells[0], 10);
+                    const acqYr = parseInt(cleanCells[1], 10);
+                    const coef = parseFloat(cleanCells[2]);
+                    if (saleYr >= 1980 && saleYr <= 2100 && acqYr >= 1950 && acqYr <= 2100 && !isNaN(coef) && coef > 0) {
+                        if (!coefMatrix[saleYr]) coefMatrix[saleYr] = {};
+                        coefMatrix[saleYr][acqYr] = coef;
+                        importedCount++;
+                    }
+                } else if (cleanCells.length === 2) {
+                    const acqYr = parseInt(cleanCells[0], 10);
+                    const coef = parseFloat(cleanCells[1]);
+                    if (acqYr >= 1950 && acqYr <= 2100 && !isNaN(coef) && coef > 0) {
+                        if (!coefMatrix[currentSaleYear]) coefMatrix[currentSaleYear] = {};
+                        coefMatrix[currentSaleYear][acqYr] = coef;
+                        importedCount++;
+                    }
+                }
+            });
+
+            return importedCount;
+        }
+
+        // --- MODÈLE EXCEL & EXPORT EXCEL ---
+        function downloadExcelTemplate() {
+            const saleYear = document.getElementById('admin-sale-year').value || 2026;
+            const wsData = [
+                ["Annee_Cession", "Annee_Acquisition", "Coefficient"],
+                [Number(saleYear), Number(saleYear), 1.000],
+                [Number(saleYear), Number(saleYear) - 1, 1.000],
+                [Number(saleYear), 2020, 1.053],
+                [Number(saleYear), 2015, 1.108]
+            ];
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, "Coefficients_TPI");
+            XLSX.writeFile(wb, `Modele_Coefficients_TPI_${saleYear}.xlsx`);
+        }
+
+        function exportCoefficientsExcel() {
+            const wsData = [["Annee_Cession", "Annee_Acquisition", "Coefficient"]];
+            Object.keys(coefMatrix).sort((a, b) => b - a).forEach(saleYr => {
+                Object.keys(coefMatrix[saleYr]).sort((a, b) => b - a).forEach(acqYr => {
+                    wsData.push([Number(saleYr), Number(acqYr), coefMatrix[saleYr][acqYr]]);
+                });
+            });
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            XLSX.utils.book_append_sheet(wb, ws, "Coefficients_TPI");
+            XLSX.writeFile(wb, "Coefficients_TPI_DGI_Maroc.xlsx");
+        }
+
+        // =====================================================================
+        // 8. CONVERSION MONTANT EN LETTRES
+        // =====================================================================
+        function nombreEnLettres(n) {
+            if (n === 0) return 'zéro';
+            const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+            const dixA19 = ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+            const dizaines = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+
+            function convertHundreds(num) {
+                let str = '';
+                const c = Math.floor(num / 100);
+                const r = num % 100;
+                if (c > 0) {
+                    str += (c > 1 ? unites[c] + ' ' : '') + 'cent' + (c > 1 && r === 0 ? 's ' : ' ');
+                }
+                if (r > 0) {
+                    if (r < 10) str += unites[r];
+                    else if (r < 20) str += dixA19[r - 10];
+                    else {
+                        const d = Math.floor(r / 10);
+                        const u = r % 10;
+                        if (d === 7 || d === 9) {
+                            str += dizaines[d] + '-' + dixA19[u];
+                        } else {
+                            str += dizaines[d] + (u === 1 && d < 8 ? ' et un' : (u > 0 ? '-' + unites[u] : (d === 8 ? 's' : '')));
+                        }
+                    }
+                }
+                return str.trim();
+            }
+
+            let res = '';
+            const millions = Math.floor(n / 1000000);
+            const milliers = Math.floor((n % 1000000) / 1000);
+            const reste = n % 1000;
+
+            if (millions > 0) res += convertHundreds(millions) + (millions > 1 ? ' millions ' : ' million ');
+            if (milliers > 0) res += (milliers === 1 ? 'mille ' : convertHundreds(milliers) + ' mille ');
+            if (reste > 0) res += convertHundreds(reste);
+
+            return res.trim();
+        }
+</script>
+</body>
+</html>
