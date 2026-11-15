@@ -117,7 +117,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   font-weight: 700;
 }
 .module-tab.active svg { opacity: 1; color: var(--accent); }
-.module-tab.active svg { opacity: 1; }
 
 #shell-main { width: min(1320px, 100%); margin: 1.65rem auto 2rem; padding: 0 1.4rem; }
 .module { display: none; }
@@ -171,19 +170,20 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 #app-droit .row { display: grid; gap: .9rem; }
 #app-droit .r2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
 #app-droit .r3 { grid-template-columns: 1.6fr 1fr .7fr; }
+#app-droit .r3-eq { grid-template-columns: repeat(3, minmax(0,1fr)); }
 #app-droit .r4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
 #app-droit .gap-top { margin-top: 1rem; }
 #app-droit .f { min-width: 0; display: flex; flex-direction: column; gap: .38rem; }
 #app-droit label { color: var(--text-2); font-size: .84rem; font-weight: 600; line-height: 1.4; }
 
-#app-droit input[type="text"], #app-droit select {
+#app-droit input[type="text"], #app-droit input[type="date"], #app-droit select {
   width: 100%; min-height: 43px; padding: .62rem .76rem;
   border: 1px solid var(--border-strong); border-radius: 7px;
   color: var(--text); background: #fff; font-size: .93rem;
   transition: border-color .18s, box-shadow .18s, background .18s;
 }
-#app-droit input[type="text"]:hover, #app-droit select:hover { border-color: #9eafb4; }
-#app-droit input[type="text"]:focus, #app-droit select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(36,79,102,.12); outline: none; }
+#app-droit input[type="text"]:hover, #app-droit input[type="date"]:hover, #app-droit select:hover { border-color: #9eafb4; }
+#app-droit input[type="text"]:focus, #app-droit input[type="date"]:focus, #app-droit select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(36,79,102,.12); outline: none; }
 #app-droit input[readonly] { background: #f2f5f4; color: #334750; font-weight: 600; }
 #app-droit select:disabled, #app-droit input:disabled { background: #f2f5f4; color: var(--muted); cursor: not-allowed; }
 
@@ -194,11 +194,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 #app-droit .hint { min-height: 1em; color: var(--muted); font-size: .75rem; }
 #app-droit .hint.on { color: var(--warning); font-weight: 600; }
 #app-droit .note { display: none; margin-top: .85rem; padding: .65rem .85rem; border-left: 3px solid var(--accent-line); border-radius: 7px; background: var(--warning-bg); color: var(--warning); font-size: .84rem; }
+#app-droit .note.late { border-left-color: var(--danger); background: var(--danger-bg); color: var(--danger); font-weight: 600; }
 
 #app-droit .badge {
   display: inline-flex; align-items: center; padding: .3rem .7rem; border-radius: 999px;
   border: 1px solid #e8d27d; background: #fff9dc; color: #5d4d1c; font-size: .75rem; font-weight: 700; white-space: nowrap;
 }
+#app-droit .badge-ok { border-color: #a8d0bd; background: var(--success-bg); color: var(--success); }
+#app-droit .badge-late { border-color: #f4d9d5; background: var(--danger-bg); color: var(--danger); }
 
 /* Panneaux colorés (jaune doux #FFEA99) */
 #app-droit .panel-yellow {
@@ -265,6 +268,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 #app-droit .result-line > :last-child { text-align: right; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
 #app-droit .result-line small { color: var(--muted); }
 #app-droit .result-line.subtotal { background: #eef4f6; border-color: #d9e5ea; color: var(--primary); font-weight: 700; }
+#app-droit .result-line.danger-line { background: var(--danger-bg); border-color: #f4d9d5; color: var(--danger); }
 
 /* Boutons */
 #app-droit .btn {
@@ -311,7 +315,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   #shell-main { margin: 1rem auto 1.5rem; padding: 0 .8rem; }
   #shell-footer { padding: .5rem .8rem 0; }
   #app-droit .card-body { padding: 1rem; }
-  #app-droit .r2, #app-droit .r3 { grid-template-columns: minmax(0,1fr); }
+  #app-droit .r2, #app-droit .r3, #app-droit .r3-eq { grid-template-columns: minmax(0,1fr); }
   #app-droit .r4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
   #app-droit .total .amt { font-size: 1.85rem; }
 }
@@ -903,14 +907,21 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
       <section class="card">
         <div class="card-header">
-          <div class="card-title-group"><span class="step-num">1</span><span class="card-title">Dossier</span></div>
+          <div class="card-title-group"><span class="step-num">1</span><span class="card-title">Dossier &amp; Délai d'enregistrement (30 Jours)</span></div>
+          <span class="badge badge-ok" id="badgeDelaiProv">● Dans le délai légal</span>
         </div>
         <div class="card-body">
           <div class="row r3">
             <div class="f"><label for="clientInfo">Client / Partie</label><input type="text" id="clientInfo" placeholder="Ex : Sté Atlas / M. Alami" autocomplete="off"></div>
-            <div class="f"><label for="titreFoncier">Réf. / RC / Titre foncier</label><input type="text" id="titreFoncier" placeholder="Ex : 12458/R ou RC 1234" autocomplete="off"></div>
+            <div class="f"><label for="titreFoncier">Titre foncier</label><input type="text" id="titreFoncier" placeholder="Ex : 12458/R" autocomplete="off"></div>
             <div class="f" id="nbrTfBox"><label for="nbrTf">Nb. de titres</label><input type="text" id="nbrTf" inputmode="numeric" value="1"></div>
           </div>
+          <div class="row r3-eq gap-top">
+            <div class="f"><label for="dateActeProv">Date de l'acte</label><input type="date" id="dateActeProv"></div>
+            <div class="f"><label for="dateDepotProv">Date dépôt Enreg.</label><input type="date" id="dateDepotProv"></div>
+            <div class="f"><label for="dateLimiteProv">Échéance légale (J+30)</label><input type="text" id="dateLimiteProv" readonly style="text-align:center;"></div>
+          </div>
+          <div class="note" id="delaiProvNote"></div>
         </div>
       </section>
 
@@ -1023,7 +1034,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         </div>
         <div class="card-body">
           <div class="meta first"><div id="mClient"></div><div id="mTf"></div></div>
-          <div class="meta"><div id="mPrix"></div></div>
+          <div class="meta"><div id="mPrix"></div><div id="mEcheance"></div></div>
           <div id="lines"></div>
           <div class="acts">
             <button class="btn btn-whatsapp span2" id="btnShare" type="button">Partager (WhatsApp)</button>
@@ -1162,7 +1173,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 </div>
                             </div>
 
-                            <div class="form-section-label">3. Dates Légales (Délai 30 Jours)</div>
+                            <div class="form-section-label">3. Dates Légales (Délai 30 Jours + Jours Fériés / Week-ends)</div>
                             <div class="grid-3">
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label>Date de l'Acte</label>
@@ -1415,7 +1426,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 </div>
                             </div>
 
-                            <div class="form-section-label">4. Dates Légales (Délai 30 Jours)</div>
+                            <div class="form-section-label">4. Dates Légales (Délai 30 Jours + Jours Fériés / Week-ends)</div>
                             <div class="grid-3">
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label>Date de l'Acte</label>
@@ -1672,9 +1683,168 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 </footer>
 
 <script>
+// =====================================================================
+// UTILITAIRE COMMUN : ÉCHÉANCE LÉGALE MAROC (J+30 + WEEK-ENDS + FÉRIÉS + FÊTES RELIGIEUSES)
+// =====================================================================
+const JOURS_FERIES_FIXES_MAROC = [
+  "01-01", // Nouvel an
+  "01-11", // Manifeste de l'Indépendance
+  "01-14", // Nouvel An Amazigh (Yennayer)
+  "05-01", // Fête du Travail
+  "07-30", // Fête du Trône
+  "08-14", // Allégeance Oued Eddahab
+  "08-20", // Révolution du Roi et du Peuple
+  "08-21", // Fête de la Jeunesse
+  "11-06", // Marche Verte
+  "11-18"  // Fête de l'Indépendance
+];
+
+function isFeteReligieuseMaroc(dateObj) {
+  try {
+    const fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {
+      month: 'numeric',
+      day: 'numeric'
+    });
+    const parts = fmt.formatToParts(dateObj);
+    const hMonth = parseInt(parts.find(p => p.type === 'month').value, 10);
+    const hDay = parseInt(parts.find(p => p.type === 'day').value, 10);
+
+    // 1er Mouharram (Nouvel an hégirien)
+    if (hMonth === 1 && hDay === 1) return true;
+    // 12 & 13 Rabia al-Awal (Aïd Al Mawlid - 2 jours fériés)
+    if (hMonth === 3 && (hDay === 12 || hDay === 13)) return true;
+    // 1er & 2 Chaoual (Aïd Al-Fitr - 2 jours fériés)
+    if (hMonth === 10 && (hDay === 1 || hDay === 2)) return true;
+    // 10 & 11 Dou Al-Hijja (Aïd Al-Adha - 2 jours fériés)
+    if (hMonth === 12 && (hDay === 10 || hDay === 11)) return true;
+  } catch (e) {
+    return false;
+  }
+  return false;
+}
+
+window.getEcheanceLegaleMaroc = function (dateActeStr) {
+  const parts = String(dateActeStr).split('-');
+  const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+  d.setDate(d.getDate() + 30);
+
+  let estReporte = false;
+  while (true) {
+    const dayOfWeek = d.getDay();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mmdd = `${mm}-${dd}`;
+
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    const isFixe = JOURS_FERIES_FIXES_MAROC.includes(mmdd);
+    const isReligieux = isFeteReligieuseMaroc(d);
+
+    if (isWeekend || isFixe || isReligieux) {
+      d.setDate(d.getDate() + 1);
+      estReporte = true;
+    } else {
+      break;
+    }
+  }
+  return { dateLimite: d, estReporte };
+};
+
+window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, droitBase) {
+  if (!dateActeStr) {
+    return {
+      dateActeFormatted: '—',
+      datePaiementFormatted: '—',
+      dateLimiteStr: '—',
+      retardLabel: '0 jour',
+      isLate: false,
+      majAssiette: 0,
+      majAssietteLabel: "Majoration d'assiette (Art. 184)",
+      penPaiement: 0,
+      penPaiementLabel: "Pénalité de paiement (Art. 208)",
+      majMensuelle: 0,
+      majMensuelleLabel: "Majorations mensuelles (Art. 208)",
+      totalPenalites: 0,
+      totalPayer: droitBase
+    };
+  }
+
+  const pActe = dateActeStr.split('-');
+  const dateActe = new Date(parseInt(pActe[0], 10), parseInt(pActe[1], 10) - 1, parseInt(pActe[2], 10));
+
+  const { dateLimite, estReporte } = window.getEcheanceLegaleMaroc(dateActeStr);
+  const dateLimiteStr = dateLimite.toLocaleDateString('fr-FR') + (estReporte ? ' (Reporté)' : '');
+
+  let datePaiement;
+  if (datePaiementStr) {
+    const pPai = datePaiementStr.split('-');
+    datePaiement = new Date(parseInt(pPai[0], 10), parseInt(pPai[1], 10) - 1, parseInt(pPai[2], 10));
+  } else {
+    const now = new Date();
+    datePaiement = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  const diffDays = Math.round((datePaiement - dateLimite) / (1000 * 60 * 60 * 24));
+
+  let majAssiette = 0;
+  let majAssietteLabel = "Majoration d'assiette (Art. 184)";
+  let penPaiement = 0;
+  let penPaiementLabel = "Pénalité de paiement (Art. 208)";
+  let majMensuelle = 0;
+  let majMensuelleLabel = "Majorations mensuelles (Art. 208)";
+  let retardLabel = '0 jour';
+  let isLate = false;
+
+  if (diffDays > 0 && droitBase > 0) {
+    isLate = true;
+    const moisRetard = Math.ceil(diffDays / 30);
+
+    if (diffDays <= 30) {
+      majAssiette = Math.max(500, Math.ceil(droitBase * 0.05));
+      majAssietteLabel = "Majoration d'assiette (Art. 184 — 5%, min. 500 DH)";
+
+      penPaiement = Math.ceil(droitBase * 0.05);
+      penPaiementLabel = "Pénalité de paiement (Art. 208 — 5%)";
+
+      majMensuelle = Math.ceil(droitBase * 0.05);
+      majMensuelleLabel = "Majorations mensuelles (Art. 208 — 5% 1er mois)";
+    } else {
+      majAssiette = Math.max(500, Math.ceil(droitBase * 0.15));
+      majAssietteLabel = "Majoration d'assiette (Art. 184 — 15%, min. 500 DH)";
+
+      penPaiement = Math.ceil(droitBase * 0.10);
+      penPaiementLabel = "Pénalité de paiement (Art. 208 — 10%)";
+
+      const moisSupp = Math.max(0, moisRetard - 1);
+      const tauxMensuel = 0.05 + (moisSupp * 0.005);
+      majMensuelle = Math.ceil(droitBase * tauxMensuel);
+      majMensuelleLabel = `Majorations mensuelles (Art. 208 — 5% + ${moisSupp}×0,50%)`;
+    }
+
+    retardLabel = `${diffDays} jour(s) (${moisRetard} mois entamé(s))`;
+  }
+
+  const totalPenalites = majAssiette + penPaiement + majMensuelle;
+
+  return {
+    dateActeFormatted: dateActe.toLocaleDateString('fr-FR'),
+    datePaiementFormatted: datePaiement.toLocaleDateString('fr-FR'),
+    dateLimiteStr,
+    retardLabel,
+    isLate,
+    majAssiette,
+    majAssietteLabel,
+    penPaiement,
+    penPaiementLabel,
+    majMensuelle,
+    majMensuelleLabel,
+    totalPenalites,
+    totalPayer: droitBase + totalPenalites
+  };
+};
+
 (function () {
   var MODS = {
-    provision: { id: 'app-droit', title: 'Hatim DALIL' },
+    provision: { id: 'app-droit', title: 'Calcul des Frais' },
     tpi:       { id: 'app-tpi',   title: 'Liquidation T.P.I. (IR / PI)' }
   };
   var BASE = 'Étude notariale — Calcul Frais et IR/PI';
@@ -1741,7 +1911,7 @@ function setTaux(v){ $('tauxEnreg').value=v; $('customBox').style.display='none'
 function printNote(){
   var c=($('clientInfo').value.trim()||'Dossier').replace(/[^\w\u00C0-\u017F-]+/g,'_');
   var old=document.title;
-  document.title='Note_Provision_'+c+'_'+new Date().toISOString().slice(0,10);
+  document.title='Note_Frais_'+c+'_'+new Date().toISOString().slice(0,10);
   try{ window.print(); }catch(e){ toast('Impression indisponible : utilisez Exporter en PDF'); }
   setTimeout(function(){document.title=old},1500);
 }
@@ -1764,7 +1934,7 @@ function buildPdf(d){
   var y=750;
   T(M,y,(d.kind==='tpi'?'Annee / dossier : ':'Client : ')+(d.client||'Non renseigne'),'F2',11,NAVY);
   T(M,y-16,(d.kind==='tpi'?'Echeance DGI : ':'Reference : ')+(d.tf||'-'),'F1',10,INK);
-  T(M,y-32,(d.kind==='tpi'?'Prix de cession : ':'Montant de base : ')+fmt(d.prix),'F1',10,INK);
+  T(M,y-32,(d.kind==='tpi'?'Prix de cession : ':'Montant de base : ')+fmt(d.prix)+(d.echeance ? '   |   Echeance Enreg. : '+d.echeance : ''),'F1',10,INK);
   y-=62;
   d.secs.forEach(function(s){
     T(M,y,s.t.toUpperCase(),'F2',8.5,GOLD); y-=6; line(y); y-=15;
@@ -1785,7 +1955,7 @@ function buildPdf(d){
   y-=4;
   ops.push('0.969 0.945 0.89 rg '+M+' '+(y-26)+' '+(W-2*M)+' 42 re f');
   ops.push(GOLD+' '+M+' '+(y-26)+' 3 42 re f');
-  T(M+14,y-6,d.totalLabel||'TOTAL FRAISA A CONSIGNER','F2',10.5,NAVY);
+  T(M+14,y-6,d.totalLabel||'TOTAL FRAIS A CONSIGNER','F2',10.5,NAVY);
   TR(y-8,fmt(d.total),'F2',15,NAVY);
   if(d.kind==='tpi' && d.enLettres) T(M+14,y-20,d.enLettres.toUpperCase(),'F2',7.5,NAVY);
   else if(d.prix>0) T(M+14,y-20,(d.total/d.prix*100).toFixed(2).replace('.',',')+" % de la base",'F1',8,MUT);
@@ -1968,6 +2138,27 @@ function calc(){
     }
   }
 
+  // Calcul échéance légale & pénalités de retard d'enregistrement (30 jours + week-ends + fériés + fêtes religieuses)
+  var dateActeStr = $('dateActeProv').value;
+  var dateDepotStr = $('dateDepotProv').value;
+  var baseDroitsEnreg = enreg + maj2pct;
+  var penEnreg = window.computeRetardPenalitesMaroc(dateActeStr, dateDepotStr, baseDroitsEnreg);
+
+  $('dateLimiteProv').value = penEnreg.dateLimiteStr;
+  var badgeDelaiProv = $('badgeDelaiProv');
+  var delaiProvNote = $('delaiProvNote');
+  if (penEnreg.isLate) {
+    badgeDelaiProv.className = 'badge badge-late';
+    badgeDelaiProv.textContent = '● Hors délai (' + penEnreg.retardLabel + ')';
+    delaiProvNote.className = 'note late';
+    delaiProvNote.textContent = 'Retard de ' + penEnreg.retardLabel + ' après l\'échéance du ' + penEnreg.dateLimiteStr + ' : pénalités Art. 184 & 208 appliquées sur l\'enregistrement.';
+    delaiProvNote.style.display = 'block';
+  } else {
+    badgeDelaiProv.className = 'badge badge-ok';
+    badgeDelaiProv.textContent = '● Dans le délai légal';
+    delaiProvNote.style.display = 'none';
+  }
+
   var cfTot = 0;
   var cfSecLines = [];
   if (isAncfccEligible) {
@@ -2003,11 +2194,16 @@ function calc(){
   var dLib=$('fraisDiversLib').value||"Frais divers", dVal=num('fraisDiversVal');
   var dpaLbl=aide?"Droits de timbre & DPA":"Droit par acte";
   
-  var total = enreg + maj2pct + dpa + cfTot + hon + tva + dVal + fraisGreffe + fraisPub;
+  var total = enreg + maj2pct + penEnreg.totalPenalites + dpa + cfTot + hon + tva + dVal + fraisGreffe + fraisPub;
 
   var rEnregList = [['Enregistrement <small>('+tE+' %, min. 100 DH)</small>', enreg, 'Enregistrement ('+tE+'%)']];
   if(maj2pct > 0){
     rEnregList.push([majLabelHtml, maj2pct, majLabelTxt]);
+  }
+  if(penEnreg.totalPenalites > 0){
+    rEnregList.push([penEnreg.majAssietteLabel, penEnreg.majAssiette, penEnreg.majAssietteLabel, true]);
+    rEnregList.push([penEnreg.penPaiementLabel, penEnreg.penPaiement, penEnreg.penPaiementLabel, true]);
+    rEnregList.push([penEnreg.majMensuelleLabel, penEnreg.majMensuelle, penEnreg.majMensuelleLabel, true]);
   }
   rEnregList.push([dpaLbl, dpa, dpaLbl]);
   
@@ -2029,19 +2225,24 @@ function calc(){
   secs.push({t: isAncfccEligible ? 'III. Étude notariale' : 'II. Étude notariale', r: [
     [honLbl,hon,'Honoraires H.T.'],[tvaLbl,tva,'TVA'],[esc(dLib),dVal,dLib]]});
 
-  var html='', txt="⚖️ *CALCUL DES FRAIS (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
+  var html='', txt="⚖️ *CALCUL DES FRAIS (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+(dateActeStr?"Échéance Enreg. (J+30) : "+penEnreg.dateLimiteStr+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
   secs.forEach(function(s){
     html+='<div class="sec">'+s.t+'</div>'; txt+="\n*"+s.t+"*\n";
-    s.r.forEach(function(x){ html+='<div class="result-line"><span>'+x[0]+'</span><span>'+fmt(x[1])+'</span></div>'; txt+="• "+x[2]+" : "+fmt(x[1])+"\n"; });
+    s.r.forEach(function(x){
+      var cls = x[3] ? 'result-line danger-line' : 'result-line';
+      html+='<div class="'+cls+'"><span>'+x[0]+'</span><span>'+fmt(x[1])+'</span></div>';
+      txt+="• "+x[2]+" : "+fmt(x[1])+"\n";
+    });
     if(s.st){ html+='<div class="result-line subtotal"><span>'+s.st[0]+'</span><span>'+fmt(s.st[1])+'</span></div>'; txt+="• "+s.st[0]+" : *"+fmt(s.st[1])+"*\n"; }
   });
   txt+="\n💰 *TOTAL PROVISION : "+fmt(total)+"*\n\n_Développé par Hatim DALIL_";
   recap=txt; $('lines').innerHTML=html;
-  lastData={client:client,tf:tf,prix:prix,total:total,secs:secs};
+  lastData={client:client,tf:tf,prix:prix,echeance:dateActeStr?penEnreg.dateLimiteStr:'',total:total,secs:secs};
 
   $('mClient').innerHTML='Client : <b>'+esc(client||'Non renseigné')+'</b>';
   $('mTf').innerHTML='Réf. : <b>'+esc(tf||'—')+'</b>';
   $('mPrix').innerHTML="Montant de base : <b>"+fmt(prix)+'</b>';
+  $('mEcheance').innerHTML=dateActeStr ? 'Échéance Enreg. : <b>'+esc(penEnreg.dateLimiteStr)+'</b>' : '';
   $('totalGeneral').textContent=fmt(total); $('barTotal').textContent=fmt(total);
   $('subSummary').textContent = prix>0 ? "Soit "+(total/prix*100).toFixed(2).replace('.',',')+" % de la base" : "";
   $('pdate').textContent="Établie le "+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
@@ -2051,7 +2252,10 @@ function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('show'); s
 window.toast = toast;
 
 function reset(){
+  var today = new Date().toISOString().split('T')[0];
   ['clientInfo','titreFoncier'].forEach(function(i){$(i).value=''});
+  $('dateActeProv').value = today;
+  $('dateDepotProv').value = today;
   $('nbrTf').value='1'; $('prixVente').value='650000'; $('tauxCf').value='1.5';
   $('tauxHon').value='1'; $('remiseHon').value='0'; $('aideLogement').checked=false;
   $('modePaiement').value='total';
@@ -2066,6 +2270,12 @@ function reset(){
 }
 
 document.addEventListener('DOMContentLoaded',function(){
+  var today = new Date().toISOString().split('T')[0];
+  $('dateActeProv').value = today;
+  $('dateDepotProv').value = today;
+  $('dateActeProv').addEventListener('change', calc);
+  $('dateDepotProv').addEventListener('change', calc);
+
   $('prixVente').addEventListener('input',onPrix);
   $('prixVente').addEventListener('blur',function(){ var v=num('prixVente'); if(v>0) this.value=String(Math.round(v*100)/100).replace(/\B(?=(\d{3})+(?!\d))/g,' '); });
   $('prixVente').addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); });
@@ -2290,87 +2500,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function computeDelayAndPenalties(dateActeStr, datePaiementStr, droitExigible) {
-            if (!dateActeStr) {
-                return {
-                    dateActeFormatted: '—',
-                    datePaiementFormatted: '—',
-                    dateLimiteStr: '—',
-                    retardLabel: '0 jour',
-                    isLate: false,
-                    majAssiette: 0,
-                    majAssietteLabel: "Majoration d'assiette (Art. 184)",
-                    penPaiement: 0,
-                    penPaiementLabel: "Pénalité de paiement (Art. 208)",
-                    majMensuelle: 0,
-                    majMensuelleLabel: "Majorations mensuelles (Art. 208)",
-                    totalPenalites: 0,
-                    totalPayer: droitExigible
-                };
-            }
-
-            const dateActe = new Date(dateActeStr);
-            const dateLimite = new Date(dateActe);
-            dateLimite.setDate(dateLimite.getDate() + 30);
-
-            const dateLimiteStr = dateLimite.toLocaleDateString('fr-FR');
-            const datePaiement = datePaiementStr ? new Date(datePaiementStr) : new Date();
-            const diffDays = Math.ceil((datePaiement - dateLimite) / (1000 * 60 * 60 * 24));
-
-            let majAssiette = 0;
-            let majAssietteLabel = "Majoration d'assiette (Art. 184)";
-            let penPaiement = 0;
-            let penPaiementLabel = "Pénalité de paiement (Art. 208)";
-            let majMensuelle = 0;
-            let majMensuelleLabel = "Majorations mensuelles (Art. 208)";
-            let retardLabel = '0 jour';
-            let isLate = false;
-
-            if (diffDays > 0 && droitExigible > 0) {
-                isLate = true;
-                const moisRetard = Math.ceil(diffDays / 30);
-
-                if (diffDays <= 30) {
-                    majAssiette = Math.max(500, Math.ceil(droitExigible * 0.05));
-                    majAssietteLabel = "Majoration d'assiette (Art. 184 — 5%, min. 500 DH)";
-
-                    penPaiement = Math.ceil(droitExigible * 0.05);
-                    penPaiementLabel = "Pénalité de paiement (Art. 208 — 5%)";
-
-                    majMensuelle = Math.ceil(droitExigible * 0.05);
-                    majMensuelleLabel = "Majorations mensuelles (Art. 208 — 5% 1er mois)";
-                } else {
-                    majAssiette = Math.max(500, Math.ceil(droitExigible * 0.15));
-                    majAssietteLabel = "Majoration d'assiette (Art. 184 — 15%, min. 500 DH)";
-
-                    penPaiement = Math.ceil(droitExigible * 0.10);
-                    penPaiementLabel = "Pénalité de paiement (Art. 208 — 10%)";
-
-                    const moisSupp = Math.max(0, moisRetard - 1);
-                    const tauxMensuel = 0.05 + (moisSupp * 0.005);
-                    majMensuelle = Math.ceil(droitExigible * tauxMensuel);
-                    majMensuelleLabel = `Majorations mensuelles (Art. 208 — 5% + ${moisSupp}×0,50%)`;
-                }
-
-                retardLabel = `${diffDays} jour(s) (${moisRetard} mois entamé(s))`;
-            }
-
-            const totalPenalites = majAssiette + penPaiement + majMensuelle;
-
-            return {
-                dateActeFormatted: dateActe.toLocaleDateString('fr-FR'),
-                datePaiementFormatted: datePaiement.toLocaleDateString('fr-FR'),
-                dateLimiteStr,
-                retardLabel,
-                isLate,
-                majAssiette,
-                majAssietteLabel,
-                penPaiement,
-                penPaiementLabel,
-                majMensuelle,
-                majMensuelleLabel,
-                totalPenalites,
-                totalPayer: droitExigible + totalPenalites
-            };
+            return window.computeRetardPenalitesMaroc(dateActeStr, datePaiementStr, droitExigible);
         }
 
         let singleState = {};
@@ -2779,7 +2909,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 enLettres: st.enLettres || '',
                 footer: 'Decompte indicatif de liquidation TPI - Code General des Impots (Maroc).'
             };
-            const filename = `${isMulti ? 'Estimation_TPI' : 'Estimation_TPI'}_${st.saleYear || new Date().getFullYear()}.pdf`;
+            const filename = `${isMulti ? 'Estimation_TPI_Multi' : 'Estimation_TPI'}_${st.saleYear || new Date().getFullYear()}.pdf`;
             const blob = new Blob([window.buildSharedProvisionPdf(data)], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
