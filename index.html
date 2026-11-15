@@ -910,7 +910,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     <div class="brand-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-2 9h4l-2-9z"/><path d="M19 7l-2 9h4l-2-9z"/><path d="M8 21h8"/></svg></div>
     <div>
       <h1>Étude Notariale — Calcul Frais et IR/PI</h1>
-      <p>Calcul Droit Enregistrement (CGI 2026) et ANCFCC -- Profits immobiliers (T.P.I.)</p>
+      <p>Calcul des Frais (CGI 2026) · Profits immobiliers (T.P.I.)</p>
       <span class="author-badge">Développé par Hatim DALIL</span>
     </div>
   </div>
@@ -1988,7 +1988,7 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
     provision: { id: 'app-droit', title: 'Étude notariale' },
     tpi:       { id: 'app-tpi',   title: 'Liquidation T.P.I. (IR / PI)' }
   };
-  var BASE = 'Hatim DALIL— Calcul Frais et IR/PI';
+  var BASE = 'Hatim DALIL — Calcul Frais et IR/PI';
   var tabs = document.querySelectorAll('.module-tab');
 
   function show(key, updateHash) {
@@ -2588,10 +2588,7 @@ function reset(){
   ['clientInfo','titreFoncier'].forEach(function(i){$(i).value=''});
   $('dateActeProv').value = today;
   $('dateDepotProv').value = today;
-<<<<<<< HEAD
   $('dateDepotCfProv').value = today;
-=======
->>>>>>> 796f44a2745c0fa30193c4753606fecc222cb4e6
   $('nbrTf').value='1'; $('prixVente').value='500 000,00'; $('tauxCf').value='1.5';
   $('tauxHon').value='1'; $('remiseHon').value='0'; $('aideLogement').checked=false;
   $('modePaiement').value='total';
