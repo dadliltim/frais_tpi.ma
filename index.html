@@ -2289,32 +2289,101 @@ document.addEventListener('DOMContentLoaded',function(){
             };
         }
 
+        // Liste des jours fériés fixes au Maroc (Mois 1-12, Jour)
+const JOURS_FERIES_FIXES = [
+    "01-01", // Nouvel an
+    "01-11", // Manifeste de l'Indépendance
+    "01-14", // Nouvel An Amazigh (Yennayer)
+    "05-01", // Fête du Travail
+    "07-30", // Fête du Trône
+    "08-14", // Allégeance Oued Eddahab
+    "08-20", // Révolution du Roi et du Peuple
+    "08-21", // Fête de la Jeunesse
+    "11-06", // Marche Verte
+    "11-18"  // Fête de l'Indépendance
+];
+
+// Détection des fêtes religieuses via le calendrier hégirien intégré (Intl.DateTimeFormat)
+function isFeteReligieuseMaroc(dateObj) {
+    try {
+        // Utilisation du calendrier islamique (tabular / umalqura)
+        const fmt = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {
+            month: 'numeric',
+            day: 'numeric'
+        });
+        const parts = fmt.formatToParts(dateObj);
+        const hMonth = parseInt(parts.find(p => p.type === 'month').value, 10);
+        const hDay = parseInt(parts.find(p => p.type === 'day').value, 10);
+
+        // 1er Mouharram (Nouvel an hégirien)
+        if (hMonth === 1 && hDay === 1) return true;
+        // 12 & 13 Rabia al-Awal (Aïd Al Mawlid - 2 jours fériés)
+        if (hMonth === 3 && (hDay === 12 || hDay === 13)) return true;
+        // 1er & 2 Chaoual (Aïd Al-Fitr - 2 jours fériés)
+        if (hMonth === 10 && (hDay === 1 || hDay === 2)) return true;
+        // 10 & 11 Dou Al-Hijja (Aïd Al-Adha - 2 jours fériés)
+        if (hMonth === 12 && (hDay === 10 || hDay === 11)) return true;
+    } catch (e) {
+        return false;
+    }
+    return false;
+}
+
+function getEcheanceLegaleMaroc(dateActe) {
+    const d = new Date(dateActe);
+    d.setDate(d.getDate() + 30);
+
+    let estReporte = false;
+    // Boucle : tant que c'est samedi (6), dimanche (0), férié fixe ou fête religieuse, on reporte au lendemain
+    while (true) {
+        const dayOfWeek = d.getDay();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mmdd = `${mm}-${dd}`;
+
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+        const isFixe = JOURS_FERIES_FIXES.includes(mmdd);
+        const isReligieux = isFeteReligieuseMaroc(d);
+
+        if (isWeekend || isFixe || isReligieux) {
+            d.setDate(d.getDate() + 1);
+            estReporte = true;
+        } else {
+            break;
+        }
+    }
+    return { dateLimite: d, estReporte };
+}    
         function computeDelayAndPenalties(dateActeStr, datePaiementStr, droitExigible) {
-            if (!dateActeStr) {
-                return {
-                    dateActeFormatted: '—',
-                    datePaiementFormatted: '—',
-                    dateLimiteStr: '—',
-                    retardLabel: '0 jour',
-                    isLate: false,
-                    majAssiette: 0,
-                    majAssietteLabel: "Majoration d'assiette (Art. 184)",
-                    penPaiement: 0,
-                    penPaiementLabel: "Pénalité de paiement (Art. 208)",
-                    majMensuelle: 0,
-                    majMensuelleLabel: "Majorations mensuelles (Art. 208)",
-                    totalPenalites: 0,
-                    totalPayer: droitExigible
-                };
+                if (!dateActeStr) {
+                    return {
+                        dateActeFormatted: '—',
+                        datePaiementFormatted: '—',
+                        dateLimiteStr: '—',
+                        retardLabel: '0 jour',
+                        isLate: false,
+                        majAssiette: 0,
+                        majAssietteLabel: "Majoration d'assiette (Art. 184)",
+                        penPaiement: 0,
+                        penPaiementLabel: "Pénalité de paiement (Art. 208)",
+                        majMensuelle: 0,
+                        majMensuelleLabel: "Majorations mensuelles (Art. 208)",
+                        totalPenalites: 0,
+                        totalPayer: droitExigible
+                    };
             }
 
-            const dateActe = new Date(dateActeStr);
-            const dateLimite = new Date(dateActe);
-            dateLimite.setDate(dateLimite.getDate() + 30);
+            cconst dateActe = new Date(dateActeStr);
+            const { dateLimite, estReporte } = getEcheanceLegaleMaroc(dateActe);
 
-            const dateLimiteStr = dateLimite.toLocaleDateString('fr-FR');
+            const dateLimiteStr = dateLimite.toLocaleDateString('fr-FR') + (estReporte ? ' (Reporté)' : '');
             const datePaiement = datePaiementStr ? new Date(datePaiementStr) : new Date();
-            const diffDays = Math.ceil((datePaiement - dateLimite) / (1000 * 60 * 60 * 24));
+            
+            // Normalisation à minuit pour éviter les décalages d'heures
+            const dLimMidnight = new Date(dateLimite.getFullYear(), dateLimite.getMonth(), dateLimite.getDate());
+            const dPaiMidnight = new Date(datePaiement.getFullYear(), datePaiement.getMonth(), datePaiement.getDate());
+            
+            const diffDays = Math.ceil((dPaiMidnight - dLimMidnight) / (1000 * 60 * 60 * 24));
 
             let majAssiette = 0;
             let majAssietteLabel = "Majoration d'assiette (Art. 184)";
