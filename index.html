@@ -195,8 +195,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   min-height: 43px;
   padding-left: .85rem;
   padding-right: 2.8rem;
-  background-color: #eef4f6; /* Fond jaune très doux */
-  border-color: #cbd5d7;     /* Bordure dorée */
+  background-color: #eef4f6;
+  border-color: #cbd5d7;
   font: 700 1.05rem var(--font-display);
   color: var(--primary);
   font-variant-numeric: tabular-nums;
@@ -215,12 +215,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   font-size: .82rem;
   color: var(--warning);
   pointer-events: none;
-}   
+}
 
 #app-droit .hint { min-height: 1em; color: var(--muted); font-size: .75rem; }
 #app-droit .hint.on { color: var(--warning); font-weight: 600; }
 #app-droit .note { display: none; margin-top: .85rem; padding: .65rem .85rem; border-left: 3px solid var(--accent-line); border-radius: 7px; background: var(--warning-bg); color: var(--warning); font-size: .84rem; }
 #app-droit .note.late { border-left-color: var(--danger); background: var(--danger-bg); color: var(--danger); font-weight: 600; }
+#app-droit .note.prescrit { border-left-color: var(--success); background: var(--success-bg); color: var(--success); font-weight: 600; }
 
 #app-droit .badge {
   display: inline-flex; align-items: center; padding: .3rem .7rem; border-radius: 999px;
@@ -380,7 +381,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
   #app-droit { padding-bottom: 0; }
   #app-droit .wrap { display: block; }
-  #app-droit .left, #app-droit .acts, #app-droit .toast { display: none !important; }
+  #app-droit .left, #app-droit .acts, #app-droit .toast, #prov-wa-modal { display: none !important; }
   #app-droit .sum { position: static; }
   #app-droit .pdate { display: block; }
   #app-droit .card { box-shadow: none; break-inside: avoid; }
@@ -970,7 +971,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                 <option value="1.5_agri">1,50 % — Terrain agricole (co-indivisaires ou cohéritiers)</option>
                 <option value="3">3,00 % — 1ère vente logement social / FVI</option>
                 <option value="1.5">1,50 % — Donation / Partage (ligne directe, époux, fratrie)</option>
-                <option value="0,00">0,00 % — Exonéré</option>
+                <option value="0">0,00 % — Exonéré</option>
                 <option value="custom">+ Autre taux personnalisé…</option>
               </select>
             </div>
@@ -1163,7 +1164,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Prix de Cession / Vente *</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="prix_cession" class="num-input" value="0,00" step="0.01" oninput="calculateAll()">
+                                        <input type="number" id="prix_cession" class="num-input" value="0" step="0.01" oninput="calculateAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1194,7 +1195,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Prix d'Acquisition Historique</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="prix_acquisition" class="num-input" value="0,00" step="0.01" oninput="calculateAll()">
+                                        <input type="number" id="prix_acquisition" class="num-input" value="0" step="0.01" oninput="calculateAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1211,7 +1212,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Dépenses d'Investissement Justifiées</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="investissement" class="num-input" value="0,00" step="0.01" oninput="calculateAll()">
+                                        <input type="number" id="investissement" class="num-input" value="0" step="0.01" oninput="calculateAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1400,7 +1401,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Prix de Cession Global / Vente *</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="multi_prix_cession" class="num-input" value="0,00" step="0.01" oninput="calculateMultiAll()">
+                                        <input type="number" id="multi_prix_cession" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1464,7 +1465,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Dépenses d'Investissement Justifiées</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="multi_investissement" class="num-input" value="0,00" step="0.01" oninput="calculateMultiAll()">
+                                        <input type="number" id="multi_investissement" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1735,7 +1736,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 <script>
 // =====================================================================
-// UTILITAIRE COMMUN : ÉCHÉANCE LÉGALE MAROC (J+30 + WEEK-ENDS + FÉRIÉS + FÊTES RELIGIEUSES)
+// UTILITAIRE COMMUN : ÉCHÉANCE LÉGALE MAROC (J+30 + WEEK-ENDS + FÉRIÉS + FÊTES RELIGIEUSES + PRESCRIPTION 10 ANS)
 // =====================================================================
 const JOURS_FERIES_FIXES_MAROC = [
   "01-01", // Nouvel an
@@ -1808,6 +1809,7 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
       dateLimiteStr: '—',
       retardLabel: '0 jour',
       isLate: false,
+      isPrescrit: false,
       majAssiette: 0,
       majAssietteLabel: "Majoration d'assiette (Art. 184)",
       penPaiement: 0,
@@ -1836,6 +1838,10 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
 
   const diffDays = Math.round((datePaiement - dateLimite) / (1000 * 60 * 60 * 24));
 
+  // Prescription décennale (10 ans à compter de la date de l'acte - Art. 232 CGI)
+  const datePrescription10Ans = new Date(dateActe.getFullYear() + 10, dateActe.getMonth(), dateActe.getDate());
+  const isPrescrit = (datePaiement > datePrescription10Ans);
+
   let majAssiette = 0;
   let majAssietteLabel = "Majoration d'assiette (Art. 184)";
   let penPaiement = 0;
@@ -1846,32 +1852,37 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
   let isLate = false;
 
   if (diffDays > 0 && droitBase > 0) {
-    isLate = true;
-    const moisRetard = Math.ceil(diffDays / 30);
-
-    if (diffDays <= 30) {
-      majAssiette = Math.max(500, Math.ceil(droitBase * 0.05));
-      majAssietteLabel = "Majoration d'assiette (Art. 184 — 5%, min. 500 DH)";
-
-      penPaiement = Math.ceil(droitBase * 0.05);
-      penPaiementLabel = "Pénalité de paiement (Art. 208 — 5%)";
-
-      majMensuelle = Math.ceil(droitBase * 0.05);
-      majMensuelleLabel = "Majorations mensuelles (Art. 208 — 5% 1er mois)";
+    if (isPrescrit) {
+      isLate = false;
+      retardLabel = `${diffDays} jour(s) — Prescrit (> 10 ans, Art. 232 CGI)`;
     } else {
-      majAssiette = Math.max(500, Math.ceil(droitBase * 0.15));
-      majAssietteLabel = "Majoration d'assiette (Art. 184 — 15%, min. 500 DH)";
+      isLate = true;
+      const moisRetard = Math.ceil(diffDays / 30);
 
-      penPaiement = Math.ceil(droitBase * 0.10);
-      penPaiementLabel = "Pénalité de paiement (Art. 208 — 10%)";
+      if (diffDays <= 30) {
+        majAssiette = Math.max(500, Math.ceil(droitBase * 0.05));
+        majAssietteLabel = "Majoration d'assiette (Art. 184 — 5%, min. 500 DH)";
 
-      const moisSupp = Math.max(0, moisRetard - 1);
-      const tauxMensuel = 0.05 + (moisSupp * 0.005);
-      majMensuelle = Math.ceil(droitBase * tauxMensuel);
-      majMensuelleLabel = `Majorations mensuelles (Art. 208 — 5% + ${moisSupp}×0,50%)`;
+        penPaiement = Math.ceil(droitBase * 0.05);
+        penPaiementLabel = "Pénalité de paiement (Art. 208 — 5%)";
+
+        majMensuelle = Math.ceil(droitBase * 0.05);
+        majMensuelleLabel = "Majorations mensuelles (Art. 208 — 5% 1er mois)";
+      } else {
+        majAssiette = Math.max(500, Math.ceil(droitBase * 0.15));
+        majAssietteLabel = "Majoration d'assiette (Art. 184 — 15%, min. 500 DH)";
+
+        penPaiement = Math.ceil(droitBase * 0.10);
+        penPaiementLabel = "Pénalité de paiement (Art. 208 — 10%)";
+
+        const moisSupp = Math.max(0, moisRetard - 1);
+        const tauxMensuel = 0.05 + (moisSupp * 0.005);
+        majMensuelle = Math.ceil(droitBase * tauxMensuel);
+        majMensuelleLabel = `Majorations mensuelles (Art. 208 — 5% + ${moisSupp}×0,50%)`;
+      }
+
+      retardLabel = `${diffDays} jour(s) (${moisRetard} mois entamé(s))`;
     }
-
-    retardLabel = `${diffDays} jour(s) (${moisRetard} mois entamé(s))`;
   }
 
   const totalPenalites = majAssiette + penPaiement + majMensuelle;
@@ -1882,6 +1893,7 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
     dateLimiteStr,
     retardLabel,
     isLate,
+    isPrescrit,
     majAssiette,
     majAssietteLabel,
     penPaiement,
@@ -2189,7 +2201,7 @@ function calc(){
     }
   }
 
-  // Calcul échéance légale & pénalités de retard d'enregistrement (30 jours + week-ends + fériés + fêtes religieuses)
+  // Calcul échéance légale, pénalités de retard & prescription décennale (Art. 232 CGI)
   var dateActeStr = $('dateActeProv').value;
   var dateDepotStr = $('dateDepotProv').value;
   var baseDroitsEnreg = enreg + maj2pct;
@@ -2203,6 +2215,12 @@ function calc(){
     badgeDelaiProv.textContent = '● Hors délai (' + penEnreg.retardLabel + ')';
     delaiProvNote.className = 'note late';
     delaiProvNote.textContent = 'Retard de ' + penEnreg.retardLabel + ' après l\'échéance du ' + penEnreg.dateLimiteStr + ' : pénalités Art. 184 & 208 appliquées sur l\'enregistrement.';
+    delaiProvNote.style.display = 'block';
+  } else if (penEnreg.isPrescrit) {
+    badgeDelaiProv.className = 'badge badge-ok';
+    badgeDelaiProv.textContent = '● Pénalités prescrites (> 10 ans)';
+    delaiProvNote.className = 'note prescrit';
+    delaiProvNote.textContent = 'Acte prescrit (> 10 ans — Art. 232 CGI) : exonération des pénalités et majorations de retard (seuls les droits simples restent exigibles, sous réserve de date certaine).';
     delaiProvNote.style.display = 'block';
   } else {
     badgeDelaiProv.className = 'badge badge-ok';
@@ -2276,7 +2294,7 @@ function calc(){
   secs.push({t: isAncfccEligible ? 'III. Étude notariale' : 'II. Étude notariale', r: [
     [honLbl,hon,'Honoraires H.T.'],[tvaLbl,tva,'TVA'],[esc(dLib),dVal,dLib]]});
 
-  var html='', txt="⚖️ *CALCUL DES FRAIS (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+(dateActeStr?"Échéance Enreg. (J+30) : "+penEnreg.dateLimiteStr+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
+  var html='', txt="⚖️ *CALCUL DES FRAIS (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+(dateActeStr?"Échéance Enreg. (J+30) : "+penEnreg.dateLimiteStr+(penEnreg.isPrescrit?" [Acte prescrit > 10 ans : pénalités exonérées]":"")+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
   secs.forEach(function(s){
     html+='<div class="sec">'+s.t+'</div>'; txt+="\n*"+s.t+"*\n";
     s.r.forEach(function(x){
@@ -2310,7 +2328,7 @@ function reset(){
   $('nbrTf').value='1'; $('prixVente').value='650 000,00'; $('tauxCf').value='1.5';
   $('tauxHon').value='1'; $('remiseHon').value='0'; $('aideLogement').checked=false;
   $('modePaiement').value='total';
-  $('montantNonConforme').value='0';
+  $('montantNonConforme').value='0,00';
   $('partielBox').style.display='none';
   $('fraisGreffeVal').value='350';
   $('fraisPubVal').value='700';
@@ -2340,7 +2358,7 @@ document.addEventListener('DOMContentLoaded',function(){
   });
   $('montantNonConforme').addEventListener('input',calc);
   $('montantNonConforme').addEventListener('blur',function(){ var v=num('montantNonConforme'),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; });
-$('montantNonConforme').addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); });
+  $('montantNonConforme').addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); });
   document.querySelectorAll('.ci,#clientInfo,#titreFoncier,#nbrTf,#tauxCf,#fraisGreffeVal,#fraisPubVal').forEach(function(e){ e.addEventListener('input',calc); });
   $('tauxEnreg').addEventListener('change',function(){
     var c=this.value==='custom'; $('customBox').style.display=c?'flex':'none';
@@ -2638,7 +2656,7 @@ $('montantNonConforme').addEventListener('focus',function(){ this.value=this.val
 
             const badge = document.getElementById('badge-delai');
             badge.className = pen.isLate ? 'badge badge-late' : 'badge badge-ok';
-            badge.textContent = pen.isLate ? '● Hors délai (Majorations)' : '● Dans le délai légal (30j)';
+            badge.textContent = pen.isLate ? '● Hors délai (Majorations)' : (pen.isPrescrit ? '● Prescrit (> 10 ans)' : '● Dans le délai légal (30j)');
 
             singleState = {
                 mode: 'single',
@@ -2711,7 +2729,7 @@ $('montantNonConforme').addEventListener('focus',function(){ this.value=this.val
             tr.innerHTML = `
                 <td class="row-num-cell" style="font-weight:600; color:var(--cds-brand-800);">#1</td>
                 <td>
-                    <input type="number" id="m-prix-${rowId}" class="num-input" value="0,00" step="0.01" oninput="calculateMultiAll()" style="padding-right:0.65rem;">
+                    <input type="number" id="m-prix-${rowId}" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()" style="padding-right:0.65rem;">
                 </td>
                 <td>
                     <select id="m-year-${rowId}" onchange="calculateMultiAll()">${getMultiAcqYearOptionsHTML()}</select>
@@ -2883,7 +2901,7 @@ $('montantNonConforme').addEventListener('focus',function(){ this.value=this.val
 
             const badge = document.getElementById('multi-badge-delai');
             badge.className = pen.isLate ? 'badge badge-late' : 'badge badge-ok';
-            badge.textContent = pen.isLate ? '● Hors délai (Majorations)' : '● Dans le délai légal (30j)';
+            badge.textContent = pen.isLate ? '● Hors délai (Majorations)' : (pen.isPrescrit ? '● Prescrit (> 10 ans)' : '● Dans le délai légal (30j)');
 
             multiState = {
                 mode: 'multi',
