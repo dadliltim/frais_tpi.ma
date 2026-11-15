@@ -187,9 +187,35 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 #app-droit input[readonly] { background: #f2f5f4; color: #334750; font-weight: 600; }
 #app-droit select:disabled, #app-droit input:disabled { background: #f2f5f4; color: var(--muted); cursor: not-allowed; }
 
-#app-droit .price { position: relative; }
-#app-droit .price input { min-height: 60px; padding-right: 3.4rem; font: 800 1.5rem var(--font-display); color: var(--primary); font-variant-numeric: tabular-nums; text-align: right; }
-#app-droit .price span { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-weight: 700; font-size: .85rem; color: var(--warning); pointer-events: none; }
+#app-droit .price {
+  position: relative;
+  max-width: 280px;
+}
+#app-droit .price input {
+  min-height: 43px;
+  padding-left: .85rem;
+  padding-right: 2.8rem;
+  background-color: #eef4f6; /* Fond jaune très doux */
+  border-color: #cbd5d7;     /* Bordure dorée */
+  font: 700 1.05rem var(--font-display);
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+#app-droit .price input:focus {
+  background-color: #fffdf2;
+  border-color: var(--primary-light);
+}
+#app-droit .price span {
+  position: absolute;
+  right: .85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 700;
+  font-size: .82rem;
+  color: var(--warning);
+  pointer-events: none;
+}   
 
 #app-droit .hint { min-height: 1em; color: var(--muted); font-size: .75rem; }
 #app-droit .hint.on { color: var(--warning); font-weight: 600; }
@@ -932,8 +958,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         </div>
         <div class="card-body">
           <div class="f">
-            <label for="prixVente">Montant de la transaction / Capital / Apport</label>
-            <div class="price"><input type="text" id="prixVente" inputmode="decimal" value="650000"><span>DH</span></div>
+            <label for="prixVente">Montant de la transaction</label>
+            <div class="price"><input type="text" id="prixVente" inputmode="decimal" value="650 000,00"><span>DH</span></div>
           </div>
           <div class="row r2 gap-top">
             <div class="f">
@@ -944,7 +970,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                 <option value="1.5_agri">1,50 % — Terrain agricole (co-indivisaires ou cohéritiers)</option>
                 <option value="3">3,00 % — 1ère vente logement social / FVI</option>
                 <option value="1.5">1,50 % — Donation / Partage (ligne directe, époux, fratrie)</option>
-                <option value="0">0,00 % — Exonéré</option>
+                <option value="0,00">0,00 % — Exonéré</option>
                 <option value="custom">+ Autre taux personnalisé…</option>
               </select>
             </div>
@@ -967,7 +993,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
             </div>
             <div class="f" id="partielBox" style="display:none">
               <label for="montantNonConforme">Montant non conforme (DH)</label>
-              <input type="text" id="montantNonConforme" inputmode="decimal" value="0" placeholder="Part payée hors art. 11">
+              <input type="text" id="montantNonConforme" inputmode="decimal" value="0,00" placeholder="Part payée hors art. 11">
               <span class="hint">Part du prix non justifiée par un moyen traçable.</span>
             </div>
           </div>
@@ -995,10 +1021,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         <summary><span class="step-num">3</span><span class="card-title">Crédit &amp; hypothèques</span><small>(optionnel)</small></summary>
         <div class="card-body">
           <div class="row r4">
-            <div class="f"><label for="pr1">Prêt rang 1</label><input type="text" id="pr1" inputmode="decimal" value="0" class="ci"><span class="hint" id="h1"></span></div>
-            <div class="f"><label for="pr2">Prêt rang 2</label><input type="text" id="pr2" inputmode="decimal" value="0" class="ci"><span class="hint" id="h2"></span></div>
-            <div class="f"><label for="pr3">Prêt rang 3</label><input type="text" id="pr3" inputmode="decimal" value="0" class="ci"><span class="hint" id="h3"></span></div>
-            <div class="f"><label for="pr4">Prêt rang 4</label><input type="text" id="pr4" inputmode="decimal" value="0" class="ci"><span class="hint" id="h4"></span></div>
+            <div class="f"><label for="pr1">Prêt rang 1</label><input type="text" id="pr1" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h1"></span></div>
+            <div class="f"><label for="pr2">Prêt rang 2</label><input type="text" id="pr2" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h2"></span></div>
+            <div class="f"><label for="pr3">Prêt rang 3</label><input type="text" id="pr3" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h3"></span></div>
+            <div class="f"><label for="pr4">Prêt rang 4</label><input type="text" id="pr4" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h4"></span></div>
           </div>
         </div>
       </details>
@@ -1009,7 +1035,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           <div class="row r4">
             <div class="f"><label for="tauxHon">Taux honoraires (%)</label><input type="text" id="tauxHon" inputmode="decimal" value="1" class="ci"></div>
             <div class="f"><label for="honorairesHT">Honoraires H.T.</label><input type="text" id="honorairesHT" readonly></div>
-            <div class="f"><label for="remiseHon">Remise (%)</label><input type="text" id="remiseHon" inputmode="decimal" value="0" class="ci"></div>
+            <div class="f"><label for="remiseHon">Remise (%)</label><input type="text" id="remiseHon" inputmode="decimal" value="0,00" class="ci"></div>
             <div class="f"><label for="dpa">Droit par acte (DH)</label><input type="text" id="dpa" inputmode="decimal" value="200" class="ci"></div>
           </div>
           <div class="row r3 gap-top">
@@ -1029,7 +1055,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       </div>
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Décompte détaillé</span>
+          <span class="card-title">Frais d'acquisition détaillé</span>
           <span class="pdate" id="pdate"></span>
         </div>
         <div class="card-body">
@@ -1112,7 +1138,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Prix de Cession / Vente *</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="prix_cession" class="num-input" value="0" step="0.01" oninput="calculateAll()">
+                                        <input type="number" id="prix_cession" class="num-input" value="0,00" step="0.01" oninput="calculateAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1143,7 +1169,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Prix d'Acquisition Historique</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="prix_acquisition" class="num-input" value="0" step="0.01" oninput="calculateAll()">
+                                        <input type="number" id="prix_acquisition" class="num-input" value="0,00" step="0.01" oninput="calculateAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1160,7 +1186,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Dépenses d'Investissement Justifiées</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="investissement" class="num-input" value="0" step="0.01" oninput="calculateAll()">
+                                        <input type="number" id="investissement" class="num-input" value="0,00" step="0.01" oninput="calculateAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1349,7 +1375,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Prix de Cession Global / Vente *</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="multi_prix_cession" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()">
+                                        <input type="number" id="multi_prix_cession" class="num-input" value="0,00" step="0.01" oninput="calculateMultiAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1413,7 +1439,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Dépenses d'Investissement Justifiées</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="multi_investissement" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()">
+                                        <input type="number" id="multi_investissement" class="num-input" value="0,00" step="0.01" oninput="calculateMultiAll()">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -2003,18 +2029,18 @@ function hyp(m){
 }
 
 function resetDefaults(){
-  $('pr1').value=$('pr2').value=$('pr3').value=$('pr4').value="0";
+  $('pr1').value=$('pr2').value=$('pr3').value=$('pr4').value="0,00";
   $('dpa').value="200"; $('fraisDiversLib').value=DEF_LIB; $('fraisDiversVal').value=DEF_VAL;
 }
 function applyAide(prix){
   setTaux('4');
   if(prix<=300000){
     $('regimeBadge').textContent="Aide 100 000 DH";
-    $('dpa').value="400"; $('pr1').value="100000";
+    $('dpa').value="400"; $('pr1').value="100 000,00";
     $('fraisDiversLib').value="Certificat de pté. et frais banque"; $('fraisDiversVal').value="335";
   } else {
     $('regimeBadge').textContent="Aide 70 000 DH";
-    $('dpa').value="200"; $('pr1').value="70000";
+    $('dpa').value="200"; $('pr1').value="70 000,00";
     $('fraisDiversLib').value=DEF_LIB; $('fraisDiversVal').value=DEF_VAL;
   }
   $('detailsCredit').open = true;
@@ -2088,7 +2114,7 @@ function calc(){
   if (!isVenteImmoOuFDC || prix <= 300000) {
     modePaiementSelect.value = 'total';
     modePaiementSelect.disabled = true;
-    montantNonConformeInput.value = '0';
+    montantNonConformeInput.value = '0,00';
     montantNonConformeInput.disabled = true;
     if (!isVenteImmoOuFDC) {
       $('paiementNote').textContent = "Le contrôle du mode de règlement (Art. 11) s'applique exclusivement aux ventes immobilières et cessions de fonds de commerce.";
@@ -2102,7 +2128,7 @@ function calc(){
       montantNonConformeInput.disabled = false;
     } else {
       montantNonConformeInput.disabled = true;
-      montantNonConformeInput.value = '0';
+      montantNonConformeInput.value = '0,00';
     }
     $('paiementNote').style.display = (modePaiementSelect.value !== 'total') ? 'block' : 'none';
     if (modePaiementSelect.value === 'non_conforme') {
@@ -2256,7 +2282,7 @@ function reset(){
   ['clientInfo','titreFoncier'].forEach(function(i){$(i).value=''});
   $('dateActeProv').value = today;
   $('dateDepotProv').value = today;
-  $('nbrTf').value='1'; $('prixVente').value='650000'; $('tauxCf').value='1.5';
+  $('nbrTf').value='1'; $('prixVente').value='650 000,00'; $('tauxCf').value='1.5';
   $('tauxHon').value='1'; $('remiseHon').value='0'; $('aideLogement').checked=false;
   $('modePaiement').value='total';
   $('montantNonConforme').value='0';
@@ -2277,7 +2303,8 @@ document.addEventListener('DOMContentLoaded',function(){
   $('dateDepotProv').addEventListener('change', calc);
 
   $('prixVente').addEventListener('input',onPrix);
-  $('prixVente').addEventListener('blur',function(){ var v=num('prixVente'); if(v>0) this.value=String(Math.round(v*100)/100).replace(/\B(?=(\d{3})+(?!\d))/g,' '); });
+  $('prixVente').addEventListener('blur',function(){ var v=num('prixVente'),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; });
+  ['pr1','pr2','pr3','pr4'].forEach(function(id){ $(id).addEventListener('blur',function(){ var v=num(id),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; }); $(id).addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); }); });
   $('prixVente').addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); });
   $('aideLogement').addEventListener('change',onAide);
   $('modePaiement').addEventListener('change',function(){
@@ -2287,6 +2314,8 @@ document.addEventListener('DOMContentLoaded',function(){
     calc();
   });
   $('montantNonConforme').addEventListener('input',calc);
+  $('montantNonConforme').addEventListener('blur',function(){ var v=num('montantNonConforme'),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; });
+$('montantNonConforme').addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); });
   document.querySelectorAll('.ci,#clientInfo,#titreFoncier,#nbrTf,#tauxCf,#fraisGreffeVal,#fraisPubVal').forEach(function(e){ e.addEventListener('input',calc); });
   $('tauxEnreg').addEventListener('change',function(){
     var c=this.value==='custom'; $('customBox').style.display=c?'flex':'none';
@@ -2647,7 +2676,7 @@ document.addEventListener('DOMContentLoaded',function(){
             tr.innerHTML = `
                 <td class="row-num-cell" style="font-weight:600; color:var(--cds-brand-800);">#1</td>
                 <td>
-                    <input type="number" id="m-prix-${rowId}" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()" style="padding-right:0.65rem;">
+                    <input type="number" id="m-prix-${rowId}" class="num-input" value="0,00" step="0.01" oninput="calculateMultiAll()" style="padding-right:0.65rem;">
                 </td>
                 <td>
                     <select id="m-year-${rowId}" onchange="calculateMultiAll()">${getMultiAcqYearOptionsHTML()}</select>
