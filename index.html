@@ -89,6 +89,18 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   color: var(--accent);
   font: 700 .78rem/1.3 var(--font-display);
 }
+.header-right { display: flex; align-items: center; gap: .85rem; flex-shrink: 0; }
+.btn-etude-cfg {
+  padding: .48rem .85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 234, 153, .55);
+  background: rgba(255, 255, 255, .12);
+  color: var(--accent);
+  font: 700 .8rem var(--font-display);
+  white-space: nowrap;
+  transition: background .18s ease;
+}
+.btn-etude-cfg:hover { background: rgba(255, 255, 255, .2); }
 .clock-box { text-align: right; color: #d7e0e4; font-size: .83rem; flex-shrink: 0; }
 #current-date { color: #fff; font-weight: 700; text-transform: capitalize; }
 #current-time { font-variant-numeric: tabular-nums; color: #aebfc7; }
@@ -337,7 +349,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   #shell-header { min-height: 90px; padding: 1rem; }
   .brand { gap: .7rem; }
   .brand-icon { width: 42px; height: 42px; flex-basis: 42px; }
-  .brand p { max-width: 260px; font-size: .77rem; }
+  .brand p { max-width: 240px; font-size: .77rem; }
   .clock-box { display: none; }
   #shell-main { margin: 1rem auto 1.5rem; padding: 0 .8rem; }
   #shell-footer { padding: .5rem .8rem 0; }
@@ -356,7 +368,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @page { size: A4; margin: 14mm; }
 @media print {
   body { background: #fff; color: #17242c; font-size: 10pt; padding-bottom: 14mm; }
-  #shell-header, #shell-nav, .bar { display: none !important; }
+  #shell-header, #shell-nav, .bar, #etude-modal { display: none !important; }
   #shell-footer {
     display: flex !important;
     position: fixed;
@@ -909,14 +921,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   <div class="brand">
     <div class="brand-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7l-2 9h4l-2-9z"/><path d="M19 7l-2 9h4l-2-9z"/><path d="M8 21h8"/></svg></div>
     <div>
-      <h1>Étude Notariale — Calcul Frais et IR/PI</h1>
-      <p>Calcul des Frais (CGI 2026) · Profits immobiliers (T.P.I.)</p>
+      <h1 id="header-etude-nom">Étude Notariale — Calcul Frais et IR/PI</h1>
+      <p id="header-etude-sub">Calcul des Frais (CGI 2026) · Profits immobiliers (T.P.I.)</p>
       <span class="author-badge">Développé par Hatim DALIL</span>
     </div>
   </div>
-  <div class="clock-box">
-    <div id="current-date"></div>
-    <div id="current-time"></div>
+  <div class="header-right">
+    <button type="button" id="btnConfigEtude" class="btn-etude-cfg" title="Personnaliser le nom de votre étude notariale">⚙️ Mon Étude</button>
+    <div class="clock-box">
+      <div id="current-date"></div>
+      <div id="current-time"></div>
+    </div>
   </div>
 </header>
 
@@ -927,7 +942,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 <main id="shell-main">
 <div id="app-droit" class="module">
-  <div class="print-title"><b>Étude notariale — Note des Frais</b><span>Code Général des Impôts 2026 · ANCFCC</span></div>
+  <div class="print-title" id="print-title-prov"><b>Étude notariale — Note des Frais</b><span>Code Général des Impôts 2026 · ANCFCC</span></div>
 
   <div class="wrap">
     <div class="left">
@@ -1114,7 +1129,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 
 <div id="app-tpi" class="module">
-<div class="print-title"><b>Étude notariale — ESTIMATION DE DECLARATION TPI (CGI 2026)</b><span>Profit immobilier, réévaluation &amp; cotisation minimale (CGI)</span></div>
+<div class="print-title" id="print-title-tpi"><b>Étude notariale — ESTIMATION DE DECLARATION TPI (CGI 2026)</b><span>Profit immobilier, réévaluation &amp; cotisation minimale (CGI)</span></div>
 
     <!-- =====================================================================
          SUB-NAVIGATION
@@ -1188,7 +1203,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             <div class="options-panel-yellow">
                                 <label class="checkbox-row">
                                     <input type="checkbox" id="chk_habitation_principale" onchange="calculateAll()">
-                                    <span>Habitation Principale occupée ≥ 5 ans (Exonération jusqu'à 4.000.000 DH, 3% sur le surplus)</span>
+                                    <span>Habitation Principale occupée ≥ 6 ans (Exonération jusqu'à 4.000.000 DH, 3% sur le surplus)</span>
                                 </label>
                                 <label class="checkbox-row">
                                     <input type="checkbox" id="chk_include_5pct" checked onchange="calculateAll()">
@@ -1425,7 +1440,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             <div class="options-panel-yellow">
                                 <label class="checkbox-row">
                                     <input type="checkbox" id="multi_chk_habitation" onchange="calculateMultiAll()">
-                                    <span>Habitation Principale occupée ≥ 5 ans (Exonération jusqu'à 4.000.000 DH, 3% sur le surplus)</span>
+                                    <span>Habitation Principale occupée ≥ 6 ans (Exonération jusqu'à 4.000.000 DH, 3% sur le surplus)</span>
                                 </label>
                                 <label class="checkbox-row">
                                     <input type="checkbox" id="multi_chk_include_5pct" checked onchange="calculateMultiAll()">
@@ -1733,6 +1748,30 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         </div>
     </div>
 </div>
+
+<!-- MODAL CONFIGURATION DE L'ÉTUDE NOTARIALE -->
+<div id="etude-modal" style="position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:120;padding:1rem" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:480px;box-shadow:0 20px 40px rgba(0,0,0,.2);overflow:hidden">
+    <div style="padding:1.1rem 1.4rem;background:var(--subtle);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <strong style="color:var(--primary-dark)">⚙️ Configuration de l'Étude Notariale</strong>
+      <button type="button" id="etudeClose" style="border:0;background:transparent;font-size:1.1rem;color:var(--muted)">✕</button>
+    </div>
+    <div style="padding:1.3rem; display:flex; flex-direction:column; gap:.9rem">
+      <div>
+        <label for="etudeNomInput" style="display:block;font-size:.84rem;font-weight:600;margin-bottom:.35rem;color:var(--text-2)">Nom de l'Étude / Notaire (affiché sur PDF, Impression &amp; WhatsApp)</label>
+        <input type="text" id="etudeNomInput" placeholder="Ex : Étude de Maître Ahmed BENNANI" style="width:100%;min-height:42px;padding:.6rem .75rem;border:1px solid var(--border-strong);border-radius:7px">
+      </div>
+      <div>
+        <label for="etudeSubInput" style="display:block;font-size:.84rem;font-weight:600;margin-bottom:.35rem;color:var(--text-2)">Ville / Adresse / Téléphone (Optionnel)</label>
+        <input type="text" id="etudeSubInput" placeholder="Ex : Notaire à Kénitra — Tél : 05 37 00 00 00" style="width:100%;min-height:42px;padding:.6rem .75rem;border:1px solid var(--border-strong);border-radius:7px">
+      </div>
+    </div>
+    <div style="padding:1rem 1.4rem;background:var(--subtle);border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.6rem">
+      <button type="button" id="etudeReset" style="padding:.55rem .9rem;border-radius:7px;border:1px solid var(--border-strong);background:#fff;color:var(--primary);font-weight:700">Effacer</button>
+      <button type="button" id="etudeSave" style="padding:.55rem 1rem;border-radius:7px;border:0;background:var(--primary);color:#fff;font-weight:700">Enregistrer</button>
+    </div>
+  </div>
+</div>
 </main>
 
 <footer id="shell-footer">
@@ -1741,6 +1780,48 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 </footer>
 
 <script>
+// =====================================================================
+// GESTION DE LA CONFIGURATION DE L'ÉTUDE NOTARIALE (PC & MOBILE)
+// =====================================================================
+window.getEtudeInfo = function () {
+  try {
+    var saved = JSON.parse(localStorage.getItem('notaire_etude_info') || '{}');
+    return {
+      nom: (saved.nom || '').trim(),
+      sub: (saved.sub || '').trim()
+    };
+  } catch (e) {
+    return { nom: '', sub: '' };
+  }
+};
+
+window.applyEtudeBranding = function () {
+  var info = window.getEtudeInfo();
+  var hNom = document.getElementById('header-etude-nom');
+  var hSub = document.getElementById('header-etude-sub');
+  var pProv = document.getElementById('print-title-prov');
+  var pTpi = document.getElementById('print-title-tpi');
+
+  if (hNom) {
+    hNom.textContent = info.nom
+      ? info.nom + ' — Calcul Frais et IR/PI'
+      : 'Étude Notariale — Calcul Frais et IR/PI';
+  }
+  if (hSub) {
+    hSub.textContent = info.sub
+      ? info.sub + ' · Profits immobiliers (T.P.I.)'
+      : 'Calcul des Frais (CGI 2026) · Profits immobiliers (T.P.I.)';
+  }
+  if (pProv) {
+    pProv.innerHTML = '<b>' + (info.nom || 'Étude notariale') + ' — Note des Frais</b>' +
+      '<span>' + (info.sub ? info.sub + ' · ' : '') + 'Code Général des Impôts 2026 · ANCFCC</span>';
+  }
+  if (pTpi) {
+    pTpi.innerHTML = '<b>' + (info.nom || 'Étude notariale') + ' — ESTIMATION DE DECLARATION TPI (CGI 2026)</b>' +
+      '<span>' + (info.sub ? info.sub + ' · ' : '') + 'Profit immobilier, réévaluation &amp; cotisation minimale (CGI)</span>';
+  }
+};
+
 // =====================================================================
 // UTILITAIRE COMMUN : ÉCHÉANCES LÉGALES MAROC (ENREG. J+30, ANCFCC M+3, FÉRIÉS & PRESCRIPTION 10 ANS)
 // =====================================================================
@@ -1985,10 +2066,9 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
 
 (function () {
   var MODS = {
-    provision: { id: 'app-droit', title: 'Étude notariale' },
+    provision: { id: 'app-droit', title: 'Calcul des Frais' },
     tpi:       { id: 'app-tpi',   title: 'Liquidation T.P.I. (IR / PI)' }
   };
-  var BASE = 'Hatim DALIL — Calcul Frais et IR/PI';
   var tabs = document.querySelectorAll('.module-tab');
 
   function show(key, updateHash) {
@@ -2002,7 +2082,9 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
       t.setAttribute('aria-selected', on ? 'true' : 'false');
       t.tabIndex = on ? 0 : -1;
     });
-    document.title = MODS[key].title + ' · ' + BASE;
+    var info = window.getEtudeInfo();
+    var baseTitle = info.nom || 'Étude notariale — Calcul Frais et IR/PI';
+    document.title = MODS[key].title + ' · ' + baseTitle;
     if (updateHash && location.hash !== '#' + key) { history.replaceState(null, '', '#' + key); }
     window.scrollTo({ top: 0 });
   }
@@ -2016,6 +2098,7 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
     });
   });
   window.addEventListener('hashchange', function () { show(location.hash.replace('#', ''), false); });
+  window.applyEtudeBranding();
   show(location.hash.replace('#', '') || 'provision', false);
   document.getElementById('footer-year').textContent = new Date().getFullYear();
 })();
@@ -2051,6 +2134,7 @@ function nature(){
 function setTaux(v){ $('tauxEnreg').value=v; $('customBox').style.display='none'; }
 
 function printNote(){
+  window.applyEtudeBranding();
   var c=($('clientInfo').value.trim()||'Dossier').replace(/[^\w\u00C0-\u017F-]+/g,'_');
   var old=document.title;
   document.title='Note_Frais_'+c+'_'+new Date().toISOString().slice(0,10);
@@ -2059,6 +2143,7 @@ function printNote(){
 }
 
 function buildPdf(d){
+  var etude = window.getEtudeInfo ? window.getEtudeInfo() : { nom: '', sub: '' };
   var W=595,H=842,M=48,ops=[];
   var NAVY='0.078 0.149 0.239 rg',GOLD='0.69 0.54 0.24 rg',INK='0.11 0.15 0.2 rg',MUT='0.42 0.46 0.51 rg';
   function enc(t){return String(t).replace(/[^\x20-\x7E\u00A0-\u00FF]/g,'').replace(/[\\()]/g,'\\$&');}
@@ -2066,14 +2151,27 @@ function buildPdf(d){
   function T(x,y,t,f,size,col){ops.push(col+' BT /'+f+' '+size+' Tf '+x.toFixed(2)+' '+y.toFixed(2)+' Td ('+enc(t)+') Tj ET');}
   function TR(y,t,f,size,col){T(W-M-tw(t,size),y,t,f,size,col);}
   function line(y){ops.push('0.9 0.89 0.85 RG 0.5 w '+M+' '+y+' m '+(W-M)+' '+y+' l S');}
-  ops.push(NAVY+' 0 782 '+W+' 60 re f');
-  ops.push(GOLD+' 0 779 '+W+' 3 re f');
-  T(M,808,d.title||'NOTE DES FRAIS (CGI 2026)','F2',18,'1 1 1 rg');
-  T(M,792,d.subtitle||'Etude notariale  -  Code General des Impots','F1',8.5,'0.8 0.84 0.9 rg');
+  var etude = (typeof window.getEtudeInfo === 'function') ? window.getEtudeInfo() : { nom: '', sub: '' };
+  var pdfNomEtude = etude.nom || 'Etude Notariale';
+  var pdfSubEtude = etude.sub || 'Code General des Impots (CGI 2026)';
+  var pdfTitreDoc = d.title || 'NOTE DES FRAIS (CGI 2026)';
+
+  ops.push(NAVY+' 0 772 '+W+' 70 re f');
+  ops.push(GOLD+' 0 769 '+W+' 3 re f');
+
+  /* Ligne 1 : Nom de l'étude à gauche + Date à droite */
+  T(M,816,pdfNomEtude,'F2',15,'1 1 1 rg');
   var date=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-  TR(808,date,'F1',9,'0.8 0.84 0.9 rg');
-  TR(792,'Développé par Hatim DALIL','F2',8.5,'1 0.918 0.6 rg');
-  var y=750;
+  TR(816,date,'F1',9,'0.8 0.84 0.9 rg');
+
+  /* Ligne 2 : Adresse / coordonnées de l'étude sur toute la largeur (sans chevauchement) */
+  T(M,800,pdfSubEtude,'F1',8.5,'0.8 0.84 0.9 rg');
+
+  /* Ligne 3 : Titre du document à gauche + Signature à droite */
+  T(M,782,pdfTitreDoc,'F2',10,'1 0.918 0.6 rg');
+  TR(782,'Développé par Hatim DALIL','F2',8.5,'1 0.918 0.6 rg');
+
+  var y=742;
   T(M,y,(d.kind==='tpi'?'Annee / dossier : ':'Client : ')+(d.client||'Non renseigne'),'F2',11,NAVY);
   T(M,y-16,(d.kind==='tpi'?'Echeance DGI : ':'Reference : ')+(d.tf||'-'),'F1',10,INK);
   var echeancesStr = '';
@@ -2222,6 +2320,7 @@ function onAide(){
 
 var recap="", lastData=null;
 function calc(){
+  var etude = window.getEtudeInfo ? window.getEtudeInfo() : { nom: '', sub: '' };
   var client=$('clientInfo').value.trim(), tf=$('titreFoncier').value.trim();
   var nbr=Math.max(1,Math.floor(num('nbrTf'))||1), prix=num('prixVente');
   var selVal = $('tauxEnreg').value;
@@ -2385,11 +2484,13 @@ function calc(){
   }
 
   // Calcul échéance légale Conservation Foncière (M+3) et pénalité ANCFCC (5% + 0,5%/mois)
+  // Pénalité appliquée sur le montant total des droits d'hypothèque (hTot) et sur le droit Mourabaha (1 000 DH)
   var dateDepotCfStr = $('dateDepotCfProv').value;
   var certifCalc = nbr * 100;
   var cfRawCalc = prix * tC / 100 + certifCalc;
   var cfBaseCalc = (isAncfccEligible && prix > 0 && tC > 0) ? (cfRawCalc < 500 ? 500 : up(cfRawCalc)) : 0;
-  var assiettePenaliteCf = isAncfccEligible ? (cfBaseCalc + hTot) : 0;
+  var droitMourabaha = 1000;
+  var assiettePenaliteCf = isAncfccEligible ? (cfBaseCalc + hTot + (isMourabaha ? droitMourabaha : 0)) : 0;
   var penCf = window.computeRetardCfMaroc(dateActeStr, dateDepotCfStr, assiettePenaliteCf);
 
   $('dateLimiteCfProv').value = penCf.dateLimiteStr;
@@ -2451,9 +2552,10 @@ function calc(){
     // --- VOLET 2 : ACHAT DÉFINITIF PAR LE CLIENT (REVENTE MOURABAHA) ---
     var enreg2 = 200; // Droit fixe Art. 135-II-15° CGI
     var dpa2 = 200;   // Droit par acte
-    var droitMourabaha = 1000; // Droit ANCFCC Mourabaha
     var certif2 = nbr * 100;
-    var penCfActe2 = (penCf.isLate && hTot > 0) ? Math.ceil(hTot * (penCf.tauxPct / 100)) : 0;
+    // Pénalité ANCFCC appliquée sur le droit Mourabaha (1 000 DH) et le montant total des droits d'hypothèque (hTot)
+    var assietteCfActe2 = droitMourabaha + hTot;
+    var penCfActe2 = (penCf.isLate && assietteCfActe2 > 0) ? Math.ceil(assietteCfActe2 * (penCf.tauxPct / 100)) : 0;
 
     var hon2 = hon1;
     var tva2 = tva1;
@@ -2464,7 +2566,8 @@ function calc(){
       ['Certificats de propriété <small>(' + nbr + ' × 100)</small>', certif2, 'Certificats de propriété (' + nbr + ')']
     ].concat(hLines);
     if (penCfActe2 > 0) {
-      rActe2.push([penCf.penaliteCfLabel + ' (Hypothèque)', penCfActe2, penCf.penaliteCfLabel + ' (Hypothèque)', true]);
+      var labelPenActe2 = hTot > 0 ? penCf.penaliteCfLabel + ' (Mourabaha & Hypothèques)' : penCf.penaliteCfLabel + ' (Mourabaha)';
+      rActe2.push([labelPenActe2, penCfActe2, labelPenActe2, true]);
     }
     rActe2.push(
       ['Honoraires Client H.T. <small>(' + tH + ' %)</small>', hon2, 'Honoraires Client H.T. (' + tH + '%)'],
@@ -2545,7 +2648,8 @@ function calc(){
   // Affichage conditionnel de Échéance Enreg. et Échéance C.F. uniquement en cas de retard
   var showEcheance = Boolean(dateActeStr && penEnreg.isLate);
   var showEcheanceCf = Boolean(dateActeStr && isAncfccEligible && penCf.isLate);
-  var html='', txt="⚖️ *CALCUL DES FRAIS (CGI 2026)*\n"+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+(showEcheance?"Échéance Enreg. (J+30) : "+penEnreg.dateLimiteStr+"\n":"")+(showEcheanceCf?"Échéance C.F. (M+3) : "+penCf.dateLimiteStr+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
+  var waHeader = etude.nom ? "⚖️ *" + etude.nom.toUpperCase() + "*\n_Calcul des Frais (CGI 2026)_\n" : "⚖️ *CALCUL DES FRAIS (CGI 2026)*\n";
+  var html='', txt=waHeader+(client?"Client : "+client+"\n":"")+(tf?"Référence : "+tf+"\n":"")+(showEcheance?"Échéance Enreg. (J+30) : "+penEnreg.dateLimiteStr+"\n":"")+(showEcheanceCf?"Échéance C.F. (M+3) : "+penCf.dateLimiteStr+"\n":"")+"Montant de base : *"+fmt(prix)+"*\n";
   secs.forEach(function(s){
     html+='<div class="sec">'+s.t+'</div>'; txt+="\n*"+s.t+"*\n";
     s.r.forEach(function(x){
@@ -2603,6 +2707,34 @@ function reset(){
 }
 
 document.addEventListener('DOMContentLoaded',function(){
+  // Gestion de la modale de configuration de l'Étude Notariale
+  $('btnConfigEtude').addEventListener('click',function(){
+    var info = window.getEtudeInfo();
+    $('etudeNomInput').value = info.nom;
+    $('etudeSubInput').value = info.sub;
+    $('etude-modal').style.display = 'flex';
+    $('etudeNomInput').focus();
+  });
+  $('etudeClose').addEventListener('click',function(){ $('etude-modal').style.display = 'none'; });
+  $('etudeSave').addEventListener('click',function(){
+    var nom = $('etudeNomInput').value.trim();
+    var sub = $('etudeSubInput').value.trim();
+    localStorage.setItem('notaire_etude_info', JSON.stringify({ nom: nom, sub: sub }));
+    window.applyEtudeBranding();
+    calc();
+    $('etude-modal').style.display = 'none';
+    toast('Informations de l\'étude enregistrées !');
+  });
+  $('etudeReset').addEventListener('click',function(){
+    localStorage.removeItem('notaire_etude_info');
+    $('etudeNomInput').value = '';
+    $('etudeSubInput').value = '';
+    window.applyEtudeBranding();
+    calc();
+    $('etude-modal').style.display = 'none';
+    toast('Configuration réinitialisée');
+  });
+
   var today = new Date().toISOString().split('T')[0];
   $('dateActeProv').value = today;
   $('dateDepotProv').value = today;
@@ -2760,6 +2892,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function printTpi() {
+            if (window.applyEtudeBranding) window.applyEtudeBranding();
             const old = document.title;
             document.title = 'Liquidation_TPI_' + new Date().toISOString().slice(0, 10);
             try { window.print(); } catch (e) { alert('Impression indisponible : utilisez le bouton PDF.'); }
@@ -3296,8 +3429,10 @@ document.addEventListener('DOMContentLoaded',function(){
         function buildWhatsAppMessage(mode) {
             const isMulti = mode === 'multi';
             const st = isMulti ? multiState : singleState;
+            const etude = window.getEtudeInfo ? window.getEtudeInfo() : { nom: '', sub: '' };
 
             let lines = [
+                ...(etude.nom ? [`⚖️ *${etude.nom.toUpperCase()}*`] : []),
                 isMulti
                     ? `⚖️ *DÉCOMPTE FISCAL ACQUISITIONS MULTIPLES — IR / PI (T.P.I.)*`
                     : `⚖️ *DÉCOMPTE FISCAL — IR / PI (T.P.I. MAROC)*`,
