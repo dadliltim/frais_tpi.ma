@@ -8,10 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<!-- Export PDF (module T.P.I.) -->
-<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=Kt1IDDm98aXLxDRRBoy7GVOINUTRRxmxpZygoDESyH2569ME_8uLLiYCMdNTrreQsQokXtBkeGdaeM6Ey2J3Ew4WuaPeBt48a3CzTJcR6uwAID-CMW4lZ2LNZnVqXsgUHunRiqq2bwawGTGIJTr7VQ6BWG-836xE1rMyzz8NtlepA_PBOrprzCpYHOqroWbAStpb-xEYB8Doq3_fLWrcR-UMGo_vxGe6UNJTGuMsOTybN3F3eePEIGYlcYa7Kyn3ntD8kwDb3S-ZfACzFaFlKGFAvlt0N087IZweVIVuRO-BnUC1raRAidmv4jrRiUUA0BpX_jj6jYfX721ACRuzTg" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9jb250cmlidXRpb24tcXcudXNlcmNvbnRlbnQuZ29vZ2xlLmNvbS9kb3dubG9hZD9jPUNneGlZWEprWDNOMGIzSmhaMlVTVHhJTmNtVnpjRzl1YzJWZlpHRjBZUm8tQ2pBMFpUSTFZakpqTlRCaE9EQm1OekV5TURBd05qWXdOakl5Wm1ReE1EY3dZekE0TkdZNE5UYzRaVEV4TURNeE1URVNDaElHRUxfMW9zMHhHQUUmZmlsZW5hbWU9aW5kZXguaHRtbCZvcGk9MTAzMTM1MDUwJmF1dGh1c2VyPTE"/><script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<!-- Lecture / écriture Excel (.xlsx, .xls, .csv) (module T.P.I.) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Bibliothèque Excel (XLSX) : chargée à la demande, voir loadXLSX() -->
 <style>
 /* =====================================================================
    DESIGN TOKENS — issus de calcul_tpi.css
@@ -65,8 +62,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
    COQUE COMMUNE : EN-TÊTE, NAVIGATION, PIED, BARRE MOBILE
    ===================================================================== */
 #shell-header {
-  min-height: 110px;
-  padding: 1.35rem max(1.25rem, calc((100vw - 1320px) / 2));
+  min-height: 88px;
+  padding: 1rem max(1.25rem, calc((100vw - 1320px) / 2));
   display: flex; justify-content: space-between; align-items: center; gap: 1rem;
   color: #fff; background: var(--primary);
   border-bottom: 3px solid var(--accent);
@@ -117,7 +114,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   background: #eef4f6;
   color: var(--text-2);
   font-weight: 600; white-space: nowrap;
-  transition: all .18s ease;
+  transition: background-color .18s ease, color .18s ease;
 }
 .module-tab:hover { color: var(--primary); background: #e2ecf0; }
 .module-tab.active {
@@ -148,7 +145,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .bar small { display: block; color: #c7d3d9; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; }
 .bar b { color: var(--accent); font: 800 1.2rem var(--font-display); font-variant-numeric: tabular-nums; }
 .bar .btn-accent {
-  min-height: 38px; padding: .5rem .85rem;
+  min-height: 44px; padding: .5rem .85rem;
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: 7px; font-size: .84rem; font-weight: 700;
   background: var(--accent); border: 1px solid var(--accent-line); color: #263943;
@@ -326,12 +323,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 #app-droit .acts { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; margin-top: 1.1rem; }
 #app-droit .acts .span2 { grid-column: span 2; }
 
-#app-droit .toast {
+.toast {
   position: fixed; left: 50%; bottom: 96px; z-index: 60; transform: translateX(-50%);
   padding: .55rem 1rem; border-radius: 8px; background: var(--text); color: #fff; font-size: .84rem;
   opacity: 0; pointer-events: none; transition: .25s;
 }
-#app-droit .toast.show { opacity: 1; }
+.toast.show { opacity: 1; }
 
 /* =====================================================================
    RESPONSIVE
@@ -390,7 +387,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
   #app-droit { padding-bottom: 0; }
   #app-droit .wrap { display: block; }
-  #app-droit .left, #app-droit .acts, #app-droit .toast, #prov-wa-modal { display: none !important; }
+  #app-droit .left, #app-droit .acts, .toast, #prov-wa-modal { display: none !important; }
   #app-droit .sum { position: static; }
   #app-droit .pdate { display: block; }
   #app-droit .card { box-shadow: none; break-inside: avoid; }
@@ -977,7 +974,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         <div class="card-body">
           <div class="f">
             <label for="prixVente">Montant de la transaction</label>
-            <div class="price"><input type="text" id="prixVente" inputmode="decimal" value="500 000,00"><span>DH</span></div>
+            <div class="price"><input type="text" id="prixVente" inputmode="decimal" inputmode="decimal" value="500 000,00"><span>DH</span></div>
           </div>
           <div class="row r2 gap-top">
             <div class="f">
@@ -995,7 +992,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
             </div>
             <div class="f" id="customBox" style="display:none">
               <label for="tauxCustom">Votre taux (%)</label>
-              <input type="text" id="tauxCustom" inputmode="decimal" placeholder="Ex : 2,5">
+              <input type="text" id="tauxCustom" inputmode="decimal" inputmode="decimal" placeholder="Ex : 2,5">
               <span class="hint">Taux personnalisé applicable à l'acte.</span>
             </div>
           </div>
@@ -1012,7 +1009,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
             </div>
             <div class="f" id="partielBox" style="display:none">
               <label for="montantNonConforme">Montant non conforme (DH)</label>
-              <input type="text" id="montantNonConforme" inputmode="decimal" value="0,00" placeholder="Part payée hors art. 11">
+              <input type="text" id="montantNonConforme" inputmode="decimal" inputmode="decimal" value="0,00" placeholder="Part payée hors art. 11">
               <span class="hint">Part du prix non justifiée par un moyen traçable.</span>
             </div>
           </div>
@@ -1022,8 +1019,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           <div class="panel-soft" id="greffeContainer">
             <div class="panel-title">Frais de greffe &amp; publications légales (tarifs officiels)</div>
             <div class="row r2">
-              <div class="f"><label for="fraisGreffeVal">Frais de Greffe / Tribunal (DH)</label><input type="text" id="fraisGreffeVal" inputmode="decimal" value="350" class="ci"></div>
-              <div class="f"><label for="fraisPubVal">Annonces légales / JAL &amp; B.O. (DH)</label><input type="text" id="fraisPubVal" inputmode="decimal" value="700" class="ci"></div>
+              <div class="f"><label for="fraisGreffeVal">Frais de Greffe / Tribunal (DH)</label><input type="text" id="fraisGreffeVal" inputmode="decimal" inputmode="decimal" value="350" class="ci"></div>
+              <div class="f"><label for="fraisPubVal">Annonces légales / JAL &amp; B.O. (DH)</label><input type="text" id="fraisPubVal" inputmode="decimal" inputmode="decimal" value="700" class="ci"></div>
             </div>
           </div>
 
@@ -1040,10 +1037,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         <summary><span class="step-num">3</span><span class="card-title">Crédit &amp; hypothèques</span><small id="creditSubLbl">(optionnel)</small></summary>
         <div class="card-body">
           <div class="row r4">
-            <div class="f"><label for="pr1" id="lblPr1">Prêt rang 1</label><input type="text" id="pr1" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h1"></span></div>
-            <div class="f"><label for="pr2" id="lblPr2">Prêt rang 2</label><input type="text" id="pr2" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h2"></span></div>
-            <div class="f"><label for="pr3">Prêt rang 3</label><input type="text" id="pr3" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h3"></span></div>
-            <div class="f"><label for="pr4">Prêt rang 4</label><input type="text" id="pr4" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h4"></span></div>
+            <div class="f"><label for="pr1" id="lblPr1">Prêt rang 1</label><input type="text" id="pr1" inputmode="decimal" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h1"></span></div>
+            <div class="f"><label for="pr2" id="lblPr2">Prêt rang 2</label><input type="text" id="pr2" inputmode="decimal" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h2"></span></div>
+            <div class="f"><label for="pr3">Prêt rang 3</label><input type="text" id="pr3" inputmode="decimal" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h3"></span></div>
+            <div class="f"><label for="pr4">Prêt rang 4</label><input type="text" id="pr4" inputmode="decimal" inputmode="decimal" value="0,00" class="ci"><span class="hint" id="h4"></span></div>
           </div>
         </div>
       </details>
@@ -1052,15 +1049,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         <summary><span class="step-num">4</span><span class="card-title">Honoraires &amp; frais</span><span class="badge" id="honBadge">1 % + TVA 20 %</span></summary>
         <div class="card-body">
           <div class="row r4">
-            <div class="f"><label for="tauxHon">Taux honoraires (%)</label><input type="text" id="tauxHon" inputmode="decimal" value="1" class="ci"></div>
-            <div class="f"><label for="honorairesHT">Honoraires H.T.</label><input type="text" id="honorairesHT" readonly></div>
-            <div class="f"><label for="remiseHon">Remise (%)</label><input type="text" id="remiseHon" inputmode="decimal" value="0,00" class="ci"></div>
-            <div class="f"><label for="dpa">Droit par acte (DH)</label><input type="text" id="dpa" inputmode="decimal" value="200" class="ci"></div>
+            <div class="f"><label for="tauxHon">Taux honoraires (%)</label><input type="text" id="tauxHon" inputmode="decimal" inputmode="decimal" value="1" class="ci"></div>
+            <div class="f"><label for="honorairesHT">Honoraires H.T.</label><input type="text" id="honorairesHT" inputmode="decimal" readonly></div>
+            <div class="f"><label for="remiseHon">Remise (%)</label><input type="text" id="remiseHon" inputmode="decimal" inputmode="decimal" value="0,00" class="ci"></div>
+            <div class="f"><label for="dpa">Droit par acte (DH)</label><input type="text" id="dpa" inputmode="decimal" inputmode="decimal" value="200" class="ci"></div>
           </div>
           <div class="row r3 gap-top">
             <div class="f"><label for="fraisDiversLib">Libellé frais divers</label><input type="text" id="fraisDiversLib" class="ci"></div>
-            <div class="f"><label for="fraisDiversVal">Montant (DH)</label><input type="text" id="fraisDiversVal" inputmode="decimal" class="ci"></div>
-            <div class="f" id="tauxCfBox"><label for="tauxCf">Taux C.F. (%)</label><input type="text" id="tauxCf" inputmode="decimal" value="1.5" class="ci"></div>
+            <div class="f"><label for="fraisDiversVal">Montant (DH)</label><input type="text" id="fraisDiversVal" inputmode="decimal" inputmode="decimal" class="ci"></div>
+            <div class="f" id="tauxCfBox"><label for="tauxCf">Taux C.F. (%)</label><input type="text" id="tauxCf" inputmode="decimal" inputmode="decimal" value="1.5" class="ci"></div>
           </div>
         </div>
       </details>
@@ -1069,7 +1066,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     <aside class="sum" id="note">
       <div class="total">
         <div class="lbl">Total Frais à consigner</div>
-        <div class="amt" id="totalGeneral">0,00 DH</div>
+        <div class="amt" id="totalGeneral" aria-live="polite" aria-atomic="true">0,00 DH</div>
         <div class="sub" id="subSummary"></div>
       </div>
       <div class="card">
@@ -1096,8 +1093,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     <div><small>Total provision</small><b id="barTotal">0,00 DH</b></div>
     <button class="btn btn-accent" id="btnDetail" type="button">Voir le détail ↓</button>
   </div>
-  <div class="toast" id="toast"></div>
-  <div id="prov-wa-modal" style="position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem" onclick="if(event.target===this)this.style.display='none'">
+  
+  <div id="prov-wa-modal" style="position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem" data-click="overlayClose">
     <div style="background:#fff;border-radius:12px;width:100%;max-width:540px;box-shadow:0 20px 40px rgba(0,0,0,.2);overflow:hidden">
       <div style="padding:1.1rem 1.4rem;background:var(--subtle);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--primary-dark)">
@@ -1134,13 +1131,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     <div class="subnav-bar">
         <div class="subnav-inner">
             <div class="tabs-list">
-                <button class="tab-btn active" onclick="switchTab(event, 'calculateur')">
+                <button class="tab-btn active" data-click="switchTab" data-arg="calculateur">
                     <span class="tab-step">1</span> Calcul Principal
                 </button>
-                <button class="tab-btn" onclick="switchTab(event, 'multi')">
+                <button class="tab-btn" data-click="switchTab" data-arg="multi">
                     <span class="tab-step">2</span> Acquisitions Multiples
                 </button>
-                <button class="tab-btn" onclick="switchTab(event, 'coefficients')">
+                <button class="tab-btn" data-click="switchTab" data-arg="coefficients">
                     <span class="tab-step">3</span> Référentiel des Coefficients (DGI)
                 </button>
             </div>
@@ -1168,8 +1165,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             </div>
                             <div style="display:flex; align-items:center; gap:0.5rem;">
                                 <label for="annee_vente" style="margin:0; font-size:0.78rem; color:var(--cds-brand-800);">Année Cession :</label>
-                                <select id="annee_vente" onchange="onAnneeVenteChange()" style="width:92px; height:34px; font-weight:700; border-color:var(--cds-brand-700);"></select>
-                                <button class="btn btn-outline no-print" onclick="resetForm()">
+                                <select id="annee_vente" data-change="onAnneeVenteChange" style="width:92px; height:34px; font-weight:700; border-color:var(--cds-brand-700);"></select>
+                                <button class="btn btn-outline no-print" data-click="resetForm">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                                     Réinitialiser
                                 </button>
@@ -1182,13 +1179,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Prix de Cession / Vente *</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="prix_cession" class="num-input" value="0" step="0.01" oninput="calculateAll()">
+                                        <input type="number" id="prix_cession" class="num-input" value="0" step="0.01" data-input="calculateAll">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Taux d'Imposition (CGI)</label>
-                                    <select id="taux_ir" onchange="calculateAll()">
+                                    <select id="taux_ir" data-change="calculateAll">
                                         <option value="20" selected>20% — Taux de droit commun</option>
                                         <option value="30">30% — Terrains urbains non bâtis (1ère cession)</option>
                                         <option value="25">25% — Ancien barème / Cas spécifique</option>
@@ -1199,11 +1196,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             <!-- FOND COLORÉ EN #FFEA99 -->
                             <div class="options-panel-yellow">
                                 <label class="checkbox-row">
-                                    <input type="checkbox" id="chk_habitation_principale" onchange="calculateAll()">
+                                    <input type="checkbox" id="chk_habitation_principale" data-change="calculateAll">
                                     <span>Habitation Principale occupée ≥ 5 ans (Exonération jusqu'à 4.000.000 DH, 3% sur le surplus)</span>
                                 </label>
                                 <label class="checkbox-row">
-                                    <input type="checkbox" id="chk_include_5pct" checked onchange="calculateAll()">
+                                    <input type="checkbox" id="chk_include_5pct" checked data-change="calculateAll">
                                     <span>Comparer également avec le seuil de 5% du Prix de Vente (retenir la valeur supérieure)</span>
                                 </label>
                             </div>
@@ -1213,7 +1210,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Prix d'Acquisition Historique</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="prix_acquisition" class="num-input" value="0" step="0.01" oninput="calculateAll()">
+                                        <input type="number" id="prix_acquisition" class="num-input" value="0" step="0.01" data-input="calculateAll">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1222,7 +1219,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                         <span>Année d'Acquisition</span>
                                         <span class="coef-pill">Coef: <strong id="disp-coef-acq">1.000</strong></span>
                                     </label>
-                                    <select id="annee_acquisition" onchange="calculateAll()"></select>
+                                    <select id="annee_acquisition" data-change="calculateAll"></select>
                                 </div>
                             </div>
 
@@ -1230,7 +1227,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Dépenses d'Investissement Justifiées</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="investissement" class="num-input" value="0" step="0.01" oninput="calculateAll()">
+                                        <input type="number" id="investissement" class="num-input" value="0" step="0.01" data-input="calculateAll">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1239,7 +1236,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                         <span>Année d'Investissement</span>
                                         <span class="coef-pill">Coef: <strong id="disp-coef-inv">1.000</strong></span>
                                     </label>
-                                    <select id="annee_investissement" onchange="calculateAll()"></select>
+                                    <select id="annee_investissement" data-change="calculateAll"></select>
                                 </div>
                             </div>
 
@@ -1247,11 +1244,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             <div class="grid-3">
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label>Date de l'Acte</label>
-                                    <input type="date" id="date_acte" onchange="onDateActeChange()">
+                                    <input type="date" id="date_acte" data-change="onDateActeChange">
                                 </div>
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label>Date Paiement DGI</label>
-                                    <input type="date" id="date_paiement" onchange="calculateAll()">
+                                    <input type="date" id="date_paiement" data-change="calculateAll">
                                 </div>
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label>Échéance Légale (J+30)</label>
@@ -1271,15 +1268,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             </div>
 
                             <div class="action-toolbar no-print">
-                                <button class="btn btn-pdf" onclick="exportToPDF('single')" id="btn-export-pdf-single">
+                                <button class="btn btn-pdf" data-click="exportToPDF" data-arg="single" id="btn-export-pdf-single">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                     PDF
                                 </button>
-                                <button class="btn btn-whatsapp" onclick="openWhatsAppModal('single')">
+                                <button class="btn btn-whatsapp" data-click="openWhatsAppModal" data-arg="single">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                                     WhatsApp
                                 </button>
-                                <button class="btn btn-print" onclick="printTpi()">
+                                <button class="btn btn-print" data-click="printTpi">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                                     Imprimer
                                 </button>
@@ -1380,7 +1377,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 </div>
                                 <div class="ledger-row" style="background:var(--cds-danger-50); border-color:var(--cds-danger-100); padding:0.85rem 1rem;">
                                     <span class="lbl" style="color:var(--cds-danger-700); font-weight:700;">TOTAL GÉNÉRAL À PAYER (DGI)</span>
-                                    <span class="val" id="res-total-payer" style="color:var(--cds-danger-700); font-size:1.15rem; font-weight:700;">0 DH</span>
+                                    <span class="val" id="res-total-payer" aria-live="polite" aria-atomic="true" style="color:var(--cds-danger-700); font-size:1.15rem; font-weight:700;">0 DH</span>
                                 </div>
                             </div>
                         </div>
@@ -1405,8 +1402,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             </div>
                             <div style="display:flex; align-items:center; gap:0.5rem;">
                                 <label for="multi_annee_vente" style="margin:0; font-size:0.78rem; color:var(--cds-brand-800);">Année Cession :</label>
-                                <select id="multi_annee_vente" onchange="onMultiAnneeVenteChange()" style="width:92px; height:34px; font-weight:700; border-color:var(--cds-brand-700);"></select>
-                                <button class="btn btn-outline no-print" onclick="resetMultiForm()">
+                                <select id="multi_annee_vente" data-change="onMultiAnneeVenteChange" style="width:92px; height:34px; font-weight:700; border-color:var(--cds-brand-700);"></select>
+                                <button class="btn btn-outline no-print" data-click="resetMultiForm">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                                     Réinitialiser
                                 </button>
@@ -1419,13 +1416,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Prix de Cession Global / Vente *</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="multi_prix_cession" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()">
+                                        <input type="number" id="multi_prix_cession" class="num-input" value="0" step="0.01" data-input="calculateMultiAll">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Taux d'Imposition (CGI)</label>
-                                    <select id="multi_taux_ir" onchange="calculateMultiAll()">
+                                    <select id="multi_taux_ir" data-change="calculateMultiAll">
                                         <option value="20" selected>20% — Taux de droit commun</option>
                                         <option value="30">30% — Terrains urbains non bâtis (1ère cession)</option>
                                         <option value="25">25% — Ancien barème / Cas spécifique</option>
@@ -1436,11 +1433,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             <!-- FOND COLORÉ EN #FFEA99 -->
                             <div class="options-panel-yellow">
                                 <label class="checkbox-row">
-                                    <input type="checkbox" id="multi_chk_habitation" onchange="calculateMultiAll()">
+                                    <input type="checkbox" id="multi_chk_habitation" data-change="calculateMultiAll">
                                     <span>Habitation Principale occupée ≥ 5 ans (Exonération jusqu'à 4.000.000 DH, 3% sur le surplus)</span>
                                 </label>
                                 <label class="checkbox-row">
-                                    <input type="checkbox" id="multi_chk_include_5pct" checked onchange="calculateMultiAll()">
+                                    <input type="checkbox" id="multi_chk_include_5pct" checked data-change="calculateMultiAll">
                                     <span>Comparer également avec le seuil de 5% du Prix de Vente (retenir la valeur supérieure)</span>
                                 </label>
                             </div>
@@ -1473,7 +1470,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 </table>
                             </div>
 
-                            <button type="button" class="btn btn-add-row no-print" onclick="addMultiRow()">
+                            <button type="button" class="btn btn-add-row no-print" data-click="addMultiRow">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                 Ajouter une autre acquisition / quittance
                             </button>
@@ -1483,7 +1480,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <div class="form-group">
                                     <label>Dépenses d'Investissement Justifiées</label>
                                     <div class="input-wrapper">
-                                        <input type="number" id="multi_investissement" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()">
+                                        <input type="number" id="multi_investissement" class="num-input" value="0" step="0.01" data-input="calculateMultiAll">
                                         <span class="input-suffix">DH</span>
                                     </div>
                                 </div>
@@ -1492,7 +1489,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                         <span>Année d'Investissement</span>
                                         <span class="coef-pill">Coef: <strong id="multi-disp-coef-inv">1.000</strong></span>
                                     </label>
-                                    <select id="multi_annee_investissement" onchange="calculateMultiAll()"></select>
+                                    <select id="multi_annee_investissement" data-change="calculateMultiAll"></select>
                                 </div>
                             </div>
 
@@ -1500,11 +1497,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             <div class="grid-3">
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label>Date de l'Acte</label>
-                                    <input type="date" id="multi_date_acte" onchange="onMultiDateActeChange()">
+                                    <input type="date" id="multi_date_acte" data-change="onMultiDateActeChange">
                                 </div>
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label>Date Paiement DGI</label>
-                                    <input type="date" id="multi_date_paiement" onchange="calculateMultiAll()">
+                                    <input type="date" id="multi_date_paiement" data-change="calculateMultiAll">
                                 </div>
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label>Échéance Légale (J+30)</label>
@@ -1524,15 +1521,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                             </div>
 
                             <div class="action-toolbar no-print">
-                                <button class="btn btn-pdf" onclick="exportToPDF('multi')" id="btn-export-pdf-multi">
+                                <button class="btn btn-pdf" data-click="exportToPDF" data-arg="multi" id="btn-export-pdf-multi">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                     PDF
                                 </button>
-                                <button class="btn btn-whatsapp" onclick="openWhatsAppModal('multi')">
+                                <button class="btn btn-whatsapp" data-click="openWhatsAppModal" data-arg="multi">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                                     WhatsApp
                                 </button>
-                                <button class="btn btn-print" onclick="printTpi()">
+                                <button class="btn btn-print" data-click="printTpi">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                                     Imprimer
                                 </button>
@@ -1656,14 +1653,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                         </div>
                     </div>
                     <div class="action-toolbar">
-                        <button class="btn btn-outline" onclick="createNewSaleYear()">+ Année de Cession</button>
-                        <button class="btn btn-outline" onclick="downloadExcelTemplate()" title="Télécharger un fichier Excel vierge prêt à remplir">📥 Modèle Excel</button>
-                        <button class="btn btn-outline" onclick="exportCoefficientsExcel()">⬇️ Exporter Excel</button>
+                        <button class="btn btn-outline" data-click="createNewSaleYear">+ Année de Cession</button>
+                        <button class="btn btn-outline" data-click="downloadExcelTemplate" title="Télécharger un fichier Excel vierge prêt à remplir">📥 Modèle Excel</button>
+                        <button class="btn btn-outline" data-click="exportCoefficientsExcel">⬇️ Exporter Excel</button>
                         <label class="btn btn-excel" style="cursor:pointer; margin:0;">
                             ⬆️ Importer Excel / CSV / JSON
-                            <input type="file" accept=".xlsx,.xls,.csv,.json" style="display:none;" onchange="importCoefficientsFile(event)">
+                            <input type="file" accept=".xlsx,.xls,.csv,.json" style="display:none;" data-change="importCoefficientsFile">
                         </label>
-                        <button class="btn btn-danger-soft" onclick="clearAllCoefficients()">
+                        <button class="btn btn-danger-soft" data-click="clearAllCoefficients">
                             🗑️ Vider les coefficients
                         </button>
                     </div>
@@ -1673,7 +1670,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                     <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem; background:var(--cds-bg-subtle); padding:1rem; border-radius:var(--cds-radius-md); border:1px solid var(--cds-border); margin-bottom:1.25rem;">
                         <div class="form-group" style="min-width:220px; margin-bottom:0;">
                             <label style="color:var(--cds-brand-800);">Année de Cession (Ans_Coefficient)</label>
-                            <select id="admin-sale-year" onchange="renderCoefficients()" style="font-weight:700; border-color:var(--cds-brand-700);"></select>
+                            <select id="admin-sale-year" data-change="renderCoefficients" style="font-weight:700; border-color:var(--cds-brand-700);"></select>
                         </div>
 
                         <div style="display:flex; gap:0.6rem; align-items:flex-end; flex-wrap:wrap;">
@@ -1685,7 +1682,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                                 <label>Coefficient</label>
                                 <input type="number" id="new-coef-val" placeholder="Ex: 1.108" step="0.001" style="width:130px;">
                             </div>
-                            <button class="btn btn-primary" onclick="addOrUpdateCoefficient()">💾 Enregistrer</button>
+                            <button class="btn btn-primary" data-click="addOrUpdateCoefficient">💾 Enregistrer</button>
                         </div>
                     </div>
 
@@ -1710,20 +1707,20 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     <!-- Barre fixe mobile pour T.P.I. -->
     <div class="bar" id="tpi-bar">
       <div><small>Total général à payer (DGI)</small><b id="tpiBarTotal">0 DH</b></div>
-      <button class="btn btn-accent" id="btnTpiDetail" type="button" onclick="scrollToTpiDetail()">Voir le détail ↓</button>
+      <button class="btn btn-accent" id="btnTpiDetail" type="button" data-click="scrollToTpiDetail">Voir le détail ↓</button>
     </div>
 
     <!-- =====================================================================
          MODAL ENVOI WHATSAPP
          ===================================================================== -->
-    <div id="wa-modal" class="modal-backdrop" onclick="if(event.target===this) closeWhatsAppModal()">
+    <div id="wa-modal" class="modal-backdrop" data-click="overlayCloseWa">
         <div class="modal-card">
             <div class="modal-header">
                 <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700; color:var(--cds-brand-900);">
                     <span style="color:var(--cds-whatsapp); font-size:1.2rem;">💬</span>
                     <span>Envoyer le Décompte T.P.I. via WhatsApp</span>
                 </div>
-                <button class="btn btn-ghost" onclick="closeWhatsAppModal()" style="font-size:1.1rem;">✕</button>
+                <button class="btn btn-ghost" data-click="closeWhatsAppModal" style="font-size:1.1rem;">✕</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -1736,8 +1733,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="copyWhatsAppText()">📋 Copier le texte</button>
-                <button class="btn btn-whatsapp" onclick="launchWhatsApp()">
+                <button class="btn btn-outline" data-click="copyWhatsAppText">📋 Copier le texte</button>
+                <button class="btn btn-whatsapp" data-click="launchWhatsApp">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     Ouvrir WhatsApp &amp; Envoyer
                 </button>
@@ -1746,7 +1743,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     </div>
 </div>
 
-<div id="etude-modal" style="position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:120;padding:1rem" onclick="if(event.target===this)this.style.display='none'">
+<div id="etude-modal" style="position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:120;padding:1rem" data-click="overlayClose">
   <div style="background:#fff;border-radius:12px;width:100%;max-width:480px;box-shadow:0 20px 40px rgba(0,0,0,.2);overflow:hidden">
     <div style="padding:1.1rem 1.4rem;background:var(--subtle);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
       <strong style="color:var(--primary-dark)">⚙️ Configuration de l'Étude Notariale</strong>
@@ -1776,7 +1773,88 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   <span>Développé par Hatim DALIL · <span id="footer-year"></span></span>
 </footer>
 
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
+// =====================================================================
+// SOCLE COMMUN : accès DOM en cache, stockage sécurisé, chargement Excel à la demande
+// =====================================================================
+const _domCache = new Map();
+function byId(id) {
+  let el = _domCache.get(id);
+  if (!el || !el.isConnected) {
+    el = document.getElementById(id);
+    if (el) _domCache.set(id, el);
+  }
+  return el;
+}
+
+function readStore(key, fallback) {
+  try {
+    const v = JSON.parse(localStorage.getItem(key));
+    if (v && typeof v === 'object' && !Array.isArray(v)) return v;
+  } catch (e) { /* valeur absente ou corrompue : on repart du défaut */ }
+  return fallback();
+}
+function writeStore(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+  catch (e) { return false; }
+}
+
+let _xlsxPromise = null;
+function loadXLSX() {
+  if (window.XLSX) return Promise.resolve();
+  if (_xlsxPromise) return _xlsxPromise;
+  _xlsxPromise = new Promise(function (resolve, reject) {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = resolve;
+    s.onerror = function () { _xlsxPromise = null; reject(new Error('xlsx')); };
+    document.head.appendChild(s);
+  });
+  return _xlsxPromise;
+}
+
+// =====================================================================
+// ÉVÉNEMENTS : délégation (remplace les onclick / onchange / oninput inline)
+// =====================================================================
+(function () {
+  const NEEDS_EVENT = new Set(['switchTab', 'importCoefficientsFile']);
+  const OVERLAY = {
+    overlayClose: function (el) { el.style.display = 'none'; },
+    overlayCloseWa: function () { closeWhatsAppModal(); }
+  };
+  const pending = new Map();
+
+  function run(name, e, el) {
+    if (OVERLAY[name]) { if (e.target === el) OVERLAY[name](el); return; }
+    const fn = window[name];
+    if (typeof fn !== 'function') return;
+    const raw = el.dataset.arg;
+    const arg = raw == null ? undefined : (/^-?\d+$/.test(raw) ? Number(raw) : raw);
+    if (NEEDS_EVENT.has(name)) {
+      fn({ target: e.target, currentTarget: el, preventDefault: function () { e.preventDefault(); } }, arg);
+    } else {
+      fn(arg);
+    }
+  }
+
+  ['click', 'change'].forEach(function (type) {
+    document.addEventListener(type, function (e) {
+      const el = e.target.closest && e.target.closest('[data-' + type + ']');
+      if (el) run(el.dataset[type], e, el);
+    });
+  });
+
+  // Saisie : un seul recalcul par image affichée, même si l'on tape vite
+  document.addEventListener('input', function (e) {
+    const el = e.target.closest && e.target.closest('[data-input]');
+    if (!el) return;
+    const name = el.dataset.input;
+    if (pending.has(name)) return;
+    pending.set(name, requestAnimationFrame(function () { pending.delete(name); run(name, e, el); }));
+  });
+})();
+
 // =====================================================================
 // UTILITAIRE COMMUN : ÉCHÉANCES LÉGALES MAROC (ENREG. J+30, ANCFCC M+3, FÉRIÉS & PRESCRIPTION 10 ANS)
 // =====================================================================
@@ -2031,7 +2109,7 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
   function show(key, updateHash) {
     if (!MODS[key]) key = 'provision';
     Object.keys(MODS).forEach(function (k) {
-      document.getElementById(MODS[k].id).classList.toggle('active', k === key);
+      byId(MODS[k].id).classList.toggle('active', k === key);
     });
     tabs.forEach(function (t) {
       var on = t.getAttribute('data-module') === key;
@@ -2054,7 +2132,7 @@ window.computeRetardPenalitesMaroc = function (dateActeStr, datePaiementStr, dro
   });
   window.addEventListener('hashchange', function () { show(location.hash.replace('#', ''), false); });
   show(location.hash.replace('#', '') || 'provision', false);
-  document.getElementById('footer-year').textContent = new Date().getFullYear();
+  byId('footer-year').textContent = new Date().getFullYear();
 })();
 
 // =====================================================================
@@ -2076,31 +2154,31 @@ window.getEtudeInfo = function () {
 
 window.applyEtudeInfoToUI = function () {
   const info = window.getEtudeInfo();
-  const hNom = document.getElementById('header-etude-nom');
-  const hSub = document.getElementById('header-etude-sub');
+  const hNom = byId('header-etude-nom');
+  const hSub = byId('header-etude-sub');
   if (hNom) hNom.textContent = info.nom ? info.nom + ' — Calcul Frais et IR/PI' : 'Étude Notariale — Calcul Frais et IR/PI';
-  if (hSub) hSub.textContent = info.sub ? info.sub + ' · Profits immobiliers (T.P.I.)' : 'Calcul des Frais (CGI 2026) · Profits immobiliers (T.P.I.)';
+  if (hSub) hSub.textContent = info.sub ? info.sub + ' · ' : 'Calcul des Frais (CGI 2026) · Profits immobiliers (T.P.I.)';
 
-  const pNomProv = document.getElementById('print-etude-nom-prov');
-  const pSubProv = document.getElementById('print-etude-sub-prov');
+  const pNomProv = byId('print-etude-nom-prov');
+  const pSubProv = byId('print-etude-sub-prov');
   if (pNomProv) pNomProv.textContent = (info.nom || 'Étude notariale') + ' — Note des Frais';
   if (pSubProv) pSubProv.textContent = info.sub ? info.sub + ' · Code Général des Impôts 2026' : 'Code Général des Impôts 2026 · ANCFCC';
 
-  const pNomTpi = document.getElementById('print-etude-nom-tpi');
-  const pSubTpi = document.getElementById('print-etude-sub-tpi');
+  const pNomTpi = byId('print-etude-nom-tpi');
+  const pSubTpi = byId('print-etude-sub-tpi');
   if (pNomTpi) pNomTpi.textContent = (info.nom || 'Étude notariale') + ' — ESTIMATION DE DECLARATION TPI (CGI 2026)';
   if (pSubTpi) pSubTpi.textContent = info.sub ? info.sub + ' · Profit immobilier & cotisation minimale' : 'Profit immobilier, réévaluation & cotisation minimale (CGI)';
 };
 
 document.addEventListener('DOMContentLoaded', function () {
   window.applyEtudeInfoToUI();
-  const btnOpen = document.getElementById('btnConfigEtude');
-  const modal = document.getElementById('etude-modal');
-  const btnClose = document.getElementById('etudeClose');
-  const btnSave = document.getElementById('etudeSave');
-  const btnReset = document.getElementById('etudeReset');
-  const inpNom = document.getElementById('etudeNomInput');
-  const inpSub = document.getElementById('etudeSubInput');
+  const btnOpen = byId('btnConfigEtude');
+  const modal = byId('etude-modal');
+  const btnClose = byId('etudeClose');
+  const btnSave = byId('etudeSave');
+  const btnReset = byId('etudeReset');
+  const inpNom = byId('etudeNomInput');
+  const inpSub = byId('etudeSubInput');
 
   if (btnOpen && modal) {
     btnOpen.addEventListener('click', function () {
@@ -2137,12 +2215,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
-</script>
 
-<script>
+
 (function(){
 
-var $ = function(id){return document.getElementById(id)};
+var $ = function(id){return byId(id)};
 var DEF_LIB = "Frais de dossier, copies & expéditions", DEF_VAL = "2700";
 
 function num(id){
@@ -2716,7 +2793,10 @@ function calc(){
 }
 
 window.recalcProvision = calc;
-function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){t.classList.remove('show')},2200); }
+var _calcRaf=0;
+function scheduleCalc(){ if(_calcRaf) return; _calcRaf=requestAnimationFrame(function(){ _calcRaf=0; calc(); }); }
+
+function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){t.classList.remove('show')},Math.max(2200,String(m).length*45)); }
 window.toast = toast;
 
 function reset(){
@@ -2759,10 +2839,10 @@ document.addEventListener('DOMContentLoaded',function(){
     if(isPartiel) $('montantNonConforme').focus();
     calc();
   });
-  $('montantNonConforme').addEventListener('input',calc);
+  $('montantNonConforme').addEventListener('input',scheduleCalc);
   $('montantNonConforme').addEventListener('blur',function(){ var v=num('montantNonConforme'),p=(v>0?v:0).toFixed(2).split('.'); this.value=p[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ')+','+p[1]; });
   $('montantNonConforme').addEventListener('focus',function(){ this.value=this.value.replace(/\s/g,''); this.select(); });
-  document.querySelectorAll('.ci,#clientInfo,#titreFoncier,#nbrTf,#tauxCf,#fraisGreffeVal,#fraisPubVal').forEach(function(e){ e.addEventListener('input',calc); });
+  document.querySelectorAll('.ci,#clientInfo,#titreFoncier,#nbrTf,#tauxCf,#fraisGreffeVal,#fraisPubVal').forEach(function(e){ e.addEventListener('input',scheduleCalc); });
   $('tauxEnreg').addEventListener('change',function(){
     var c=this.value==='custom'; $('customBox').style.display=c?'flex':'none';
     if(c) $('tauxCustom').focus();
@@ -2794,7 +2874,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     calc();
   });
-  $('tauxCustom').addEventListener('input',calc);
+  $('tauxCustom').addEventListener('input',scheduleCalc);
   $('btnDetail').addEventListener('click',function(){ $('note').scrollIntoView({behavior:'smooth'}); });
   $('btnPrint').addEventListener('click',printNote);
   $('btnPdf').addEventListener('click',exportPdf);
@@ -2821,9 +2901,8 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 })();
-</script>
 
-<script>
+
         // =====================================================================
         // 1. STRUCTURE MATRICIELLE VIDE PAR DÉFAUT (PRÊTE POUR IMPORT EXCEL)
         // =====================================================================
@@ -2853,17 +2932,17 @@ document.addEventListener('DOMContentLoaded',function(){
             };
         }
 
-        let coefMatrix = JSON.parse(localStorage.getItem('tpi_coef_matrix_v3')) || buildEmptyDefaultMatrix();
+        let coefMatrix = readStore('tpi_coef_matrix_v3', buildEmptyDefaultMatrix);
 
         // =====================================================================
         // 2. INITIALISATION
         // =====================================================================
         window.onload = () => {
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date_acte').value = today;
-            document.getElementById('date_paiement').value = today;
-            document.getElementById('multi_date_acte').value = today;
-            document.getElementById('multi_date_paiement').value = today;
+            byId('date_acte').value = today;
+            byId('date_paiement').value = today;
+            byId('multi_date_acte').value = today;
+            byId('multi_date_paiement').value = today;
 
             populateSaleYearSelects();
             populateAcquisitionSelectsForMain();
@@ -2874,25 +2953,27 @@ document.addEventListener('DOMContentLoaded',function(){
             calculateAll();
             renderCoefficients();
 
-            setInterval(updateClock, 1000);
+            setInterval(updateClock, 30000);
+            document.addEventListener('visibilitychange', function () { if (!document.hidden) updateClock(); });
             updateClock();
         };
 
         function updateClock() {
+            if (document.hidden) return;
             const now = new Date();
-            document.getElementById('current-date').textContent = now.toLocaleDateString('fr-FR', {
+            byId('current-date').textContent = now.toLocaleDateString('fr-FR', {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             });
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('fr-FR');
+            byId('current-time').textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         }
 
         function switchTab(e, tabName) {
             document.querySelectorAll('#app-tpi .view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('#app-tpi .tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.add('active');
+            byId('tab-' + tabName).classList.add('active');
             e.currentTarget.classList.add('active');
 
-            const tpiBar = document.getElementById('tpi-bar');
+            const tpiBar = byId('tpi-bar');
             if (tabName === 'coefficients') {
                 tpiBar.style.visibility = 'hidden';
             } else {
@@ -2906,22 +2987,22 @@ document.addEventListener('DOMContentLoaded',function(){
             const activeTab = document.querySelector('#app-tpi .view-section.active');
             if (!activeTab) return;
             const target = activeTab.id === 'tab-multi'
-                ? document.getElementById('tpi-detail-multi')
-                : document.getElementById('tpi-detail-single');
+                ? byId('tpi-detail-multi')
+                : byId('tpi-detail-single');
             if (target) target.scrollIntoView({ behavior: 'smooth' });
         }
 
         function printTpi() {
             const old = document.title;
             document.title = 'Liquidation_TPI_' + new Date().toISOString().slice(0, 10);
-            try { window.print(); } catch (e) { alert('Impression indisponible : utilisez le bouton PDF.'); }
+            try { window.print(); } catch (e) { toast('Impression indisponible : utilisez le bouton PDF.'); }
             setTimeout(function () { document.title = old; }, 1500);
         }
 
         function populateSaleYearSelects() {
             const saleYears = Object.keys(coefMatrix).sort((a, b) => b - a);
             ['annee_vente', 'multi_annee_vente', 'admin-sale-year'].forEach(id => {
-                const sel = document.getElementById(id);
+                const sel = byId(id);
                 const prevVal = sel.value;
                 sel.innerHTML = saleYears.map(y => `<option value="${y}">${y}</option>`).join('');
                 if (prevVal && saleYears.includes(prevVal)) sel.value = prevVal;
@@ -2929,12 +3010,12 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function populateAcquisitionSelectsForMain() {
-            const saleYear = document.getElementById('annee_vente').value;
+            const saleYear = byId('annee_vente').value;
             const tableForYear = coefMatrix[saleYear] || {};
             const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
 
             ['annee_acquisition', 'annee_investissement'].forEach(id => {
-                const sel = document.getElementById(id);
+                const sel = byId(id);
                 const prev = sel.value;
                 sel.innerHTML = acqYears.map(y => `<option value="${y}">${y} — Coef: ${tableForYear[y].toFixed(3)}</option>`).join('');
                 if (prev && acqYears.includes(prev)) sel.value = prev;
@@ -2947,11 +3028,11 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function onDateActeChange() {
-            const dateActeStr = document.getElementById('date_acte').value;
+            const dateActeStr = byId('date_acte').value;
             if (dateActeStr) {
                 const yr = new Date(dateActeStr).getFullYear().toString();
                 if (coefMatrix[yr]) {
-                    document.getElementById('annee_vente').value = yr;
+                    byId('annee_vente').value = yr;
                     populateAcquisitionSelectsForMain();
                 }
             }
@@ -3034,46 +3115,46 @@ document.addEventListener('DOMContentLoaded',function(){
 
         // --- CALCUL ONGLET 1 : CALCUL PRINCIPAL ---
         function calculateAll() {
-            const saleYear = document.getElementById('annee_vente').value;
+            const saleYear = byId('annee_vente').value;
             const tableForYear = coefMatrix[saleYear] || {};
 
-            const prixCession = parseFloat(document.getElementById('prix_cession').value) || 0;
-            const prixAcq = parseFloat(document.getElementById('prix_acquisition').value) || 0;
-            const inv = parseFloat(document.getElementById('investissement').value) || 0;
+            const prixCession = parseFloat(byId('prix_cession').value) || 0;
+            const prixAcq = parseFloat(byId('prix_acquisition').value) || 0;
+            const inv = parseFloat(byId('investissement').value) || 0;
 
-            const anneeAcq = document.getElementById('annee_acquisition').value;
-            const anneeInv = document.getElementById('annee_investissement').value;
+            const anneeAcq = byId('annee_acquisition').value;
+            const anneeInv = byId('annee_investissement').value;
             const coefAcq = tableForYear[anneeAcq] || 1;
             const coefInv = tableForYear[anneeInv] || 1;
 
-            document.getElementById('disp-coef-acq').textContent = coefAcq.toFixed(3);
-            document.getElementById('disp-coef-inv').textContent = coefInv.toFixed(3);
+            byId('disp-coef-acq').textContent = coefAcq.toFixed(3);
+            byId('disp-coef-inv').textContent = coefInv.toFixed(3);
 
             const prixActualise = prixAcq * coefAcq;
             const invActualise = inv * coefInv;
-            const tauxIRPercent = parseInt(document.getElementById('taux_ir').value, 10);
-            const isHabitationPrincipale = document.getElementById('chk_habitation_principale').checked;
-            const include5Pct = document.getElementById('chk_include_5pct').checked;
+            const tauxIRPercent = parseInt(byId('taux_ir').value, 10);
+            const isHabitationPrincipale = byId('chk_habitation_principale').checked;
+            const include5Pct = byId('chk_include_5pct').checked;
 
             const liq = computeTaxLiquidation({ prixCession, prixActualise, invActualise, tauxIRPercent, isHabitationPrincipale, include5Pct });
-            const pen = computeDelayAndPenalties(document.getElementById('date_acte').value, document.getElementById('date_paiement').value, liq.droitExigible, liq.impotDeclare);
+            const pen = computeDelayAndPenalties(byId('date_acte').value, byId('date_paiement').value, liq.droitExigible, liq.impotDeclare);
 
-            document.getElementById('lbl-taux-ir').textContent = tauxIRPercent;
-            document.getElementById('res-prix-act').textContent = formatDH(prixActualise);
-            document.getElementById('res-frais-15').textContent = formatDH(liq.frais15);
-            document.getElementById('res-inv-act').textContent = formatDH(invActualise);
-            document.getElementById('res-cout-total').textContent = formatDH(liq.coutTotal);
-            document.getElementById('res-profit').textContent = formatDH(liq.profit);
-            document.getElementById('res-droit-taux').textContent = formatDH(liq.droitTaux);
-            document.getElementById('res-cm-3').textContent = formatDH(liq.cm3Pct);
-            document.getElementById('res-cm-5').textContent = formatDH(liq.cm5Pct);
-            document.getElementById('lbl-base-retenue').textContent = liq.labelRetenu;
-            document.getElementById('res-droit-exigible').textContent = liq.droitExigible.toLocaleString('fr-MA') + ' DH';
-            document.getElementById('res-en-lettres').textContent = liq.enLettres;
+            byId('lbl-taux-ir').textContent = tauxIRPercent;
+            byId('res-prix-act').textContent = formatDH(prixActualise);
+            byId('res-frais-15').textContent = formatDH(liq.frais15);
+            byId('res-inv-act').textContent = formatDH(invActualise);
+            byId('res-cout-total').textContent = formatDH(liq.coutTotal);
+            byId('res-profit').textContent = formatDH(liq.profit);
+            byId('res-droit-taux').textContent = formatDH(liq.droitTaux);
+            byId('res-cm-3').textContent = formatDH(liq.cm3Pct);
+            byId('res-cm-5').textContent = formatDH(liq.cm5Pct);
+            byId('lbl-base-retenue').textContent = liq.labelRetenu;
+            byId('res-droit-exigible').textContent = liq.droitExigible.toLocaleString('fr-MA') + ' DH';
+            byId('res-en-lettres').textContent = liq.enLettres;
 
-            const boxDroit = document.getElementById('box-droit-taux');
-            const boxCM3 = document.getElementById('box-cm-3');
-            const boxCM5 = document.getElementById('box-cm-5');
+            const boxDroit = byId('box-droit-taux');
+            const boxCM3 = byId('box-cm-3');
+            const boxCM5 = byId('box-cm-5');
             boxDroit.classList.remove('winner', 'dimmed');
             boxCM3.classList.remove('winner', 'dimmed');
             boxCM5.classList.remove('winner', 'dimmed');
@@ -3084,21 +3165,21 @@ document.addEventListener('DOMContentLoaded',function(){
                 if (liq.winnerKey === 'cm5') boxCM5.classList.add('winner');
             }
 
-            document.getElementById('date_limite').value = pen.dateLimiteStr;
-            document.getElementById('retard_jours').textContent = pen.retardLabel;
-            document.getElementById('lbl-maj-assiette').textContent = pen.majAssietteLabel;
-            document.getElementById('res-maj-assiette').textContent = formatDH(pen.majAssiette);
-            document.getElementById('lbl-pen-paiement').textContent = pen.penPaiementLabel;
-            document.getElementById('res-pen-paiement').textContent = formatDH(pen.penPaiement);
-            document.getElementById('lbl-maj-mensuelle').textContent = pen.majMensuelleLabel;
-            document.getElementById('res-maj-mensuelle').textContent = formatDH(pen.majMensuelle);
-            document.getElementById('res-total-payer').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+            byId('date_limite').value = pen.dateLimiteStr;
+            byId('retard_jours').textContent = pen.retardLabel;
+            byId('lbl-maj-assiette').textContent = pen.majAssietteLabel;
+            byId('res-maj-assiette').textContent = formatDH(pen.majAssiette);
+            byId('lbl-pen-paiement').textContent = pen.penPaiementLabel;
+            byId('res-pen-paiement').textContent = formatDH(pen.penPaiement);
+            byId('lbl-maj-mensuelle').textContent = pen.majMensuelleLabel;
+            byId('res-maj-mensuelle').textContent = formatDH(pen.majMensuelle);
+            byId('res-total-payer').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
 
-            if (document.getElementById('tab-calculateur').classList.contains('active')) {
-                document.getElementById('tpiBarTotal').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+            if (byId('tab-calculateur').classList.contains('active')) {
+                byId('tpiBarTotal').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
             }
 
-            const badge = document.getElementById('badge-delai');
+            const badge = byId('badge-delai');
             badge.className = pen.isLate ? 'badge badge-late' : 'badge badge-ok';
             badge.textContent = pen.isLate ? '● Hors délai (Majorations)' : (pen.isPrescrit ? '● Prescrit (> 10 ans)' : '● Dans le délai légal (30j)');
 
@@ -3119,14 +3200,14 @@ document.addEventListener('DOMContentLoaded',function(){
 
         function resetForm() {
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('prix_cession').value = 0;
-            document.getElementById('prix_acquisition').value = 0;
-            document.getElementById('investissement').value = 0;
-            document.getElementById('chk_habitation_principale').checked = false;
-            document.getElementById('chk_include_5pct').checked = true;
-            document.getElementById('taux_ir').value = '20';
-            document.getElementById('date_acte').value = today;
-            document.getElementById('date_paiement').value = today;
+            byId('prix_cession').value = 0;
+            byId('prix_acquisition').value = 0;
+            byId('investissement').value = 0;
+            byId('chk_habitation_principale').checked = false;
+            byId('chk_include_5pct').checked = true;
+            byId('taux_ir').value = '20';
+            byId('date_acte').value = today;
+            byId('date_paiement').value = today;
             onDateActeChange();
         }
 
@@ -3136,24 +3217,24 @@ document.addEventListener('DOMContentLoaded',function(){
         let multiRowCounter = 0;
 
         function getMultiAcqYearOptionsHTML() {
-            const saleYear = document.getElementById('multi_annee_vente').value;
+            const saleYear = byId('multi_annee_vente').value;
             const tableForYear = coefMatrix[saleYear] || {};
             const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
             return acqYears.map(y => `<option value="${y}">${y}</option>`).join('');
         }
 
         function populateAcquisitionSelectForMultiInv() {
-            const saleYear = document.getElementById('multi_annee_vente').value;
+            const saleYear = byId('multi_annee_vente').value;
             const tableForYear = coefMatrix[saleYear] || {};
             const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
-            const sel = document.getElementById('multi_annee_investissement');
+            const sel = byId('multi_annee_investissement');
             const prev = sel.value;
             sel.innerHTML = acqYears.map(y => `<option value="${y}">${y} — Coef: ${tableForYear[y].toFixed(3)}</option>`).join('');
             if (prev && acqYears.includes(prev)) sel.value = prev;
         }
 
         function initMultiTable4Rows() {
-            const tbody = document.getElementById('multi-rows');
+            const tbody = byId('multi-rows');
             tbody.innerHTML = '';
             multiRowCounter = 0;
             for (let i = 0; i < 4; i++) {
@@ -3165,7 +3246,7 @@ document.addEventListener('DOMContentLoaded',function(){
         function addMultiRow(recalc = true) {
             multiRowCounter++;
             const rowId = multiRowCounter;
-            const tbody = document.getElementById('multi-rows');
+            const tbody = byId('multi-rows');
             const tr = document.createElement('tr');
             tr.id = `multi-tr-${rowId}`;
             tr.dataset.rowId = rowId;
@@ -3173,15 +3254,15 @@ document.addEventListener('DOMContentLoaded',function(){
             tr.innerHTML = `
                 <td class="row-num-cell" style="font-weight:600; color:var(--cds-brand-800);">#1</td>
                 <td>
-                    <input type="number" id="m-prix-${rowId}" class="num-input" value="0" step="0.01" oninput="calculateMultiAll()" style="padding-right:0.65rem;">
+                    <input type="number" id="m-prix-${rowId}" class="num-input" value="0" step="0.01" data-input="calculateMultiAll" style="padding-right:0.65rem;">
                 </td>
                 <td>
-                    <select id="m-year-${rowId}" onchange="calculateMultiAll()">${getMultiAcqYearOptionsHTML()}</select>
+                    <select id="m-year-${rowId}" data-change="calculateMultiAll">${getMultiAcqYearOptionsHTML()}</select>
                 </td>
                 <td id="m-coef-${rowId}" class="mono" style="font-size:0.8rem;">1.000</td>
                 <td id="m-act-${rowId}" class="mono" style="text-align:right; font-weight:600;">0,00 DH</td>
                 <td style="text-align:center;">
-                    <button type="button" class="btn btn-ghost btn-del-row" onclick="removeMultiRow(${rowId})" title="Supprimer cette ligne" style="height:30px; padding:0 0.45rem; color:var(--cds-danger-700);">✕</button>
+                    <button type="button" class="btn btn-ghost btn-del-row" data-click="removeMultiRow" data-arg="${rowId}" title="Supprimer cette ligne" style="height:30px; padding:0 0.45rem; color:var(--cds-danger-700);">✕</button>
                 </td>
             `;
 
@@ -3191,9 +3272,9 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function removeMultiRow(rowId) {
-            const tbody = document.getElementById('multi-rows');
+            const tbody = byId('multi-rows');
             if (tbody.children.length <= 1) return;
-            const tr = document.getElementById(`multi-tr-${rowId}`);
+            const tr = byId(`multi-tr-${rowId}`);
             if (tr) tr.remove();
             renumberMultiRows();
             calculateMultiAll();
@@ -3208,18 +3289,18 @@ document.addEventListener('DOMContentLoaded',function(){
                     delBtn.style.visibility = rows.length > 1 ? 'visible' : 'hidden';
                 }
             });
-            document.getElementById('multi-count-lbl').textContent = rows.length;
+            byId('multi-count-lbl').textContent = rows.length;
         }
 
         function onMultiAnneeVenteChange() {
-            const saleYear = document.getElementById('multi_annee_vente').value;
+            const saleYear = byId('multi_annee_vente').value;
             const tableForYear = coefMatrix[saleYear] || {};
             const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
             const yearOpts = acqYears.map(y => `<option value="${y}">${y}</option>`).join('');
 
             document.querySelectorAll('#multi-rows tr').forEach(tr => {
                 const rowId = tr.dataset.rowId;
-                const sel = document.getElementById(`m-year-${rowId}`);
+                const sel = byId(`m-year-${rowId}`);
                 const prev = sel.value;
                 sel.innerHTML = yearOpts;
                 if (prev && acqYears.includes(prev)) sel.value = prev;
@@ -3230,11 +3311,11 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function onMultiDateActeChange() {
-            const dateActeStr = document.getElementById('multi_date_acte').value;
+            const dateActeStr = byId('multi_date_acte').value;
             if (dateActeStr) {
                 const yr = new Date(dateActeStr).getFullYear().toString();
                 if (coefMatrix[yr]) {
-                    document.getElementById('multi_annee_vente').value = yr;
+                    byId('multi_annee_vente').value = yr;
                     onMultiAnneeVenteChange();
                     return;
                 }
@@ -3243,7 +3324,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function calculateMultiAll() {
-            const saleYear = document.getElementById('multi_annee_vente').value;
+            const saleYear = byId('multi_annee_vente').value;
             const tableForYear = coefMatrix[saleYear] || {};
 
             let sumBrut = 0;
@@ -3252,13 +3333,13 @@ document.addEventListener('DOMContentLoaded',function(){
 
             document.querySelectorAll('#multi-rows tr').forEach((tr, index) => {
                 const rowId = tr.dataset.rowId;
-                const val = parseFloat(document.getElementById(`m-prix-${rowId}`).value) || 0;
-                const yr = document.getElementById(`m-year-${rowId}`).value;
+                const val = parseFloat(byId(`m-prix-${rowId}`).value) || 0;
+                const yr = byId(`m-year-${rowId}`).value;
                 const coef = tableForYear[yr] || 1;
                 const act = val * coef;
 
-                document.getElementById(`m-coef-${rowId}`).textContent = coef.toFixed(3);
-                document.getElementById(`m-act-${rowId}`).textContent = formatDH(act);
+                byId(`m-coef-${rowId}`).textContent = coef.toFixed(3);
+                byId(`m-act-${rowId}`).textContent = formatDH(act);
 
                 sumBrut += val;
                 sumAct += act;
@@ -3274,19 +3355,19 @@ document.addEventListener('DOMContentLoaded',function(){
                 }
             });
 
-            document.getElementById('multi-sum-brut').textContent = formatDH(sumBrut);
-            document.getElementById('multi-sum-act').textContent = formatDH(sumAct);
+            byId('multi-sum-brut').textContent = formatDH(sumBrut);
+            byId('multi-sum-act').textContent = formatDH(sumAct);
 
-            const inv = parseFloat(document.getElementById('multi_investissement').value) || 0;
-            const anneeInv = document.getElementById('multi_annee_investissement').value;
+            const inv = parseFloat(byId('multi_investissement').value) || 0;
+            const anneeInv = byId('multi_annee_investissement').value;
             const coefInv = tableForYear[anneeInv] || 1;
-            document.getElementById('multi-disp-coef-inv').textContent = coefInv.toFixed(3);
+            byId('multi-disp-coef-inv').textContent = coefInv.toFixed(3);
             const invActualise = inv * coefInv;
 
-            const prixCession = parseFloat(document.getElementById('multi_prix_cession').value) || 0;
-            const tauxIRPercent = parseInt(document.getElementById('multi_taux_ir').value, 10);
-            const isHabitationPrincipale = document.getElementById('multi_chk_habitation').checked;
-            const include5Pct = document.getElementById('multi_chk_include_5pct').checked;
+            const prixCession = parseFloat(byId('multi_prix_cession').value) || 0;
+            const tauxIRPercent = parseInt(byId('multi_taux_ir').value, 10);
+            const isHabitationPrincipale = byId('multi_chk_habitation').checked;
+            const include5Pct = byId('multi_chk_include_5pct').checked;
 
             const liq = computeTaxLiquidation({
                 prixCession,
@@ -3298,28 +3379,28 @@ document.addEventListener('DOMContentLoaded',function(){
             });
 
             const pen = computeDelayAndPenalties(
-                document.getElementById('multi_date_acte').value,
-                document.getElementById('multi_date_paiement').value,
+                byId('multi_date_acte').value,
+                byId('multi_date_paiement').value,
                 liq.droitExigible,
                 liq.impotDeclare
             );
 
-            document.getElementById('multi-lbl-taux-ir').textContent = tauxIRPercent;
-            document.getElementById('multi-res-prix-act').textContent = formatDH(sumAct);
-            document.getElementById('multi-res-frais-15').textContent = formatDH(liq.frais15);
-            document.getElementById('multi-res-inv-act').textContent = formatDH(invActualise);
-            document.getElementById('multi-res-cout-total').textContent = formatDH(liq.coutTotal);
-            document.getElementById('multi-res-profit').textContent = formatDH(liq.profit);
-            document.getElementById('multi-res-droit-taux').textContent = formatDH(liq.droitTaux);
-            document.getElementById('multi-res-cm-3').textContent = formatDH(liq.cm3Pct);
-            document.getElementById('multi-res-cm-5').textContent = formatDH(liq.cm5Pct);
-            document.getElementById('multi-lbl-base-retenue').textContent = liq.labelRetenu;
-            document.getElementById('multi-res-droit-exigible').textContent = liq.droitExigible.toLocaleString('fr-MA') + ' DH';
-            document.getElementById('multi-res-en-lettres').textContent = liq.enLettres;
+            byId('multi-lbl-taux-ir').textContent = tauxIRPercent;
+            byId('multi-res-prix-act').textContent = formatDH(sumAct);
+            byId('multi-res-frais-15').textContent = formatDH(liq.frais15);
+            byId('multi-res-inv-act').textContent = formatDH(invActualise);
+            byId('multi-res-cout-total').textContent = formatDH(liq.coutTotal);
+            byId('multi-res-profit').textContent = formatDH(liq.profit);
+            byId('multi-res-droit-taux').textContent = formatDH(liq.droitTaux);
+            byId('multi-res-cm-3').textContent = formatDH(liq.cm3Pct);
+            byId('multi-res-cm-5').textContent = formatDH(liq.cm5Pct);
+            byId('multi-lbl-base-retenue').textContent = liq.labelRetenu;
+            byId('multi-res-droit-exigible').textContent = liq.droitExigible.toLocaleString('fr-MA') + ' DH';
+            byId('multi-res-en-lettres').textContent = liq.enLettres;
 
-            const boxDroit = document.getElementById('multi-box-droit-taux');
-            const boxCM3 = document.getElementById('multi-box-cm-3');
-            const boxCM5 = document.getElementById('multi-box-cm-5');
+            const boxDroit = byId('multi-box-droit-taux');
+            const boxCM3 = byId('multi-box-cm-3');
+            const boxCM5 = byId('multi-box-cm-5');
             boxDroit.classList.remove('winner', 'dimmed');
             boxCM3.classList.remove('winner', 'dimmed');
             boxCM5.classList.remove('winner', 'dimmed');
@@ -3330,21 +3411,21 @@ document.addEventListener('DOMContentLoaded',function(){
                 if (liq.winnerKey === 'cm5') boxCM5.classList.add('winner');
             }
 
-            document.getElementById('multi_date_limite').value = pen.dateLimiteStr;
-            document.getElementById('multi_retard_jours').textContent = pen.retardLabel;
-            document.getElementById('multi-lbl-maj-assiette').textContent = pen.majAssietteLabel;
-            document.getElementById('multi-res-maj-assiette').textContent = formatDH(pen.majAssiette);
-            document.getElementById('multi-lbl-pen-paiement').textContent = pen.penPaiementLabel;
-            document.getElementById('multi-res-pen-paiement').textContent = formatDH(pen.penPaiement);
-            document.getElementById('multi-lbl-maj-mensuelle').textContent = pen.majMensuelleLabel;
-            document.getElementById('multi-res-maj-mensuelle').textContent = formatDH(pen.majMensuelle);
-            document.getElementById('multi-res-total-payer').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+            byId('multi_date_limite').value = pen.dateLimiteStr;
+            byId('multi_retard_jours').textContent = pen.retardLabel;
+            byId('multi-lbl-maj-assiette').textContent = pen.majAssietteLabel;
+            byId('multi-res-maj-assiette').textContent = formatDH(pen.majAssiette);
+            byId('multi-lbl-pen-paiement').textContent = pen.penPaiementLabel;
+            byId('multi-res-pen-paiement').textContent = formatDH(pen.penPaiement);
+            byId('multi-lbl-maj-mensuelle').textContent = pen.majMensuelleLabel;
+            byId('multi-res-maj-mensuelle').textContent = formatDH(pen.majMensuelle);
+            byId('multi-res-total-payer').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
 
-            if (document.getElementById('tab-multi').classList.contains('active')) {
-                document.getElementById('tpiBarTotal').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
+            if (byId('tab-multi').classList.contains('active')) {
+                byId('tpiBarTotal').textContent = pen.totalPayer.toLocaleString('fr-MA') + ' DH';
             }
 
-            const badge = document.getElementById('multi-badge-delai');
+            const badge = byId('multi-badge-delai');
             badge.className = pen.isLate ? 'badge badge-late' : 'badge badge-ok';
             badge.textContent = pen.isLate ? '● Hors délai (Majorations)' : (pen.isPrescrit ? '● Prescrit (> 10 ans)' : '● Dans le délai légal (30j)');
 
@@ -3366,13 +3447,13 @@ document.addEventListener('DOMContentLoaded',function(){
 
         function resetMultiForm() {
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('multi_prix_cession').value = 0;
-            document.getElementById('multi_investissement').value = 0;
-            document.getElementById('multi_chk_habitation').checked = false;
-            document.getElementById('multi_chk_include_5pct').checked = true;
-            document.getElementById('multi_taux_ir').value = '20';
-            document.getElementById('multi_date_acte').value = today;
-            document.getElementById('multi_date_paiement').value = today;
+            byId('multi_prix_cession').value = 0;
+            byId('multi_investissement').value = 0;
+            byId('multi_chk_habitation').checked = false;
+            byId('multi_chk_include_5pct').checked = true;
+            byId('multi_taux_ir').value = '20';
+            byId('multi_date_acte').value = today;
+            byId('multi_date_paiement').value = today;
             initMultiTable4Rows();
             onMultiDateActeChange();
         }
@@ -3499,24 +3580,24 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function openWhatsAppModal(mode) {
-            document.getElementById('wa-message-preview').value = buildWhatsAppMessage(mode);
-            document.getElementById('wa-modal').classList.add('open');
+            byId('wa-message-preview').value = buildWhatsAppMessage(mode);
+            byId('wa-modal').classList.add('open');
         }
 
         function closeWhatsAppModal() {
-            document.getElementById('wa-modal').classList.remove('open');
+            byId('wa-modal').classList.remove('open');
         }
 
         function copyWhatsAppText() {
-            const txt = document.getElementById('wa-message-preview');
+            const txt = byId('wa-message-preview');
             txt.select();
             navigator.clipboard.writeText(txt.value);
-            alert('Décompte copié dans le presse-papiers !');
+            toast('Décompte copié dans le presse-papiers !');
         }
 
         function launchWhatsApp() {
-            const rawPhone = document.getElementById('wa-phone').value.replace(/\D/g, '');
-            const text = encodeURIComponent(document.getElementById('wa-message-preview').value);
+            const rawPhone = byId('wa-phone').value.replace(/\D/g, '');
+            const text = encodeURIComponent(byId('wa-message-preview').value);
             const url = rawPhone ? `https://wa.me/${rawPhone}?text=${text}` : `https://wa.me/?text=${text}`;
             window.open(url, '_blank', 'noopener,noreferrer');
             closeWhatsAppModal();
@@ -3526,7 +3607,7 @@ document.addEventListener('DOMContentLoaded',function(){
         // 7. GESTION DE LA TABLE MATRICIELLE DES COEFFICIENTS (EXCEL/CSV/JSON)
         // =====================================================================
         function saveMatrix() {
-            localStorage.setItem('tpi_coef_matrix_v3', JSON.stringify(coefMatrix));
+            if (!writeStore('tpi_coef_matrix_v3', coefMatrix)) toast("Enregistrement local impossible : les coefficients ne seront pas conservés.");
             populateSaleYearSelects();
             populateAcquisitionSelectsForMain();
             onMultiAnneeVenteChange();
@@ -3536,12 +3617,12 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function renderCoefficients() {
-            const saleYear = document.getElementById('admin-sale-year').value;
+            const saleYear = byId('admin-sale-year').value;
             const tableForYear = coefMatrix[saleYear] || {};
             const acqYears = Object.keys(tableForYear).sort((a, b) => b - a);
 
             if (acqYears.length === 0) {
-                document.getElementById('coef-tbody').innerHTML = `
+                byId('coef-tbody').innerHTML = `
                     <tr>
                         <td colspan="4" style="text-align:center; padding:1.5rem; color:var(--cds-text-muted);">
                             Aucun coefficient enregistré pour ${saleYear}. Utilisez <strong>Importer Excel / CSV / JSON</strong> ou ajoutez une ligne manuellement.
@@ -3551,25 +3632,25 @@ document.addEventListener('DOMContentLoaded',function(){
                 return;
             }
 
-            document.getElementById('coef-tbody').innerHTML = acqYears.map(y => `
+            byId('coef-tbody').innerHTML = acqYears.map(y => `
                 <tr>
                     <td><span class="coef-pill">${saleYear}</span></td>
                     <td><strong>${y}</strong></td>
                     <td class="mono">${tableForYear[y].toFixed(3)}</td>
                     <td style="text-align:right;">
-                        <button class="btn btn-outline" style="height:30px; padding:0 0.6rem; font-size:0.76rem;" onclick="editCoef(${y})">Modifier</button>
-                        <button class="btn btn-danger-soft" style="height:30px; padding:0 0.6rem; font-size:0.76rem;" onclick="deleteCoef(${y})">✕</button>
+                        <button class="btn btn-outline" style="height:30px; padding:0 0.6rem; font-size:0.76rem;" data-click="editCoef" data-arg="${y}">Modifier</button>
+                        <button class="btn btn-danger-soft" style="height:30px; padding:0 0.6rem; font-size:0.76rem;" data-click="deleteCoef" data-arg="${y}">✕</button>
                     </td>
                 </tr>
             `).join('');
         }
 
         function addOrUpdateCoefficient() {
-            const saleYear = document.getElementById('admin-sale-year').value;
-            const acqYear = parseInt(document.getElementById('new-coef-year').value, 10);
-            const val = parseFloat(document.getElementById('new-coef-val').value);
+            const saleYear = byId('admin-sale-year').value;
+            const acqYear = parseInt(byId('new-coef-year').value, 10);
+            const val = parseFloat(byId('new-coef-val').value);
             if (!saleYear || !acqYear || !val) {
-                alert("Veuillez saisir l'année antérieure et le coefficient.");
+                toast("Veuillez saisir l'année antérieure et le coefficient.");
                 return;
             }
             if (!coefMatrix[saleYear]) coefMatrix[saleYear] = {};
@@ -3578,13 +3659,13 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function editCoef(acqYear) {
-            const saleYear = document.getElementById('admin-sale-year').value;
-            document.getElementById('new-coef-year').value = acqYear;
-            document.getElementById('new-coef-val').value = coefMatrix[saleYear][acqYear];
+            const saleYear = byId('admin-sale-year').value;
+            byId('new-coef-year').value = acqYear;
+            byId('new-coef-val').value = coefMatrix[saleYear][acqYear];
         }
 
         function deleteCoef(acqYear) {
-            const saleYear = document.getElementById('admin-sale-year').value;
+            const saleYear = byId('admin-sale-year').value;
             if (!confirm(`Supprimer l'année ${acqYear} du barème ${saleYear} ?`)) return;
             delete coefMatrix[saleYear][acqYear];
             saveMatrix();
@@ -3594,7 +3675,7 @@ document.addEventListener('DOMContentLoaded',function(){
             if (!confirm("⚠️ Voulez-vous vraiment vider tous les coefficients enregistrés ?")) return;
             coefMatrix = buildEmptyDefaultMatrix();
             saveMatrix();
-            alert("Tous les coefficients ont été vidés.");
+            toast("Tous les coefficients ont été vidés.");
         }
 
         function createNewSaleYear() {
@@ -3603,8 +3684,8 @@ document.addEventListener('DOMContentLoaded',function(){
             if (!newYear || newYear < 1980 || newYear > 2100) return;
 
             if (coefMatrix[newYear]) {
-                alert(`L'année de cession ${newYear} existe déjà.`);
-                document.getElementById('admin-sale-year').value = newYear;
+                toast(`L'année de cession ${newYear} existe déjà.`);
+                byId('admin-sale-year').value = newYear;
                 renderCoefficients();
                 return;
             }
@@ -3612,9 +3693,9 @@ document.addEventListener('DOMContentLoaded',function(){
             coefMatrix[newYear] = { [newYear]: 1.000 };
 
             saveMatrix();
-            document.getElementById('admin-sale-year').value = newYear;
+            byId('admin-sale-year').value = newYear;
             renderCoefficients();
-            alert(`Barème créé pour l'année de cession ${newYear}.`);
+            toast(`Barème créé pour l'année de cession ${newYear}.`);
         }
 
         // --- IMPORT EXCEL (.xlsx, .xls), CSV & JSON ---
@@ -3627,19 +3708,22 @@ document.addEventListener('DOMContentLoaded',function(){
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
-                        coefMatrix = JSON.parse(e.target.result);
+                        const parsed = JSON.parse(e.target.result);
+                        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('format');
+                        coefMatrix = parsed;
                         saveMatrix();
-                        alert("Table JSON importée avec succès !");
+                        toast("Table JSON importée avec succès !");
                     } catch (err) {
-                        alert("Erreur lors de la lecture du fichier JSON.");
+                        toast("Erreur lors de la lecture du fichier JSON.");
                     }
                 };
                 reader.readAsText(file);
             } else {
                 const reader = new FileReader();
-                reader.onload = (e) => {
+                reader.onload = async (e) => {
                     try {
                         const data = new Uint8Array(e.target.result);
+                        await loadXLSX();
                         const workbook = XLSX.read(data, { type: 'array' });
                         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                         const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, raw: true });
@@ -3647,12 +3731,12 @@ document.addEventListener('DOMContentLoaded',function(){
                         const count = applyRowsToMatrix(rows);
                         if (count > 0) {
                             saveMatrix();
-                            alert(`✅ ${count} coefficient(s) importé(s) avec succès depuis Excel/CSV !`);
+                            toast(`✅ ${count} coefficient(s) importé(s) avec succès depuis Excel/CSV !`);
                         } else {
-                            alert("Aucune ligne valide détectée. Vérifiez les colonnes : [Année Acquisition, Coefficient] ou [Année Cession, Année Acquisition, Coefficient].");
+                            toast("Aucune ligne valide détectée. Vérifiez les colonnes : [Année Acquisition, Coefficient] ou [Année Cession, Année Acquisition, Coefficient].");
                         }
                     } catch (err) {
-                        alert("Erreur lors de la lecture du fichier Excel/CSV.");
+                        toast("Erreur lors de la lecture du fichier Excel/CSV.");
                     }
                 };
                 reader.readAsArrayBuffer(file);
@@ -3661,7 +3745,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function applyRowsToMatrix(rows) {
-            const currentSaleYear = document.getElementById('admin-sale-year').value;
+            const currentSaleYear = byId('admin-sale-year').value;
             let importedCount = 0;
 
             rows.forEach(row => {
@@ -3694,8 +3778,9 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         // --- MODÈLE EXCEL & EXPORT EXCEL ---
-        function downloadExcelTemplate() {
-            const saleYear = document.getElementById('admin-sale-year').value || 2026;
+        async function downloadExcelTemplate() {
+            try { await loadXLSX(); } catch (err) { toast('Bibliothèque Excel indisponible : connexion Internet requise.'); return; }
+            const saleYear = byId('admin-sale-year').value || 2026;
             const wsData = [
                 ["Annee_Cession", "Annee_Acquisition", "Coefficient"],
                 [Number(saleYear), Number(saleYear), 1.000],
@@ -3709,7 +3794,8 @@ document.addEventListener('DOMContentLoaded',function(){
             XLSX.writeFile(wb, `Modele_Coefficients_TPI_${saleYear}.xlsx`);
         }
 
-        function exportCoefficientsExcel() {
+        async function exportCoefficientsExcel() {
+            try { await loadXLSX(); } catch (err) { toast('Bibliothèque Excel indisponible : connexion Internet requise.'); return; }
             const wsData = [["Annee_Cession", "Annee_Acquisition", "Coefficient"]];
             Object.keys(coefMatrix).sort((a, b) => b - a).forEach(saleYr => {
                 Object.keys(coefMatrix[saleYr]).sort((a, b) => b - a).forEach(acqYr => {
