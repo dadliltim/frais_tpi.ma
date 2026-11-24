@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <!-- Lecture / écriture Excel (.xlsx, .xls, .csv) (chargé en arrière-plan) -->
-<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=aXaLJ166b9JbQu7wCvUEgKOOFYBcrZbXMR4txUudJjc4TwQ3KDcRbnAlixSy8eEl0ccbUp-Kqa1EMJCzu6_BHc5a31VZ6Jxzjh9NTkklpmapXaFz3quTyrg1ZAGOVtY720hs7LRqP6nKP4d1nhfIDTpIF5qMsmgadFo6_yttuFYjBVGSWbqjEACahm5-Z03mZBX7WmIvL8Uheg4CuYNTV0chc53tTKR1jsc1lMM9LBm-V0XKoQ86SvhMHcVG7F8m6rAN1P5yXgPPtrcZj0KPuEreu4BsvGxKhG-DJyOW5bDX3YfA4qmaqzb7_XUP3xWtCu8KHAs3bCa31FXNZi2XKg" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9jb250cmlidXRpb24tcXcudXNlcmNvbnRlbnQuZ29vZ2xlLmNvbS9kb3dubG9hZD9jPUNneGlZWEprWDNOMGIzSmhaMlVTVHhJTmNtVnpjRzl1YzJWZlpHRjBZUm8tQ2pBNE56UTRZMlZpTm1Oak1UVm1PRFE1TURBd05qWXdPV1U1WXpSaE5qaGtaakF3TkRFMlpqSTBPV1l5TmpZMlpHTVNDaElHRUxfMW9zMHhHQUUmZmlsZW5hbWU9aW5kZXguaHRtbCZvcGk9MTAzMTM1MDUwJmF1dGh1c2VyPTE"/><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=WUU6yw0fTPktYPFNeaIJ8NIgMgYaFBDACsgSGg_JyWvKbfhAUlr2n1isDm879CNOXZ-tP0-C0DeKxcV1AIQxnKg_Zy87b32WALYR9KW2LXIDCiP7A7Cxw-oHgY-NhYcl7woGCbAF3cydMg7cF7mKANS8HSVEY6boFYqo2s1O0H3Vs60SxDSq--ZWBNWCj0bgiKS2Divi7_NdwzJ2BjLq_R0rIywDSeNriqjNWdNhEhhIID1tt0aC66rs66qb4sLpVlW1I81IxtnlkFu5qfzWIoUlRBvFPjG87BfpPgWP8x9ERXL0gVaFiK_vZNDS9C_qT0RYaQGeKXYWuIlOU6k7vAPLk63tjzr1X83YZanCo1A" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9jb250cmlidXRpb24tcXcudXNlcmNvbnRlbnQuZ29vZ2xlLmNvbS9kb3dubG9hZD9jPUNneGlZWEprWDNOMGIzSmhaMlVTVHhJTmNtVnpjRzl1YzJWZlpHRjBZUm8tQ2pCa1lUTmhNMlk0TURKaFpETTFOemcxTURBd05qWXhNRFptWmpabVlXWTJZakE0TVRBek1UQm1OVGd5WmpnMk1ETVNDaElHRUxfMW9zMHhHQUUmZmlsZW5hbWU9aW5kZXhfdHBpXzE0MGsuaHRtbCZvcGk9MTAzMTM1MDUwJmF1dGh1c2VyPTE"/><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 <style>
 /* =====================================================================
    DESIGN TOKENS — issus de calcul_tpi.css
@@ -2983,7 +2983,7 @@ document.addEventListener('DOMContentLoaded',function(){
             return new Intl.NumberFormat('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' DH';
         }
 
-        function computeTaxLiquidation({ prixCession, prixActualise, invActualise, tauxIRPercent, isHabitationPrincipale, include5Pct }) {
+        function computeTaxLiquidation({ prixCession, prixActualise, invActualise, tauxIRPercent, isHabitationPrincipale, include5Pct, dateActeStr, datePaiementStr }) {
             const frais15 = prixActualise * 0.15;
             const coutTotal = prixActualise + frais15 + invActualise;
             const profit = Math.max(0, prixCession - coutTotal);
@@ -3022,8 +3022,75 @@ document.addEventListener('DOMContentLoaded',function(){
             }
 
             const impotDeclareBrut = isHabitationPrincipale ? cm3Pct : Math.max(droitTaux, cm3Pct);
-            const impotDeclare = impotDeclareBrut > 0 ? Math.ceil(impotDeclareBrut) : 0;
-            const droitExigible = droitExigibleBrut > 0 ? Math.ceil(droitExigibleBrut) : 0;
+            const impotDeclareTheorique = impotDeclareBrut > 0 ? Math.ceil(impotDeclareBrut) : 0;
+            const droitExigibleTheorique = droitExigibleBrut > 0 ? Math.ceil(droitExigibleBrut) : 0;
+
+            // Vérification seuil d'exonération <= 140 000 DH (Art. 63-I CGI)
+            const isExonere140k = (prixCession > 0 && prixCession <= 140000);
+            if (isExonere140k) {
+                const penCheck = window.computeRetardPenalitesMaroc(dateActeStr, datePaiementStr, droitExigibleTheorique, impotDeclareTheorique);
+                if (penCheck.isLate) {
+                    const maj15 = droitExigibleTheorique > 0
+                        ? Math.max(500, Math.ceil(Math.round(droitExigibleTheorique * 0.15 * 100) / 100))
+                        : 500;
+                    const enLettresMaj = nombreEnLettres(maj15).toUpperCase() + (maj15 > 1 ? ' DIRHAMS' : ' DIRHAM');
+                    return {
+                        frais15,
+                        coutTotal,
+                        profit,
+                        droitTaux,
+                        cm3Pct,
+                        cm5Pct,
+                        impotDeclare: 0,
+                        avance5Pct: 0,
+                        droitExigible: 0,
+                        droitExigibleTheorique,
+                        isExonere140k: true,
+                        winnerKey,
+                        labelRetenu: `Exonéré en principal (≤ 140 000 DH) — Omission déclaration : 15% sur droit théorique (${droitExigibleTheorique.toLocaleString('fr-MA')} DH)`,
+                        enLettres: `ZÉRO DIRHAM (MAJORATION DÉFAUT DÉCLARATION : ${enLettresMaj})`,
+                        penOverride: {
+                            ...penCheck,
+                            majAssiette: maj15,
+                            majAssietteLabel: `Majoration défaut de déclaration ≤ 140 000 DH (Art. 184 — 15% sur ${droitExigibleTheorique.toLocaleString('fr-MA')} DH, min. 500 DH)`,
+                            penPaiement: 0,
+                            penPaiementLabel: "Pénalité de paiement (Art. 208 — Néant)",
+                            majMensuelle: 0,
+                            majMensuelleLabel: "Majorations mensuelles (Art. 208 — Néant)",
+                            totalPenalites: maj15,
+                            totalPayer: maj15
+                        }
+                    };
+                } else {
+                    return {
+                        frais15,
+                        coutTotal,
+                        profit,
+                        droitTaux,
+                        cm3Pct,
+                        cm5Pct,
+                        impotDeclare: 0,
+                        avance5Pct: 0,
+                        droitExigible: 0,
+                        droitExigibleTheorique,
+                        isExonere140k: true,
+                        winnerKey: '',
+                        labelRetenu: 'Exonération légale : Prix de cession ≤ 140 000 DH (Art. 63-I CGI)',
+                        enLettres: 'ZÉRO DIRHAM',
+                        penOverride: {
+                            ...penCheck,
+                            majAssiette: 0,
+                            penPaiement: 0,
+                            majMensuelle: 0,
+                            totalPenalites: 0,
+                            totalPayer: 0
+                        }
+                    };
+                }
+            }
+
+            const impotDeclare = impotDeclareTheorique;
+            const droitExigible = droitExigibleTheorique;
             const avance5Pct = Math.max(0, droitExigible - impotDeclare);
             const enLettres = nombreEnLettres(droitExigible) + (droitExigible > 1 ? ' DIRHAMS' : ' DIRHAM');
 
@@ -3037,9 +3104,12 @@ document.addEventListener('DOMContentLoaded',function(){
                 impotDeclare,
                 avance5Pct,
                 droitExigible,
+                droitExigibleTheorique,
+                isExonere140k: false,
                 winnerKey,
                 labelRetenu,
-                enLettres
+                enLettres,
+                penOverride: null
             };
         }
 
@@ -3073,8 +3143,10 @@ document.addEventListener('DOMContentLoaded',function(){
             const isHabitationPrincipale = document.getElementById('chk_habitation_principale').checked;
             const include5Pct = document.getElementById('chk_include_5pct').checked;
 
-            const liq = computeTaxLiquidation({ prixCession, prixActualise, invActualise, tauxIRPercent, isHabitationPrincipale, include5Pct });
-            const pen = computeDelayAndPenalties(document.getElementById('date_acte').value, document.getElementById('date_paiement').value, liq.droitExigible, liq.impotDeclare);
+            const dateActeVal = document.getElementById('date_acte').value;
+            const datePaiementVal = document.getElementById('date_paiement').value;
+            const liq = computeTaxLiquidation({ prixCession, prixActualise, invActualise, tauxIRPercent, isHabitationPrincipale, include5Pct, dateActeStr: dateActeVal, datePaiementStr: datePaiementVal });
+            const pen = liq.penOverride || computeDelayAndPenalties(dateActeVal, datePaiementVal, liq.droitExigible, liq.impotDeclare);
 
             document.getElementById('lbl-taux-ir').textContent = tauxIRPercent;
             document.getElementById('res-prix-act').textContent = formatDH(prixActualise);
@@ -3096,7 +3168,7 @@ document.addEventListener('DOMContentLoaded',function(){
             boxCM3.classList.remove('winner', 'dimmed');
             boxCM5.classList.remove('winner', 'dimmed');
             if (!include5Pct) boxCM5.classList.add('dimmed');
-            if (liq.droitExigible > 0) {
+            if (liq.droitExigible > 0 || (liq.isExonere140k && liq.winnerKey)) {
                 if (liq.winnerKey === 'taux') boxDroit.classList.add('winner');
                 if (liq.winnerKey === 'cm3') boxCM3.classList.add('winner');
                 if (liq.winnerKey === 'cm5') boxCM5.classList.add('winner');
@@ -3312,18 +3384,22 @@ document.addEventListener('DOMContentLoaded',function(){
             const isHabitationPrincipale = document.getElementById('multi_chk_habitation').checked;
             const include5Pct = document.getElementById('multi_chk_include_5pct').checked;
 
+            const multiDateActeVal = document.getElementById('multi_date_acte').value;
+            const multiDatePaiementVal = document.getElementById('multi_date_paiement').value;
             const liq = computeTaxLiquidation({
                 prixCession,
                 prixActualise: sumAct,
                 invActualise,
                 tauxIRPercent,
                 isHabitationPrincipale,
-                include5Pct
+                include5Pct,
+                dateActeStr: multiDateActeVal,
+                datePaiementStr: multiDatePaiementVal
             });
 
-            const pen = computeDelayAndPenalties(
-                document.getElementById('multi_date_acte').value,
-                document.getElementById('multi_date_paiement').value,
+            const pen = liq.penOverride || computeDelayAndPenalties(
+                multiDateActeVal,
+                multiDatePaiementVal,
                 liq.droitExigible,
                 liq.impotDeclare
             );
@@ -3348,7 +3424,7 @@ document.addEventListener('DOMContentLoaded',function(){
             boxCM3.classList.remove('winner', 'dimmed');
             boxCM5.classList.remove('winner', 'dimmed');
             if (!include5Pct) boxCM5.classList.add('dimmed');
-            if (liq.droitExigible > 0) {
+            if (liq.droitExigible > 0 || (liq.isExonere140k && liq.winnerKey)) {
                 if (liq.winnerKey === 'taux') boxDroit.classList.add('winner');
                 if (liq.winnerKey === 'cm3') boxCM3.classList.add('winner');
                 if (liq.winnerKey === 'cm5') boxCM5.classList.add('winner');
